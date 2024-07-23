@@ -1,6 +1,6 @@
 package com.saessakmaeul.bitamin.member;
 
-import com.saessakmaeul.bitamin.member.dto.MemberDTO;
+import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.service.MemberService;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,7 @@ public class MemberController {
 
     @Operation(summary = "회원가입", description = "")
     @PostMapping("/register")
-    public Long register(@RequestBody MemberDTO user) {
+    public Long register(@RequestBody MemberResponseDTO user) {
         return memberService.register(user);
     }
 
@@ -40,8 +40,8 @@ public class MemberController {
 
     @Operation(summary = "회원 목록 조회", description = "모든 회원 정보를 조회합니다.")
     @GetMapping("/list")
-    public ResponseEntity<List<MemberDTO>> getMemberList() {
-        List<MemberDTO> members = memberService.getMemberList();
+    public ResponseEntity<List<MemberResponseDTO>> getMemberList() {
+        List<MemberResponseDTO> members = memberService.getMemberList();
         return ResponseEntity.ok(members);
     }
 }

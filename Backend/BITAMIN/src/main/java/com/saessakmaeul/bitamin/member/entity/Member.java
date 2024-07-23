@@ -1,6 +1,6 @@
 package com.saessakmaeul.bitamin.member.entity;
 
-import com.saessakmaeul.bitamin.member.dto.MemberDTO;
+import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,7 +36,7 @@ public class Member {
     private String profileUrl;
 
     @Enumerated(EnumType.STRING)
-    private MemberDTO.Role role;
+    private MemberResponseDTO.Role role;
 
     public enum Role {
         ROLE_MEMBER, ROLE_ADMIN

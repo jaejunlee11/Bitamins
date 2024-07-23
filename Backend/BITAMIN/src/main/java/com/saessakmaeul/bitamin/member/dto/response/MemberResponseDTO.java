@@ -1,4 +1,4 @@
-package com.saessakmaeul.bitamin.member.dto;
+package com.saessakmaeul.bitamin.member.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Builder
-public class MemberDTO {
+public class MemberResponseDTO {
     private long id;
     private String email;
     private String password;
