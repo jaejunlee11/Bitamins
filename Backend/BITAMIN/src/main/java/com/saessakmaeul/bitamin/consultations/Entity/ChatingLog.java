@@ -1,13 +1,17 @@
 package com.saessakmaeul.bitamin.consultations.Entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chating_log")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
+@Setter
 public class ChatingLog {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

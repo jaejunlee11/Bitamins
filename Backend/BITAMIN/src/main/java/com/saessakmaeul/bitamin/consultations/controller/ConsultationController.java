@@ -2,7 +2,11 @@ package com.saessakmaeul.bitamin.consultations.controller;
 
 import com.saessakmaeul.bitamin.consultations.Entity.Consultation;
 import com.saessakmaeul.bitamin.consultations.Entity.SerchCondition;
+import com.saessakmaeul.bitamin.consultations.dto.request.JoinRoomRequest;
+import com.saessakmaeul.bitamin.consultations.dto.request.RegistRoomRequest;
 import com.saessakmaeul.bitamin.consultations.dto.request.SelectAllResquest;
+import com.saessakmaeul.bitamin.consultations.dto.response.JoinRoomResponse;
+import com.saessakmaeul.bitamin.consultations.dto.response.RegistRoomResponse;
 import com.saessakmaeul.bitamin.consultations.dto.response.SelectAllResponse;
 import com.saessakmaeul.bitamin.consultations.service.ConsultationService;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +34,45 @@ public class ConsultationController {
         List<SelectAllResponse> consultations = consultationService.selectAll(page, size, type);
 
         return ResponseEntity.ok(consultations);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> registRoom(
+//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
+            @RequestBody RegistRoomRequest registRoomRequest) {
+
+        // 기본 생성까진 확인 완료
+//        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
+//        String memberNickname = jwtUtil.getNicknameFromToken(tokenHeader.substring(7));
+//        registRoomRequest.setMemberId(memberId);
+//        registRoomRequest.setMemberNickname(memberNickName);
+//        registRoomRequest.setConsultationDate(registRoomRequest.getStartTime().toLocalDate());
+
+        RegistRoomResponse registRoomResponse = consultationService.registRoom(registRoomRequest);
+
+        if(registRoomResponse == null) return ResponseEntity.status(404).body("방이 생성되지 않았습니다.");
+
+        return ResponseEntity.status(201).body(registRoomRequest);
+
+    }
+
+    @PostMapping("/participants")
+    public ResponseEntity<?> joinRoom(
+//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
+            @RequestBody JoinRoomRequest joinRoomRequest) {
+
+//        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
+//        String memberNickname = jwtUtil.getNicknameFromToken(tokenHeader.substring(7));
+
+//        joinRoomRequest.setConsultationId(joinRoomRequest.getId());
+//        joinRoomRequest.setMemberId(memberId);
+//        joinRoomRequest.setMemberNickname(memberNickName);
+//        joinRoomRequest.setConsultationDate(joinRoomRequest.getStartTime().toLocalDate());
+
+        JoinRoomResponse joinRoomResponse = consultationService.joinRoom(joinRoomRequest);
+
+        if(joinRoomResponse == null) return ResponseEntity.status(404).body("방에 참여되지 않았습니다.");
+
+        return ResponseEntity.status(201).body(joinRoomResponse);
     }
 }
