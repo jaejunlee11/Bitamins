@@ -23,7 +23,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v2/api-docs", "/v3/api-docs", "/v3/api-docs/**", "/swagger-resources",
                                 "/swagger-resources/**", "/configuration/ui", "/configuration/security", "/swagger-ui/**",
-                                "/webjars/**", "/swagger-ui.html", "/members/**", "/test/**").permitAll()
+                                "/webjars/**", "/swagger-ui.html", "/members/**", "/test/**", "/missions/**", "/messages/**",
+                                "/consultations/**", "/exercises/**", "/complaints/**").permitAll()
                         .anyRequest().authenticated()
                 );
 //                .httpBasic(withDefaults());   // swagger때메 끔
