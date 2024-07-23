@@ -1,12 +1,14 @@
-package com.saessakmaeul.bitamin.consultations.domain;
+package com.saessakmaeul.bitamin.consultations.Entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDate;
 
 @Entity
+@Getter
 @Table(name = "participant")
-public class ParticipantDomain {
+public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
