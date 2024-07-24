@@ -1,5 +1,6 @@
 package com.saessakmaeul.bitamin.member.dto.response;
 
+import com.saessakmaeul.bitamin.member.entity.Role;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,8 +21,4 @@ public class MemberResponseDTO {
     private String profileKey;
     private String profileUrl;
     private Role role;
-
-    public enum Role {
-        ROLE_MEMBER, ROLE_ADMIN
-    }
 }
