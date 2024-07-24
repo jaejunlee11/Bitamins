@@ -1,9 +1,7 @@
 package com.saessakmaeul.bitamin.consultations.controller;
 
 import com.saessakmaeul.bitamin.consultations.Entity.SearchCondition;
-import com.saessakmaeul.bitamin.consultations.dto.request.JoinRandomRequest;
-import com.saessakmaeul.bitamin.consultations.dto.request.JoinRoomRequest;
-import com.saessakmaeul.bitamin.consultations.dto.request.RegistRoomRequest;
+import com.saessakmaeul.bitamin.consultations.dto.request.*;
 import com.saessakmaeul.bitamin.consultations.dto.response.JoinRandomResponse;
 import com.saessakmaeul.bitamin.consultations.dto.response.JoinRoomResponse;
 import com.saessakmaeul.bitamin.consultations.dto.response.RegistRoomResponse;
@@ -82,8 +80,8 @@ public class ConsultationController {
 //        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
 //        String memberNickname = jwtUtil.getNicknameFromToken(tokenHeader.substring(7));
 
-//        joinRoomRequest.setMemberId(memberId);
-//        joinRoomRequest.setMemberNickname(memberNickName);
+//        joinRandomRequest.setMemberId(memberId);
+//        joinRandomRequest.setMemberNickname(memberNickName);
 
         JoinRandomResponse joinRandomResponse = consultationService.joinRandom(joinRandomRequest);
 
@@ -91,4 +89,37 @@ public class ConsultationController {
 
         return ResponseEntity.status(200).body(joinRandomResponse);
     }
+
+    @DeleteMapping("{consultationId}")
+    public ResponseEntity<?> ExitRoomBeforeStart(
+//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
+            @PathVariable("consultationId") Long consultationId) {
+
+//        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
+//        exitRoomBeforeStart.setMemberId(memberId);
+
+        ExitRoomBeforeStartRequest exitRoomBeforeStartRequest = new ExitRoomBeforeStartRequest(memberId, consultationId);
+
+        int result = consultationService.exitRoomBeforeStart(exitRoomBeforeStartRequest);
+
+        if(result == 0) ResponseEntity.status(404).body("퇴장하지 못 했습니다.");
+
+        return ResponseEntity.status(200).body("정상적으로 퇴장 처리 되었습니다.");
+    }
+
+    @PatchMapping
+    public ResponseEntity<?> ExitRoomAfterStart(
+//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
+            @RequestBody ExitRoomAfterStartRequest exitRoomAfterStartRequest) {
+
+//        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
+//        exitRoomAfterStart.setMemberId(memberId);
+
+        int result = consultationService.exitRoomAfterStart(exitRoomAfterStartRequest);
+
+        if(result == 0) ResponseEntity.status(404).body("퇴장하지 못 했습니다.");
+
+        return ResponseEntity.status(200).body("정상적으로 퇴장 처리 되었습니다.");
+    }
+
 }
