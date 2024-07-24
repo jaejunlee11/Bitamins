@@ -1,10 +1,9 @@
 package com.saessakmaeul.bitamin.config;
 
-import com.saessakmaeul.bitamin.consultations.Entity.SerchCondition;
+import com.saessakmaeul.bitamin.consultations.Entity.SearchCondition;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -23,10 +22,10 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addConverter(new StringToSerchConditionConverter());
     }
 
-    private static class StringToSerchConditionConverter implements Converter<String, SerchCondition> {
+    private static class StringToSerchConditionConverter implements Converter<String, SearchCondition> {
         @Override
-        public SerchCondition convert(String source) {
-            return SerchCondition.fromString(source);
+        public SearchCondition convert(String source) {
+            return SearchCondition.fromString(source);
         }
     }
 }
