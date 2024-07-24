@@ -1,6 +1,5 @@
 package com.saessakmaeul.bitamin.member.entity;
 
-import com.saessakmaeul.bitamin.member.dto.MemberDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,6 +15,7 @@ import java.util.Date;
 public class Member {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
 
     @Column(nullable = false)
@@ -36,9 +36,5 @@ public class Member {
     private String profileUrl;
 
     @Enumerated(EnumType.STRING)
-    private MemberDTO.Role role;
-
-    public enum Role {
-        ROLE_MEMBER, ROLE_ADMIN
-    }
+    private Role role;
 }

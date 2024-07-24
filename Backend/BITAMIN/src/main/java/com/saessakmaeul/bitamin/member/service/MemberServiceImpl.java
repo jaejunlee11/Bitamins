@@ -1,6 +1,6 @@
 package com.saessakmaeul.bitamin.member.service;
 
-import com.saessakmaeul.bitamin.member.dto.MemberDTO;
+import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public Long register(MemberDTO memberDTO) {
+    public Long register(MemberResponseDTO memberDTO) {
         Member member = Member.builder()
                 .email(memberDTO.getEmail())
                 .password(passwordEncoder.encode(memberDTO.getPassword()))
@@ -48,9 +48,9 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public List<MemberDTO> getMemberList() {
+    public List<MemberResponseDTO> getMemberList() {
         return memberRepository.findAll().stream()
-                .map(member -> MemberDTO.builder()
+                .map(member -> MemberResponseDTO.builder()
                         .id(member.getId())
                         .name(member.getName())
                         .email(member.getEmail())
