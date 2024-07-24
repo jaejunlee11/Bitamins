@@ -153,7 +153,9 @@ public class ConsultationService {
         if(id == 0) return null;
 
         // 방 현재 참가자 수 수정
-        Consultation consultation = consultationRepository.findById(id).get();
+        Consultation consultation = consultationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
         consultation.setCurrentParticipants(consultation.getCurrentParticipants() + 1);
         Consultation c = consultationRepository.save(consultation);
 
