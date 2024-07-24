@@ -17,4 +17,8 @@ public class ParticipantResponse {
     private String memberNickname;
     private Long consultationId;
     private LocalDate consultationDate;
+
+    private String profileKey;
+    private String profileUrl;
+
 }

@@ -1,10 +1,10 @@
 package com.saessakmaeul.bitamin.consultations.controller;
 
-import com.saessakmaeul.bitamin.consultations.Entity.Consultation;
-import com.saessakmaeul.bitamin.consultations.Entity.SerchCondition;
+import com.saessakmaeul.bitamin.consultations.Entity.SearchCondition;
+import com.saessakmaeul.bitamin.consultations.dto.request.JoinRandomRequest;
 import com.saessakmaeul.bitamin.consultations.dto.request.JoinRoomRequest;
 import com.saessakmaeul.bitamin.consultations.dto.request.RegistRoomRequest;
-import com.saessakmaeul.bitamin.consultations.dto.request.SelectAllResquest;
+import com.saessakmaeul.bitamin.consultations.dto.response.JoinRandomResponse;
 import com.saessakmaeul.bitamin.consultations.dto.response.JoinRoomResponse;
 import com.saessakmaeul.bitamin.consultations.dto.response.RegistRoomResponse;
 import com.saessakmaeul.bitamin.consultations.dto.response.SelectAllResponse;
@@ -27,7 +27,7 @@ public class ConsultationController {
 //            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                        @RequestParam(value = "page", defaultValue = "0") int page,
                                        @RequestParam(value = "size", defaultValue = "100") int size,
-                                       @RequestParam(value = "type") SerchCondition type) {
+                                       @RequestParam(value = "type") SearchCondition type) {
 
         System.out.println("Controller");
 
@@ -46,7 +46,6 @@ public class ConsultationController {
 //        String memberNickname = jwtUtil.getNicknameFromToken(tokenHeader.substring(7));
 //        registRoomRequest.setMemberId(memberId);
 //        registRoomRequest.setMemberNickname(memberNickName);
-//        registRoomRequest.setConsultationDate(registRoomRequest.getStartTime().toLocalDate());
 
         RegistRoomResponse registRoomResponse = consultationService.registRoom(registRoomRequest);
 
@@ -73,6 +72,23 @@ public class ConsultationController {
 
         if(joinRoomResponse == null) return ResponseEntity.status(404).body("방에 참여되지 않았습니다.");
 
-        return ResponseEntity.status(201).body(joinRoomResponse);
+        return ResponseEntity.status(200).body(joinRoomResponse);
+    }
+
+    @PostMapping("/random-participants")
+    public ResponseEntity<?> joinRandom(
+//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
+            @RequestBody JoinRandomRequest joinRandomRequest) {
+//        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
+//        String memberNickname = jwtUtil.getNicknameFromToken(tokenHeader.substring(7));
+
+//        joinRoomRequest.setMemberId(memberId);
+//        joinRoomRequest.setMemberNickname(memberNickName);
+
+        JoinRandomResponse joinRandomResponse = consultationService.joinRandom(joinRandomRequest);
+
+        if(joinRandomResponse == null) return ResponseEntity.status(404).body("방에 참여되지 않았습니다.");
+
+        return ResponseEntity.status(200).body(joinRandomResponse);
     }
 }
