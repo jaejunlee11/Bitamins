@@ -1,13 +1,18 @@
-package com.saessakmaeul.bitamin.consultations.domain;
+package com.saessakmaeul.bitamin.consultations.Entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chating_log")
-public class ChatingLogDomain {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class ChatingLog {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column

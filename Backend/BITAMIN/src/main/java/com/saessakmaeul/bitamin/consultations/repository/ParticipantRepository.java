@@ -1,7 +1,12 @@
 package com.saessakmaeul.bitamin.consultations.repository;
 
-import com.saessakmaeul.bitamin.consultations.domain.ParticipantDomain;
+import com.saessakmaeul.bitamin.consultations.Entity.Participant;
+import com.saessakmaeul.bitamin.consultations.dto.response.ParticipantResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ParticipantRepository extends JpaRepository<ParticipantDomain, Long> {
+import java.util.List;
+
+public interface ParticipantRepository extends JpaRepository<Participant, Long> {
+    List<Participant> findByConsultationId(Long consultationId);
+    Participant findByMemberIdAndConsultationId(Long memberId, Long consultationId);
 }

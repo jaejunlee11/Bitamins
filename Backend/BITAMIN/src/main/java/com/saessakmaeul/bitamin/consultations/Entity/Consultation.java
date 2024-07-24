@@ -1,12 +1,18 @@
-package com.saessakmaeul.bitamin.consultations.domain;
+package com.saessakmaeul.bitamin.consultations.Entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "consultaiton")
-public class ConsultationDomain {
+@Table(name = "consultation")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class Consultation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
@@ -19,7 +25,7 @@ public class ConsultationDomain {
     private String title;
 
     @Column(name = "is_privated")
-    private int isPrivated;
+    private Boolean isPrivated;
 
     @Column
     private String password;

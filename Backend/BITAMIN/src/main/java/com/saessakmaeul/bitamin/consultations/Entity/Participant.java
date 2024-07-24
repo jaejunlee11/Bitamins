@@ -1,12 +1,18 @@
-package com.saessakmaeul.bitamin.consultations.domain;
+package com.saessakmaeul.bitamin.consultations.Entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "participant")
-public class ParticipantDomain {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
@@ -23,4 +29,5 @@ public class ParticipantDomain {
 
     @Column(name = "consultation_date")
     private LocalDate consultationDate;
+
 }
