@@ -1,10 +1,12 @@
 package com.saessakmaeul.bitamin.consultations.service;
 
+import com.saessakmaeul.bitamin.consultations.Entity.ChatingLog;
 import com.saessakmaeul.bitamin.consultations.Entity.Consultation;
 import com.saessakmaeul.bitamin.consultations.Entity.Participant;
 import com.saessakmaeul.bitamin.consultations.Entity.SearchCondition;
 import com.saessakmaeul.bitamin.consultations.dto.request.*;
 import com.saessakmaeul.bitamin.consultations.dto.response.*;
+import com.saessakmaeul.bitamin.consultations.repository.ChatingLogRepository;
 import com.saessakmaeul.bitamin.consultations.repository.ConsultationRepository;
 import com.saessakmaeul.bitamin.consultations.repository.ParticipantRepository;
 import com.saessakmaeul.bitamin.member.entity.Member;
@@ -28,6 +30,7 @@ public class ConsultationService {
     private final ConsultationRepository consultationRepository;
     private final ParticipantRepository participantRepository;
     private final MemberRepository memberRepository;
+    private final ChatingLogRepository chatingLogRepository;
 
     // 방 리스트 조회
     public List<SelectAllResponse> selectAll(int page, int size, SearchCondition type) {
@@ -291,6 +294,41 @@ public class ConsultationService {
 
         consultation.setCurrentParticipants(consultation.getCurrentParticipants() - 1);
         Consultation c = consultationRepository.save(consultation);
+
+        if(c.getId() == 0) return 0;
+
+        return 1;
+    }
+
+    // 채팅 조회
+    public List<FindByIdResponse> findById(Long consultationId) {
+        List<ChatingLog> chatingLog = chatingLogRepository.findByConsultationId(consultationId);
+
+        List<FindByIdResponse> findByIdResponse = chatingLog.stream()
+                .map(chating -> FindByIdResponse.builder()
+                        .id(chating.getId())
+                        .content(chating.getContent())
+                        .memberId(chating.getMemberId())
+                        .memberNickname(chating.getMemberNickname())
+                        .sendTime(chating.getSendTime())
+                        .consultationId(chating.getConsultationId())
+                        .build()
+                )
+                .collect(Collectors.toList());
+
+        return findByIdResponse;
+    }
+
+    // 채팅 등록
+    public int registChating(RegistChatingRequest registChatingRequest) {
+        ChatingLog chatingLog = ChatingLog.builder()
+                .consultationId(registChatingRequest.getConsultationId())
+                .memberId(registChatingRequest.getMemberId())
+                .memberNickname(registChatingRequest.getMemberNickname())
+                .content(registChatingRequest.getContent())
+                .build();
+
+        ChatingLog c = chatingLogRepository.save(chatingLog);
 
         if(c.getId() == 0) return 0;
 
