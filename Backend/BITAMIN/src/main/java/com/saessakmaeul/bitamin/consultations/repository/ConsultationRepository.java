@@ -5,8 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
 public interface ConsultationRepository extends JpaRepository<Consultation, Long> {
     Page<Consultation> findByIsPrivated(int isPrivated, Pageable pageable);
     Page<Consultation> findByCategory(String category, Pageable pageable);
