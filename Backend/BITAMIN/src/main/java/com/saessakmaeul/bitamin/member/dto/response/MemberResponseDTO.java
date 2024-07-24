@@ -1,5 +1,6 @@
-package com.saessakmaeul.bitamin.member.dto;
+package com.saessakmaeul.bitamin.member.dto.response;
 
+import com.saessakmaeul.bitamin.member.entity.Role;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +10,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Builder
-public class MemberDTO {
+public class MemberResponseDTO {
     private long id;
     private String email;
     private String password;
@@ -20,8 +21,4 @@ public class MemberDTO {
     private String profileKey;
     private String profileUrl;
     private Role role;
-
-    public enum Role {
-        ROLE_MEMBER, ROLE_ADMIN
-    }
 }
