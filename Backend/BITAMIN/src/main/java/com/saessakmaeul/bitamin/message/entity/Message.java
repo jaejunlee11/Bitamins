@@ -1,11 +1,13 @@
 package com.saessakmaeul.bitamin.message.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "message")
+@Getter
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
