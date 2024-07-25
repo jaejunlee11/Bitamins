@@ -3,10 +3,9 @@ package com.saessakmaeul.bitamin.member.controller;
 import com.saessakmaeul.bitamin.member.dto.request.ChangePasswordRequest;
 import com.saessakmaeul.bitamin.member.dto.request.CheckPasswordRequest;
 import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
+import com.saessakmaeul.bitamin.member.dto.request.MemberUpdateRequestDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberBasicInfo;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
-import com.saessakmaeul.bitamin.member.entity.Member;
-import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.service.MemberService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,9 +31,16 @@ public class MemberController {
     private final MemberService memberService;
     private final JwtUtil jwtUtil;
 
-    public MemberController(@Lazy MemberService memberService, MemberRepository memberRepository, JwtUtil jwtUtil) {
+    public MemberController(@Lazy MemberService memberService, JwtUtil jwtUtil) {
         this.memberService = memberService;
         this.jwtUtil = jwtUtil;
+    }
+
+    @Operation(summary = "회원 목록 조회", description = "테스트용")
+    @GetMapping("/list")
+    public ResponseEntity<List<MemberResponseDTO>> getMemberList() {
+        List<MemberResponseDTO> members = memberService.getMemberList();
+        return ResponseEntity.ok(members);
     }
 
     @Operation(summary = "회원가입", description = "")
@@ -62,11 +68,23 @@ public class MemberController {
         }
     }
 
-    @Operation(summary = "회원 목록 조회", description = "테스트용")
-    @GetMapping("/list")
-    public ResponseEntity<List<MemberResponseDTO>> getMemberList() {
-        List<MemberResponseDTO> members = memberService.getMemberList();
-        return ResponseEntity.ok(members);
+    @Operation(summary = "회원 정보 수정", description = "수정 완료하면 1 반환")
+    @PutMapping("/update-member")
+    public ResponseEntity<Integer> updateMemberByToken(HttpServletRequest request, @RequestBody MemberUpdateRequestDTO memberUpdateRequestDTO) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authorizationHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);
+
+        int updateResult = memberService.updateMember(userId, memberUpdateRequestDTO);
+        if (updateResult == 1) {
+            return ResponseEntity.ok(updateResult);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(updateResult);
+        }
     }
 
     // swagger test -> Authorize 버튼 클릭해서 accesstoken 넣고 info test
