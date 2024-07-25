@@ -3,6 +3,7 @@ package com.saessakmaeul.bitamin.message.service;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.message.dto.requestDto.MessageRegistRequest;
+import com.saessakmaeul.bitamin.message.dto.requestDto.ReplyRegistRequest;
 import com.saessakmaeul.bitamin.message.dto.responseDto.MessageDetailResponse;
 import com.saessakmaeul.bitamin.message.dto.responseDto.MessageSimpleResponse;
 import com.saessakmaeul.bitamin.message.dto.responseDto.Replies;
@@ -128,5 +129,61 @@ public class MessageService {
         registMessage.setCounselingDate(message.getCounselingDate());
         registMessage.setSendDate(LocalDateTime.now());
         messageRepository.save(registMessage);
+    }
+
+    @Transactional
+    public void registReply(ReplyRegistRequest reply, Long id, Long userId) throws Exception{
+        Reply registReply = new Reply();
+        registReply.setMessageId(id);
+        registReply.setMemberId(userId);
+        registReply.setContent(reply.getContent());
+        registReply.setIsDeleted(0);
+        registReply.setIsRead(false);
+        registReply.setSendDate(LocalDateTime.now());
+        replyRepository.save(registReply);
+    }
+
+    @Transactional
+    public void deleteMessage(Long id, Long userId) throws Exception{
+        Message message = messageRepository.findById(id).orElseThrow(Exception::new);
+        // user가 sender 인 경우 2이면 제거, 0이면 1로 변경
+        if(message.getSenderId() == userId) {
+            if(message.getIsDeleted()==2) {
+                messageRepository.delete(message);
+                return;
+            }
+                message.setIsDeleted(1);
+                messageRepository.save(message);
+                return;
+        }
+        // reciever인 경우 1이면 제거 0이면 2로 변경
+        if(message.getIsDeleted()==1) {
+            messageRepository.delete(message);
+            return;
+        }
+        message.setIsDeleted(2);
+        messageRepository.save(message);
+    }
+
+    @Transactional
+    public void deleteReply(Long id, Long userId) throws Exception{
+        Reply reply = replyRepository.findById(id).orElseThrow(Exception::new);
+        // user가 sender 인 경우 2이면 제거, 0이면 1로 변경
+        if(reply.getMemberId() == userId) {
+            if(reply.getIsDeleted()==2) {
+                replyRepository.delete(reply);
+                return;
+            }
+            reply.setIsDeleted(1);
+            replyRepository.save(reply);
+            return;
+        }
+        // reciever인 경우 1이면 제거 0이면 2로 변경
+        if(reply.getIsDeleted()==1) {
+            replyRepository.delete(reply);
+            return;
+        }
+        reply.setIsDeleted(2);
+        replyRepository.save(reply);
     }
 }
