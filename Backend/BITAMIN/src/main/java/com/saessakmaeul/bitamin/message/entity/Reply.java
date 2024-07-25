@@ -5,27 +5,22 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
-@Table(name = "message")
+@Table(name = "reply")
 @Getter
-public class Message {
+public class Reply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
 
-    @Column(name = "sender_id")
-    private long senderId;
+    @Column(name = "message_id")
+    private long messageId;
 
-    @Column(name = "reciever_id")
-    private long recieverId;
-
-    @Column(name = "category")
-    private String category;
-
-    @Column(name = "title")
-    private String title;
+    @Column(name = "member_id")
+    private long memberId;
 
     @Column(name = "content")
     private String content;
@@ -33,12 +28,9 @@ public class Message {
     @Column(name = "send_date")
     private LocalDateTime sendDate;
 
-    @Column(name= "counseling_date")
-    private LocalDateTime counselingDate;
-
     @Column(name = "is_read")
     private Boolean isRead;
 
     @Column(name = "is_deleted")
-    private int isDeleted;
+    private Boolean isDeleted;
 }
