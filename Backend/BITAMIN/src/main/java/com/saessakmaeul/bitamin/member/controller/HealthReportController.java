@@ -37,5 +37,18 @@ public class HealthReportController {
         return ResponseEntity.ok(healthReportResponseDTO);
     }
 
+    @Operation(summary = "자가진단 결과 리스트 조회", description = "")
+    @GetMapping
+    public ResponseEntity<List<HealthReportResponseDTO>> getHealthReports(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).build();
+        }
 
+        String token = authorizationHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);
+
+        List<HealthReportResponseDTO> healthReports = healthReportService.getHealthReportsByUserId(userId);
+        return ResponseEntity.ok(healthReports);
+    }
 }

@@ -42,5 +42,17 @@ public class HealthReportServiceImpl implements HealthReportService {
         return healthReportResponseDTO;
     }
 
-    
+    @Override
+    public List<HealthReportResponseDTO> getHealthReportsByUserId(Long userId) {
+        List<HealthReport> healthReports = healthReportRepository.findByMemberId(userId);
+        return healthReports.stream().map(healthReport -> {
+            HealthReportResponseDTO dto = new HealthReportResponseDTO();
+            dto.setId(healthReport.getId());
+            dto.setCheckupScore(healthReport.getCheckupScore());
+            dto.setCheckupDate(healthReport.getCheckupDate());
+            dto.setMemberId(healthReport.getMember().getId());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
 }
