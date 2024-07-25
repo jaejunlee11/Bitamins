@@ -3,6 +3,7 @@ package com.saessakmaeul.bitamin.member.service;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
+import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,11 +17,13 @@ import java.util.stream.Collectors;
 @Service
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public MemberServiceImpl(MemberRepository memberRepository, @Lazy PasswordEncoder passwordEncoder) {
+    public MemberServiceImpl(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, @Lazy PasswordEncoder passwordEncoder) {
         this.memberRepository = memberRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -76,5 +79,16 @@ public class MemberServiceImpl implements MemberService {
     public boolean checkPassword(String email, String password) {
         Member member = getMember(email).orElseThrow(() -> new RuntimeException("User not found"));
         return passwordEncoder.matches(password, member.getPassword());
+    }
+
+    @Override
+    @Transactional
+    public void deleteMember(Long memberId) {
+        // 연결된 모든 테이블 데이터 삭제
+        // 회원 id랑 연결된 모든 테이블의 repository를 넣으삼.deleteByMemberId(memberId);
+        refreshTokenRepository.deleteByUserId(memberId);
+
+        // 최최종 Member 테이블에서 삭제
+        memberRepository.deleteById(memberId);
     }
 }

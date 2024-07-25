@@ -9,10 +9,13 @@ import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.service.MemberService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -89,6 +92,26 @@ public class MemberController {
 
         memberService.changePassword(email, changePasswordRequest.getNewPassword());
         return ResponseEntity.ok("비밀번호 변경 완료");
+    }
+
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 및 관련 정보 삭제 & 로그아웃")
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteMember(HttpServletRequest request, HttpServletResponse response) {
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String accessToken = authorizationHeader.substring(7);
+            Long memberId = jwtUtil.extractUserId(accessToken);
+            memberService.deleteMember(memberId);
+            // 로그아웃 처리
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                new SecurityContextLogoutHandler().logout(request, response, auth);
+            }
+            return ResponseEntity.ok("회원 탈퇴 및 로그아웃 완료");
+        } else {
+            throw new RuntimeException("access token 확인 불가");
+        }
     }
 
 }

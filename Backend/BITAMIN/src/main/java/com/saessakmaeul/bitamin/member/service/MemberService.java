@@ -12,4 +12,5 @@ public interface MemberService {
     List<MemberResponseDTO> getMemberList();
     void changePassword(String email, String newPassword);
     boolean checkPassword(String email, String password);
+    void deleteMember(Long memberId);
 }
