@@ -1,6 +1,7 @@
 package com.saessakmaeul.bitamin.message.controller;
 
 import com.saessakmaeul.bitamin.message.dto.requestDto.MessageRegistRequest;
+import com.saessakmaeul.bitamin.message.dto.requestDto.ReplyRegistRequest;
 import com.saessakmaeul.bitamin.message.dto.responseDto.MessageDetailResponse;
 import com.saessakmaeul.bitamin.message.dto.responseDto.MessageSimpleResponse;
 import com.saessakmaeul.bitamin.message.service.MessageService;
@@ -44,13 +45,37 @@ public class MessageController {
         }
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> postMessage(@RequestBody MessageRegistRequest request, @RequestHeader(name = "Authorization",required = false) String token) {
+    @PostMapping("/{id}")
+    public ResponseEntity<?> postMessage(@RequestBody ReplyRegistRequest request, @PathVariable("id") long id, @RequestHeader(name = "Authorization",required = false) String token) {
         try{
             long userId = jwtUtil.extractUserId(token.substring(7));
-            messageService.registMessage(request,userId);
+            messageService.registReply(request,id,userId);
             return ResponseEntity.ok().build();
-        } catch (Exception e){
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMessage(@PathVariable("id") long id, @RequestHeader(name = "Authorization",required = false) String token) {
+        try{
+            long userId = jwtUtil.extractUserId(token.substring(7));
+            messageService.deleteMessage(id,userId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/replies/{id}")
+    public ResponseEntity<?> deleteReply(@PathVariable("id") long id, @RequestHeader(name = "Authorization",required = false) String token) {
+        try{
+            long userId = jwtUtil.extractUserId(token.substring(7));
+            messageService.deleteReply(id,userId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
