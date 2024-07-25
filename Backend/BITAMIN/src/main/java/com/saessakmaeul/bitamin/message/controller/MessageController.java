@@ -1,5 +1,6 @@
 package com.saessakmaeul.bitamin.message.controller;
 
+import com.saessakmaeul.bitamin.message.dto.requestDto.MessageRegistRequest;
 import com.saessakmaeul.bitamin.message.dto.responseDto.MessageDetailResponse;
 import com.saessakmaeul.bitamin.message.dto.responseDto.MessageSimpleResponse;
 import com.saessakmaeul.bitamin.message.service.MessageService;
@@ -38,6 +39,18 @@ public class MessageController {
             MessageDetailResponse messages = messageService.getMessageDetail(id,userId);
             return ResponseEntity.ok(messages);
         } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> postMessage(@RequestBody MessageRegistRequest request, @RequestHeader(name = "Authorization",required = false) String token) {
+        try{
+            long userId = jwtUtil.extractUserId(token.substring(7));
+            messageService.registMessage(request,userId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }

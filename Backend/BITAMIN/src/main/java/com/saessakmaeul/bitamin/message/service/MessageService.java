@@ -2,6 +2,7 @@ package com.saessakmaeul.bitamin.message.service;
 
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
+import com.saessakmaeul.bitamin.message.dto.requestDto.MessageRegistRequest;
 import com.saessakmaeul.bitamin.message.dto.responseDto.MessageDetailResponse;
 import com.saessakmaeul.bitamin.message.dto.responseDto.MessageSimpleResponse;
 import com.saessakmaeul.bitamin.message.dto.responseDto.Replies;
@@ -9,9 +10,11 @@ import com.saessakmaeul.bitamin.message.entity.Message;
 import com.saessakmaeul.bitamin.message.entity.Reply;
 import com.saessakmaeul.bitamin.message.repository.MessageRepository;
 import com.saessakmaeul.bitamin.message.repository.ReplyRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -108,5 +111,22 @@ public class MessageService {
                 .replies(repliyList)
                 .build();
         return result;
+    }
+
+    @Transactional
+    public void registMessage(MessageRegistRequest message,Long userId) throws Exception{
+        Message registMessage = new Message();
+        System.out.println(userId);
+        System.out.println(message.getRecieverId());
+        registMessage.setSenderId(userId);
+        registMessage.setRecieverId(message.getRecieverId());
+        registMessage.setCategory(message.getCategory());
+        registMessage.setTitle(message.getTitle());
+        registMessage.setContent(message.getContent());
+        registMessage.setIsDeleted(0);
+        registMessage.setIsRead(false);
+        registMessage.setCounselingDate(message.getCounselingDate());
+        registMessage.setSendDate(LocalDateTime.now());
+        messageRepository.save(registMessage);
     }
 }
