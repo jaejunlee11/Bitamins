@@ -1,6 +1,7 @@
 package com.saessakmaeul.bitamin.member.service;
 
 import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
+import com.saessakmaeul.bitamin.member.dto.request.MemberUpdateRequestDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.entity.Member;
 
@@ -15,4 +16,5 @@ public interface MemberService {
     boolean checkPassword(String email, String password);
     void deleteMember(Long memberId);
     MemberRequestDTO getMemberById(Long userId);
+    int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO);
 }

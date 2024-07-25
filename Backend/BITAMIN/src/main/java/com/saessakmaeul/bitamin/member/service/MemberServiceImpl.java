@@ -1,6 +1,7 @@
 package com.saessakmaeul.bitamin.member.service;
 
 import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
+import com.saessakmaeul.bitamin.member.dto.request.MemberUpdateRequestDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
@@ -114,6 +115,24 @@ public class MemberServiceImpl implements MemberService {
                     .build();
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO) {
+        Optional<Member> optionalMember = memberRepository.findById(userId);
+        if (optionalMember.isPresent()) {
+            Member member = optionalMember.get();
+            member.setName(memberUpdateRequestDTO.getName());
+            member.setNickname(memberUpdateRequestDTO.getNickname());
+            member.setDongCode(memberUpdateRequestDTO.getDongCode());
+            member.setBirthday(memberUpdateRequestDTO.getBirthday());
+            member.setProfileKey(memberUpdateRequestDTO.getProfileKey());
+            member.setProfileUrl(memberUpdateRequestDTO.getProfileUrl());
+            memberRepository.save(member);
+            return 1;
+        } else {
+            return 0;
         }
     }
 }
