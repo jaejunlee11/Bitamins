@@ -2,6 +2,7 @@ package com.saessakmaeul.bitamin.member.controller;
 
 import com.saessakmaeul.bitamin.member.dto.request.ChangePasswordRequest;
 import com.saessakmaeul.bitamin.member.dto.request.CheckPasswordRequest;
+import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberBasicInfo;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.entity.Member;
@@ -22,7 +23,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/members")
@@ -43,12 +43,23 @@ public class MemberController {
         return memberService.register(user);
     }
 
-    @Operation(summary = "회원 한명 조회", description = "테스트용")
+    @Operation(summary = "회원 한명 조회", description = "")
     @GetMapping("/get-member")
-    public ResponseEntity<Member> getMemberByEmail(@RequestParam String email) {
-        Optional<Member> member = memberService.getMember(email);
-        return member.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    public ResponseEntity<MemberRequestDTO> getMemberByToken(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authorizationHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);
+
+        MemberRequestDTO member = memberService.getMemberById(userId);
+        if (member != null) {
+            return ResponseEntity.ok(member);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @Operation(summary = "회원 목록 조회", description = "테스트용")

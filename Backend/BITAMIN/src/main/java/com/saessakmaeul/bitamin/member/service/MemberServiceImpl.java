@@ -1,5 +1,6 @@
 package com.saessakmaeul.bitamin.member.service;
 
+import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
@@ -94,5 +95,25 @@ public class MemberServiceImpl implements MemberService {
 
         // 최최종 Member 테이블에서 삭제
         memberRepository.deleteById(memberId);
+    }
+
+    @Override
+    public MemberRequestDTO getMemberById(Long userId) {
+        Optional<Member> optionalMember = memberRepository.findById(userId);
+        if (optionalMember.isPresent()) {
+            Member member = optionalMember.get();
+            return MemberRequestDTO.builder()
+                    .email(member.getEmail())
+                    .password(member.getPassword())
+                    .name(member.getName())
+                    .nickname(member.getNickname())
+                    .dongCode(member.getDongCode())
+                    .birthday(member.getBirthday())
+                    .profileKey(member.getProfileKey())
+                    .profileUrl(member.getProfileUrl())
+                    .build();
+        } else {
+            return null;
+        }
     }
 }
