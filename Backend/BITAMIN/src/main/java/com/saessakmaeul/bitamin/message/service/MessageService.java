@@ -82,6 +82,8 @@ public class MessageService {
         // 답장 리스트 정제
         List<Replies> repliyList = new ArrayList<>();
         for(Reply reply : replies){
+            if(reply.getIsDeleted()==1 && reply.getMemberId()==userId) continue;
+            if(reply.getIsDeleted()==2 && reply.getMemberId()!=userId) continue;
             Replies temp = Replies
                     .builder()
                     .id(reply.getId())
@@ -92,6 +94,7 @@ public class MessageService {
                     .build();
             repliyList.add(temp);
         }
+        Collections.sort(repliyList,(o1,o2)->o2.getSendDate().compareTo(o1.getSendDate()));
 
         MessageDetailResponse result = MessageDetailResponse.builder()
                 .id(id)

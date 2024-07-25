@@ -32,5 +32,5 @@ public class Reply {
     private Boolean isRead;
 
     @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    private int isDeleted;
 }
