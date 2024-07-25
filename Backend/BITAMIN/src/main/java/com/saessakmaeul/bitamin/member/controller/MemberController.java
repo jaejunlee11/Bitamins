@@ -1,9 +1,14 @@
 package com.saessakmaeul.bitamin.member.controller;
 
+import com.saessakmaeul.bitamin.member.dto.request.ChangePasswordRequest;
+import com.saessakmaeul.bitamin.member.dto.request.CheckPasswordRequest;
+import com.saessakmaeul.bitamin.member.dto.response.MemberBasicInfo;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.service.MemberService;
+import com.saessakmaeul.bitamin.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,9 +27,11 @@ import java.util.Optional;
 @Tag(name = "Member Controller", description = "회원 관리하는 컨트롤러")
 public class MemberController {
     private final MemberService memberService;
+    private final JwtUtil jwtUtil;
 
-    public MemberController(@Lazy MemberService memberService, MemberRepository memberRepository) {
+    public MemberController(@Lazy MemberService memberService, MemberRepository memberRepository, JwtUtil jwtUtil) {
         this.memberService = memberService;
+        this.jwtUtil = jwtUtil;
     }
 
     @Operation(summary = "회원가입", description = "")
@@ -49,13 +56,39 @@ public class MemberController {
     }
 
     // swagger test -> Authorize 버튼 클릭해서 accesstoken 넣고 info test
-    @Operation(summary = "회원 정보 조회", description = "AccessToken 파싱해서 회원 정보 조회")
+    @Operation(summary = "회원 id, 닉네임 조회", description = "AccessToken 파싱해서 회원 id, 닉네임 조회")
     @GetMapping("/info")
-    public Member getUserInfo() {
+    public MemberBasicInfo getUserInfo(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String accessToken = authorizationHeader.substring(7);
+            Long userId = jwtUtil.extractUserId(accessToken);
+            String nickname = jwtUtil.extractNickname(accessToken);
+            return new MemberBasicInfo(userId, nickname);
+        } else {
+            throw new RuntimeException("access token 확인 불가");
+        }
+    }
+
+    @Operation(summary = "회원 비밀번호 확인", description = "비밀번호 변경 전 사용자 비밀번호 일치 여부 확인")
+    @PostMapping("/check-password")
+    public ResponseEntity<Integer> checkPassword(@RequestBody CheckPasswordRequest checkPasswordRequest) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
-        Member member = memberService.getMember(email).orElseThrow(() -> new RuntimeException("User not found"));
-        return member;
+
+        boolean isPasswordCorrect = memberService.checkPassword(email, checkPasswordRequest.getPassword());
+        return ResponseEntity.ok(isPasswordCorrect ? 1 : 0);
+    }
+
+    @Operation(summary = "회원 비밀번호 수정", description = "비밀번호 변경")
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+
+        memberService.changePassword(email, changePasswordRequest.getNewPassword());
+        return ResponseEntity.ok("비밀번호 변경 완료");
     }
 
 }

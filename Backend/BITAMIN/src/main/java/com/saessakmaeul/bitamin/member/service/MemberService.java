@@ -10,4 +10,6 @@ public interface MemberService {
     Long register(MemberResponseDTO memberDTO);
     Optional<Member> getMember(String email);
     List<MemberResponseDTO> getMemberList();
+    void changePassword(String email, String newPassword);
+    boolean checkPassword(String email, String password);
 }
