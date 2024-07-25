@@ -29,15 +29,15 @@ public class Message {
     @Column(name = "content")
     private String content;
 
-    @Column(table = "send_date")
+    @Column(name = "send_date")
     private LocalDate sendDate;
 
-    @Column(table = "counseling_date")
+    @Column(name= "counseling_date")
     private LocalDate counselingDate;
 
-    @Column(table = "is_read")
-    private boolean isRead;
+    @Column(name = "is_read")
+    private Boolean isRead;
 
-    @Column(table = "is_deleted")
+    @Column(name = "is_deleted")
     private int isDeleted;
 }
