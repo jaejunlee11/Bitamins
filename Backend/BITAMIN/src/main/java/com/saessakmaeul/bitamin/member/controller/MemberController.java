@@ -103,7 +103,26 @@ public class MemberController {
         }
     }
 
-    @Operation(summary = "회원 비밀번호 확인", description = "비밀번호 변경 전 사용자 비밀번호 일치 여부 확인")
+    @Operation(summary = "회원 비밀번호 수정", description = "비밀번호 변경")
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(HttpServletRequest request, @RequestBody ChangePasswordRequest changePasswordRequest) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authorizationHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);
+
+        boolean isPasswordChanged = memberService.changePassword(userId, changePasswordRequest);
+        if (isPasswordChanged) {
+            return ResponseEntity.ok("비밀번호 변경 완료");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("현재 비밀번호가 일치하지 않습니다.");
+        }
+    }
+
+    @Operation(summary = "회원 비밀번호 확인", description = "회원 탈퇴 전 비밀번호 확인")
     @PostMapping("/check-password")
     public ResponseEntity<Integer> checkPassword(@RequestBody CheckPasswordRequest checkPasswordRequest) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -111,16 +130,6 @@ public class MemberController {
 
         boolean isPasswordCorrect = memberService.checkPassword(email, checkPasswordRequest.getPassword());
         return ResponseEntity.ok(isPasswordCorrect ? 1 : 0);
-    }
-
-    @Operation(summary = "회원 비밀번호 수정", description = "비밀번호 변경")
-    @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
-
-        memberService.changePassword(email, changePasswordRequest.getNewPassword());
-        return ResponseEntity.ok("비밀번호 변경 완료");
     }
 
     @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 및 관련 정보 삭제 & 로그아웃")

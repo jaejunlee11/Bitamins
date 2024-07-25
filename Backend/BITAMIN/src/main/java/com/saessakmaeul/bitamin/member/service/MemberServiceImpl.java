@@ -1,5 +1,6 @@
 package com.saessakmaeul.bitamin.member.service;
 
+import com.saessakmaeul.bitamin.member.dto.request.ChangePasswordRequest;
 import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
 import com.saessakmaeul.bitamin.member.dto.request.MemberUpdateRequestDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
@@ -74,10 +75,17 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void changePassword(String email, String newPassword) {
-        Member member = getMember(email).orElseThrow(() -> new RuntimeException("멤버를 찾을 수 없음"));
-        member.setPassword(passwordEncoder.encode(newPassword));
-        memberRepository.save(member);
+    public boolean changePassword(Long userId, ChangePasswordRequest changePasswordRequest) {
+        Optional<Member> optionalMember = memberRepository.findById(userId);
+        if (optionalMember.isPresent()) {
+            Member member = optionalMember.get();
+            if (passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), member.getPassword())) {
+                member.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+                memberRepository.save(member);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
