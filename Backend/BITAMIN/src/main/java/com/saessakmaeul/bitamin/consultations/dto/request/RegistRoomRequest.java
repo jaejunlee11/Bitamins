@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class RegistRoomRequest {
     private String category;
     private String title;
-    private boolean isPrivated;
+    private Boolean isPrivated;
     private String password;
     private LocalDateTime startTime;
     private LocalDateTime endTime;

@@ -1,4 +1,4 @@
-package com.saessakmaeul.bitamin.member.util;
+package com.saessakmaeul.bitamin.util;
 
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
@@ -54,13 +54,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(member.getEmail())
                 .claim("id", member.getId())
-                .claim("email", member.getEmail())
-                .claim("name", member.getName())
                 .claim("nickname", member.getNickname())
-                .claim("dongCode", member.getDongCode())
-                .claim("birthday", member.getBirthday())
-                .claim("profileKey", member.getProfileKey())
-                .claim("profileUrl", member.getProfileUrl())
                 .claim("role", member.getRole())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
@@ -113,5 +107,12 @@ public class JwtUtil {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + userDetails.getUsername()));
     }
 
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("id", Long.class));
+    }
+
+    public String extractNickname(String token) {
+        return extractClaim(token, claims -> claims.get("nickname", String.class));
+    }
 
 }
