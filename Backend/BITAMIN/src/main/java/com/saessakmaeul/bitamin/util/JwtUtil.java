@@ -1,4 +1,4 @@
-package com.saessakmaeul.bitamin.member.util;
+package com.saessakmaeul.bitamin.util;
 
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
