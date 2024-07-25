@@ -1,5 +1,7 @@
 package com.saessakmaeul.bitamin.member.controller;
 
+import com.saessakmaeul.bitamin.member.dto.request.ChangePasswordRequest;
+import com.saessakmaeul.bitamin.member.dto.request.CheckPasswordRequest;
 import com.saessakmaeul.bitamin.member.dto.response.MemberBasicInfo;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.entity.Member;
@@ -9,6 +11,8 @@ import com.saessakmaeul.bitamin.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -65,6 +69,26 @@ public class MemberController {
         } else {
             throw new RuntimeException("access token 확인 불가");
         }
+    }
+
+    @Operation(summary = "회원 비밀번호 확인", description = "비밀번호 변경 전 사용자 비밀번호 일치 여부 확인")
+    @PostMapping("/check-password")
+    public ResponseEntity<Integer> checkPassword(@RequestBody CheckPasswordRequest checkPasswordRequest) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+
+        boolean isPasswordCorrect = memberService.checkPassword(email, checkPasswordRequest.getPassword());
+        return ResponseEntity.ok(isPasswordCorrect ? 1 : 0);
+    }
+
+    @Operation(summary = "회원 비밀번호 수정", description = "비밀번호 변경")
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+
+        memberService.changePassword(email, changePasswordRequest.getNewPassword());
+        return ResponseEntity.ok("비밀번호 변경 완료");
     }
 
 }

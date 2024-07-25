@@ -64,4 +64,17 @@ public class MemberServiceImpl implements MemberService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void changePassword(String email, String newPassword) {
+        Member member = getMember(email).orElseThrow(() -> new RuntimeException("멤버를 찾을 수 없음"));
+        member.setPassword(passwordEncoder.encode(newPassword));
+        memberRepository.save(member);
+    }
+
+    @Override
+    public boolean checkPassword(String email, String password) {
+        Member member = getMember(email).orElseThrow(() -> new RuntimeException("User not found"));
+        return passwordEncoder.matches(password, member.getPassword());
+    }
 }
