@@ -71,7 +71,7 @@ public class ConsultationService {
         Consultation consultation = Consultation.builder()
                 .category(registRoomRequest.getCategory())
                 .title(registRoomRequest.getTitle())
-                .isPrivated(registRoomRequest.isPrivated())
+                .isPrivated(registRoomRequest.getIsPrivated())
                 .password(registRoomRequest.getPassword())
                 .startTime(registRoomRequest.getStartTime())
                 .endTime(registRoomRequest.getEndTime())
@@ -101,9 +101,7 @@ public class ConsultationService {
 
         if(c.getId() == 0) return null;
 
-        // 방 정보 조회
-        Consultation currentConsultation = consultationRepository.findById(c.getId())
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+        System.out.println("조회결과: "+ c.getId());
 
         // 참가자 리스트 조회
         List<Participant> list = participantRepository.findByConsultationId(c.getId());
@@ -124,14 +122,14 @@ public class ConsultationService {
         }).collect(Collectors.toList());
 
         RegistRoomResponse registRoomResponse = RegistRoomResponse.builder()
-                .id(currentConsultation.getId())
-                .category(currentConsultation.getCategory())
-                .title(currentConsultation.getTitle())
-                .isPrivated(currentConsultation.getIsPrivated())
-                .password(currentConsultation.getPassword())
-                .startTime(currentConsultation.getStartTime())
-                .endTime(currentConsultation.getEndTime())
-                .currentParticipants(currentConsultation.getCurrentParticipants())
+                .id(c.getId())
+                .category(c.getCategory())
+                .title(c.getTitle())
+                .isPrivated(c.getIsPrivated())
+                .password(c.getPassword())
+                .startTime(c.getStartTime())
+                .endTime(c.getEndTime())
+                .currentParticipants(c.getCurrentParticipants())
                 .participants(pList)
                 .build();
 

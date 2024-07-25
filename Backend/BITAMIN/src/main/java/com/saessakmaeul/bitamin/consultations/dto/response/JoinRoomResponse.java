@@ -16,12 +16,12 @@ public class JoinRoomResponse {
     private Long id;
     private String category;
     private String title;
-    private boolean isPrivated;
+    private Boolean isPrivated;
     private String password;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private int currentParticipants;
 
-    List<ParticipantResponse> participants;
+    private List<ParticipantResponse> participants;
 
 }
