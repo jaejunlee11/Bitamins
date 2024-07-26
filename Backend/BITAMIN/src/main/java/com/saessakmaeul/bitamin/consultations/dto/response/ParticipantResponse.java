@@ -20,5 +20,4 @@ public class ParticipantResponse {
 
     private String profileKey;
     private String profileUrl;
-
 }

@@ -21,7 +21,7 @@ public class ChatingLog {
     @Column
     private String content;
 
-    @Column(name = "send_time")
+    @Column(name = "send_time", insertable = false)
     private LocalDateTime sendTime;
 
     @Column(name = "member_id")

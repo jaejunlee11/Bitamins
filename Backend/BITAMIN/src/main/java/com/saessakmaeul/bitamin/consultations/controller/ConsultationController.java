@@ -4,11 +4,11 @@ import com.saessakmaeul.bitamin.consultations.Entity.SearchCondition;
 import com.saessakmaeul.bitamin.consultations.dto.request.*;
 import com.saessakmaeul.bitamin.consultations.dto.response.*;
 import com.saessakmaeul.bitamin.consultations.service.ConsultationService;
+import com.saessakmaeul.bitamin.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -17,52 +17,48 @@ import java.util.List;
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class ConsultationController {
     private final ConsultationService consultationService;
+    private final JwtUtil jwtUtil;
 
     @GetMapping
-    public ResponseEntity<?> selectAll(
-//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
-                                       @RequestParam(value = "page", defaultValue = "0") int page,
+    public ResponseEntity<?> selectAll(@RequestParam(value = "page", defaultValue = "0") int page,
                                        @RequestParam(value = "size", defaultValue = "100") int size,
                                        @RequestParam(value = "type") SearchCondition type) {
 
-        System.out.println("Controller");
+        List<SelectAllResponse> consultationList = consultationService.selectAll(page, size, type);
 
-        List<SelectAllResponse> consultations = consultationService.selectAll(page, size, type);
+        if(consultationList == null) return ResponseEntity.status(404).body("다시 조회하세요");
 
-        return ResponseEntity.ok(consultations);
+        return ResponseEntity.ok(consultationList);
     }
 
     @PostMapping
-    public ResponseEntity<?> registRoom(
-//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
-            @RequestBody RegistRoomRequest registRoomRequest) {
+    public ResponseEntity<?> registRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+                                        @RequestBody RegistRoomRequest registRoomRequest) {
 
-        // 기본 생성까진 확인 완료
-//        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
-//        String memberNickname = jwtUtil.getNicknameFromToken(tokenHeader.substring(7));
-//        registRoomRequest.setMemberId(memberId);
-//        registRoomRequest.setMemberNickname(memberNickName);
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+        String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
+        registRoomRequest.setMemberId(memberId);
+        registRoomRequest.setMemberNickname(memberNickname);
 
         RegistRoomResponse registRoomResponse = consultationService.registRoom(registRoomRequest);
 
         if(registRoomResponse == null) return ResponseEntity.status(404).body("방이 생성되지 않았습니다.");
 
-        return ResponseEntity.status(201).body(registRoomRequest);
+        return ResponseEntity.status(201).body(registRoomResponse);
 
     }
 
     @PostMapping("/participants")
-    public ResponseEntity<?> joinRoom(
-//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
-            @RequestBody JoinRoomRequest joinRoomRequest) {
+    public ResponseEntity<?> joinRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+                                      @RequestBody JoinRoomRequest joinRoomRequest) {
 
-//        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
-//        String memberNickname = jwtUtil.getNicknameFromToken(tokenHeader.substring(7));
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+        String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
 
-//        joinRoomRequest.setConsultationId(joinRoomRequest.getId());
-//        joinRoomRequest.setMemberId(memberId);
-//        joinRoomRequest.setMemberNickname(memberNickName);
-//        joinRoomRequest.setConsultationDate(joinRoomRequest.getStartTime().toLocalDate());
+        joinRoomRequest.setConsultationId(joinRoomRequest.getId());
+        joinRoomRequest.setMemberId(memberId);
+        joinRoomRequest.setMemberNickname(memberNickname);
+        joinRoomRequest.setConsultationDate(joinRoomRequest.getStartTime().toLocalDate());
 
         JoinRoomResponse joinRoomResponse = consultationService.joinRoom(joinRoomRequest);
 
@@ -72,14 +68,14 @@ public class ConsultationController {
     }
 
     @PostMapping("/random-participants")
-    public ResponseEntity<?> joinRandom(
-//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
-            @RequestBody JoinRandomRequest joinRandomRequest) {
-//        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
-//        String memberNickname = jwtUtil.getNicknameFromToken(tokenHeader.substring(7));
+    public ResponseEntity<?> joinRandom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+                                        @RequestBody JoinRandomRequest joinRandomRequest) {
 
-//        joinRandomRequest.setMemberId(memberId);
-//        joinRandomRequest.setMemberNickname(memberNickName);
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+        String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
+
+        joinRandomRequest.setMemberId(memberId);
+        joinRandomRequest.setMemberNickname(memberNickname);
 
         JoinRandomResponse joinRandomResponse = consultationService.joinRandom(joinRandomRequest);
 
@@ -89,58 +85,56 @@ public class ConsultationController {
     }
 
     @DeleteMapping("{consultationId}")
-    public ResponseEntity<?> ExitRoomBeforeStart(
-//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
-            @PathVariable("consultationId") Long consultationId) {
+    public ResponseEntity<?> ExitRoomBeforeStart(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+                                                 @PathVariable("consultationId") Long consultationId) {
 
-//        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
-//        exitRoomBeforeStart.setMemberId(memberId);
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
         ExitRoomBeforeStartRequest exitRoomBeforeStartRequest = new ExitRoomBeforeStartRequest(memberId, consultationId);
+        exitRoomBeforeStartRequest.setMemberId(memberId);
 
         int result = consultationService.exitRoomBeforeStart(exitRoomBeforeStartRequest);
 
-        if(result == 0) ResponseEntity.status(404).body("퇴장하지 못 했습니다.");
+        if(result == 0) return ResponseEntity.status(404).body("퇴장하지 못 했습니다.");
 
         return ResponseEntity.status(200).body("정상적으로 퇴장 처리 되었습니다.");
     }
 
     @PatchMapping
-    public ResponseEntity<?> ExitRoomAfterStart(
-//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
-            @RequestBody ExitRoomAfterStartRequest exitRoomAfterStartRequest) {
+    public ResponseEntity<?> ExitRoomAfterStart(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+                                                @RequestBody ExitRoomAfterStartRequest exitRoomAfterStartRequest) {
 
-//        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
-//        exitRoomAfterStart.setMemberId(memberId);
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+        exitRoomAfterStartRequest.setMemberId(memberId);
 
         int result = consultationService.exitRoomAfterStart(exitRoomAfterStartRequest);
 
-        if(result == 0) ResponseEntity.status(404).body("퇴장하지 못 했습니다.");
+        if(result == 0) return ResponseEntity.status(404).body("퇴장하지 못했습니다.");
 
         return ResponseEntity.status(200).body("정상적으로 퇴장 처리 되었습니다.");
     }
 
-    @GetMapping("/chaings/{consultationId}")
+    @GetMapping("/chatings/{consultationId}")
     public ResponseEntity<?> findById(@PathVariable("consultationId") Long consultationId) {
+
         List<FindByIdResponse> chatingList = consultationService.findById(consultationId);
 
         return ResponseEntity.status(200).body(chatingList);
     }
 
     @PostMapping("/chatings")
-    public ResponseEntity<?> registChating(
-//            @RequestHeader(value = "Authorization", required = false) String tokenHeader,
-            @RequestBody RegistChatingRequest registChatingRequest) {
+    public ResponseEntity<?> registChating(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+                                           @RequestBody RegistChatingRequest registChatingRequest) {
 
-//        String memberId = jwtUtil.getIdFromToken(tokenHeader.substring(7));
-//        String memberNickname = jwtUtil.getNicknameFromToken(tokenHeader.substring(7));
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+        String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
 
-//        registChatingRequest.setMemberId(memberId);
-//        registChatingRequest.setMemberNickname(memberNickname);
+        registChatingRequest.setMemberId(memberId);
+        registChatingRequest.setMemberNickname(memberNickname);
 
         int result = consultationService.registChating(registChatingRequest);
 
-        if(result == 0) ResponseEntity.status(404).body("채팅이 저장되지 않았습니다.");
+        if(result == 0) return ResponseEntity.status(404).body("채팅이 저장되지 않았습니다.");
 
         return ResponseEntity.status(200).body("정상적으로 채팅이 저장되었습니다.");
     }

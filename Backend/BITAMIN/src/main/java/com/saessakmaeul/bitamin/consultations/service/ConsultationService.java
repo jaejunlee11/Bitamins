@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,8 +37,6 @@ public class ConsultationService {
     public List<SelectAllResponse> selectAll(int page, int size, SearchCondition type) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         Page<Consultation> consultationPage;
-
-        System.out.println("Service");
 
         if(type == null || type == SearchCondition.전체 ) consultationPage = consultationRepository.findAll(pageable);
 
@@ -71,15 +70,18 @@ public class ConsultationService {
         Consultation consultation = Consultation.builder()
                 .category(registRoomRequest.getCategory())
                 .title(registRoomRequest.getTitle())
-                .isPrivated(registRoomRequest.isPrivated())
+                .isPrivated(registRoomRequest.getIsPrivated())
                 .password(registRoomRequest.getPassword())
                 .startTime(registRoomRequest.getStartTime())
                 .endTime(registRoomRequest.getEndTime())
                 .build();
 
-        Consultation newConsultation = consultationRepository.save(consultation);
-
-        if(newConsultation.getId() == 0) return null;
+        Consultation newConsultation;
+        try {
+            newConsultation= consultationRepository.save(consultation);
+        } catch (Exception e) {
+            return null;
+        }
 
         // 참가자 등록
         LocalDate date = newConsultation.getStartTime().toLocalDate();
@@ -91,19 +93,21 @@ public class ConsultationService {
                 .consultationDate(date)
                 .build();
 
-        Long pId = participantRepository.save(newParticipant).getId();
-
-        if(pId == 0) return null;
+        try {
+            participantRepository.save(newParticipant);
+        } catch (Exception e) {
+            return null;
+        }
 
         // 방 현재 참가자 수 수정
         newConsultation.setCurrentParticipants(newConsultation.getCurrentParticipants() + 1);
-        Consultation c = consultationRepository.save(newConsultation);
 
-        if(c.getId() == 0) return null;
-
-        // 방 정보 조회
-        Consultation currentConsultation = consultationRepository.findById(c.getId())
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+        Consultation c;
+        try {
+            c = consultationRepository.save(newConsultation);
+        }  catch (Exception e) {
+            return null;
+        }
 
         // 참가자 리스트 조회
         List<Participant> list = participantRepository.findByConsultationId(c.getId());
@@ -124,14 +128,14 @@ public class ConsultationService {
         }).collect(Collectors.toList());
 
         RegistRoomResponse registRoomResponse = RegistRoomResponse.builder()
-                .id(currentConsultation.getId())
-                .category(currentConsultation.getCategory())
-                .title(currentConsultation.getTitle())
-                .isPrivated(currentConsultation.getIsPrivated())
-                .password(currentConsultation.getPassword())
-                .startTime(currentConsultation.getStartTime())
-                .endTime(currentConsultation.getEndTime())
-                .currentParticipants(currentConsultation.getCurrentParticipants())
+                .id(c.getId())
+                .category(c.getCategory())
+                .title(c.getTitle())
+                .isPrivated(c.getIsPrivated())
+                .password(c.getPassword())
+                .startTime(c.getStartTime())
+                .endTime(c.getEndTime())
+                .currentParticipants(c.getCurrentParticipants())
                 .participants(pList)
                 .build();
 
@@ -148,32 +152,42 @@ public class ConsultationService {
                 .consultationDate(joinRoomRequest.getConsultationDate())
                 .build();
 
-        Long id = participantRepository.save(newParticipant).getConsultationId();
+        Participant participant;
 
-        if(id == 0) return null;
+        try {
+            participant = participantRepository.save(newParticipant);
+        } catch (Exception e) {
+            return null;
+        }
 
         // 방 현재 참가자 수 수정
-        Consultation consultation = consultationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+        Optional<Consultation> consultation = consultationRepository.findById(participant.getConsultationId());
 
-        consultation.setCurrentParticipants(consultation.getCurrentParticipants() + 1);
-        Consultation c = consultationRepository.save(consultation);
+        if(consultation.isEmpty()) return null;
 
-        if(c.getId() == 0) return null;
+        consultation.get().setCurrentParticipants(consultation.get().getCurrentParticipants() + 1);
+
+        Consultation c;
+
+        try {
+            c = consultationRepository.save(consultation.get());
+        } catch (Exception e) {
+            return null;
+        }
 
         // 참가자 리스트 조회
         List<Participant> list = participantRepository.findByConsultationId(c.getId());
 
-        List<ParticipantResponse> pList = list.stream().map(participant -> {
-            Member member = memberRepository.findById(participant.getMemberId())
+        List<ParticipantResponse> pList = list.stream().map(p -> {
+            Member member = memberRepository.findById(p.getMemberId())
                     .orElseThrow(() -> new RuntimeException("Member not found"));
 
             return ParticipantResponse.builder()
-                    .id(participant.getId())
-                    .memberId(participant.getMemberId())
-                    .memberNickname(participant.getMemberNickname())
-                    .consultationId(participant.getConsultationId())
-                    .consultationDate(participant.getConsultationDate())
+                    .id(p.getId())
+                    .memberId(p.getMemberId())
+                    .memberNickname(p.getMemberNickname())
+                    .consultationId(p.getConsultationId())
+                    .consultationDate(p.getConsultationDate())
                     .profileKey(member.getProfileKey())
                     .profileUrl(member.getProfileUrl())
                     .build();
@@ -194,10 +208,10 @@ public class ConsultationService {
         return joinRoomResponse;
     }
 
+    // 랜덤 방 조회 (조건: 사용자가 선택한 카테고리, 현재 참여 인원이 5 미만인 곳
     @Transactional
     public JoinRandomResponse joinRandom(JoinRandomRequest joinRandomRequest) {
-        // 랜덤 방 조회 (조건: 사용자가 선택한 카테고리, 현재 참여 인원이 5 미만인 곳
-        Consultation consultation;
+        Optional<Consultation> consultation;
 
         SearchCondition type = joinRandomRequest.getType();
 
@@ -208,23 +222,33 @@ public class ConsultationService {
         else return null;
 
         // 해당 방 id 가져와서 paticipant update
-        LocalDate date = consultation.getStartTime().toLocalDate();
+        LocalDate date = consultation.get().getStartTime().toLocalDate();
 
         Participant newParticipant = Participant.builder()
                 .memberId(joinRandomRequest.getMemberId())
                 .memberNickname(joinRandomRequest.getMemberNickname())
-                .consultationId(consultation.getId())
+                .consultationId(consultation.get().getId())
                 .consultationDate(date)
                 .build();
 
-        Long pId = participantRepository.save(newParticipant).getId();
-
-        if(pId == 0) return null;
+        try {
+            participantRepository.save(newParticipant);
+        }
+        catch (Exception e) {
+            return null;
+        }
 
         // 다시 해당 상담방 update
-        consultation.setCurrentParticipants(consultation.getCurrentParticipants()+1);
-        Consultation c = consultationRepository.save(consultation);
-        
+        consultation.get().setCurrentParticipants(consultation.get().getCurrentParticipants()+1);
+
+        Consultation c;
+
+        try {
+            c = consultationRepository.save(consultation.get());
+        } catch (Exception e) {
+            return null;
+        }
+
         // 리스트 조회
         List<Participant> list = participantRepository.findByConsultationId(c.getId());
         
@@ -243,7 +267,6 @@ public class ConsultationService {
                             .build();
         }).collect(Collectors.toList());
 
-        
         // Response 파싱
         JoinRandomResponse joinRandomResponse = JoinRandomResponse.builder()
                 .id(c.getId())
@@ -263,41 +286,56 @@ public class ConsultationService {
     // 회의 시작 전 퇴장
     @Transactional
     public int exitRoomBeforeStart(ExitRoomBeforeStartRequest exitRoomBeforeStartRequest) {
-        Participant participant = participantRepository.findByMemberIdAndConsultationId(exitRoomBeforeStartRequest.getMemberId(), exitRoomBeforeStartRequest.getConsultationId());
+        Optional<Participant> participant = participantRepository.findByMemberIdAndConsultationId(exitRoomBeforeStartRequest.getMemberId(), exitRoomBeforeStartRequest.getConsultationId());
 
-        if(participant.getId() == 0) return 0;
+        if(participant.isEmpty()) return 0;
 
         try {
-            participantRepository.delete(participant);
+            participantRepository.delete(participant.get());
         } catch (EmptyResultDataAccessException e) {
             return 0;
         }
 
-        Consultation consultation = consultationRepository.findById(exitRoomBeforeStartRequest.getConsultationId())
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+        Optional<Consultation> consultation = consultationRepository.findById(exitRoomBeforeStartRequest.getConsultationId());
 
+        consultation.get().setCurrentParticipants(consultation.get().getCurrentParticipants() - 1);
 
-        consultation.setCurrentParticipants(consultation.getCurrentParticipants() - 1);
-        Consultation c = consultationRepository.save(consultation);
+        if(consultation.get().getCurrentParticipants() == 0) {
+            try {
+                consultationRepository.delete(consultation.get());
+            } catch (Exception e) {
+                return 0;
+            }
 
-        if(c.getId() == 0) return 0;
+            return 1;
+        }
+
+        try {
+            consultationRepository.save(consultation.get());
+        } catch (Exception e) {
+            return 0;
+        }
 
         return 1;
     }
 
     // 회의 시작 후 퇴장
     public int exitRoomAfterStart(ExitRoomAfterStartRequest exitRoomAfterStartRequest) {
-        Participant participant = participantRepository.findByMemberIdAndConsultationId(exitRoomAfterStartRequest.getMemberId(), exitRoomAfterStartRequest.getConsultationId());
+        Optional<Participant> participant = participantRepository.findByMemberIdAndConsultationId(exitRoomAfterStartRequest.getMemberId(), exitRoomAfterStartRequest.getConsultationId());
 
-        if(participant.getId() == 0) return 0;
+        if(participant.isEmpty()) return 0;
 
-        Consultation consultation = consultationRepository.findById(exitRoomAfterStartRequest.getConsultationId())
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+        Optional<Consultation> consultation = consultationRepository.findById(exitRoomAfterStartRequest.getConsultationId());
 
-        consultation.setCurrentParticipants(consultation.getCurrentParticipants() - 1);
-        Consultation c = consultationRepository.save(consultation);
+        if(consultation.isEmpty()) return 0;
 
-        if(c.getId() == 0) return 0;
+        consultation.get().setCurrentParticipants(consultation.get().getCurrentParticipants() - 1);
+
+        try {
+            consultationRepository.save(consultation.get());
+        } catch (Exception e) {
+            return 0;
+        }
 
         return 1;
     }
@@ -323,6 +361,10 @@ public class ConsultationService {
 
     // 채팅 등록
     public int registChating(RegistChatingRequest registChatingRequest) {
+        Optional<Participant> participant = participantRepository.findByMemberIdAndConsultationId(registChatingRequest.getMemberId(), registChatingRequest.getConsultationId());
+
+        if(participant.isEmpty()) return 0;
+
         ChatingLog chatingLog = ChatingLog.builder()
                 .consultationId(registChatingRequest.getConsultationId())
                 .memberId(registChatingRequest.getMemberId())
@@ -330,9 +372,11 @@ public class ConsultationService {
                 .content(registChatingRequest.getContent())
                 .build();
 
-        ChatingLog c = chatingLogRepository.save(chatingLog);
-
-        if(c.getId() == 0) return 0;
+        try {
+            chatingLogRepository.save(chatingLog);
+        } catch (Exception e) {
+            return 0;
+        }
 
         return 1;
     }
