@@ -6,7 +6,7 @@ import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.entity.RefreshToken;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
-import com.saessakmaeul.bitamin.member.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

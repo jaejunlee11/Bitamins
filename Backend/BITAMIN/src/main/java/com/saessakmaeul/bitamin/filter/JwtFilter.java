@@ -1,8 +1,7 @@
-package com.saessakmaeul.bitamin.member.filter;
+package com.saessakmaeul.bitamin.filter;
 
-import com.saessakmaeul.bitamin.member.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.JwtUtil;
 import com.saessakmaeul.bitamin.member.service.CustomUserDetailsService;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,7 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
             if (jwtUtil.extractUsername(jwt).equals(userDetails.getUsername()) && !jwtUtil.isTokenExpired(jwt)) {
 
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        new UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
