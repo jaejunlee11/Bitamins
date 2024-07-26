@@ -1,12 +1,18 @@
 package com.saessakmaeul.bitamin.consultations.dto.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
-public class SelectAllResponse {
+public class JoinRandomResponse {
     private Long id;
     private String category;
     private String title;
@@ -16,9 +22,5 @@ public class SelectAllResponse {
     private LocalDateTime endTime;
     private int currentParticipants;
 
-    // 추가 페이징 정보
-    private int page;
-    private int size;
-    private long totalElements;
-    private int totalPages;
+    private List<ParticipantResponse> participants;
 }
