@@ -2,12 +2,14 @@ package com.saessakmaeul.bitamin.complaint.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "complainant")
 @Getter
+@Setter
 public class Complaint {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

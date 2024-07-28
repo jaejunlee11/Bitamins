@@ -1,5 +1,6 @@
 package com.saessakmaeul.bitamin.complaint.service;
 
+import com.saessakmaeul.bitamin.complaint.dto.requestDto.ComplaintRegistRequest;
 import com.saessakmaeul.bitamin.complaint.dto.responseDto.ComplaintSimpleResponse;
 import com.saessakmaeul.bitamin.complaint.dto.responseDto.ComplatinDetailResponse;
 import com.saessakmaeul.bitamin.complaint.entity.Complaint;
@@ -9,8 +10,10 @@ import com.saessakmaeul.bitamin.complaint.repository.UserStopRepository;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.entity.Role;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
+import jakarta.persistence.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.rmi.server.ExportException;
 import java.time.LocalDateTime;
@@ -84,6 +87,20 @@ public class ComplaintService {
                 .judgementDate(judgementDate)
                 .build();
         return result;
+    }
+
+    @Transactional
+    public void postComplaint(ComplaintRegistRequest request, long userId) throws Exception{
+        Complaint complaint = new Complaint();
+        complaint.setComplainantId(userId);
+        complaint.setRespondentId(request.getRespondentId());
+        complaint.setCategory(request.getCategory());
+        complaint.setContent(request.getContent());
+        complaint.setType(request.getType());
+        complaint.setIsResolved(false);
+        complaint.setJudgement(0);
+        complaint.setSendDate(LocalDateTime.now());
+        complaintRepository.save(complaint);
     }
 
     private String getNickName(long userId) throws Exception {
