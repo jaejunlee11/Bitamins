@@ -54,4 +54,15 @@ public class ComplaintController {
         }
     }
 
+    @PatchMapping("/{id}/{stopDate}")
+    public ResponseEntity<?> patchComplaint(@RequestHeader(name = "Authorization",required = false) String token, @PathVariable(name = "id") long id, @PathVariable(name = "stopDate") int stopDate){
+        try{
+            long userId = jwtUtil.extractUserId(token.substring(7));
+            complaintService.patchComplaint(id,stopDate,userId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }
