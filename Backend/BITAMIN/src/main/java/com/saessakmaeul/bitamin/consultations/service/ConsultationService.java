@@ -74,6 +74,7 @@ public class ConsultationService {
                 .password(registRoomRequest.getPassword())
                 .startTime(registRoomRequest.getStartTime())
                 .endTime(registRoomRequest.getEndTime())
+                .currentParticipants(1)
                 .build();
 
         Consultation newConsultation;
@@ -99,48 +100,9 @@ public class ConsultationService {
             return null;
         }
 
-        // 방 현재 참가자 수 수정
-        newConsultation.setCurrentParticipants(newConsultation.getCurrentParticipants() + 1);
-
-        Consultation c;
-        try {
-            c = consultationRepository.save(newConsultation);
-        }  catch (Exception e) {
-            return null;
-        }
-        /** 여기서부터 socket broad cast 용 조회 로직을 따로 만들자*/
-
-        // 참가자 리스트 조회
-        List<Participant> list = participantRepository.findByConsultationId(c.getId());
-
-        List<ParticipantResponse> pList = list.stream().map(participant -> {
-            Member member = memberRepository.findById(participant.getMemberId())
-                    .orElseThrow(() -> new RuntimeException("Member not found"));
-
-            return ParticipantResponse.builder()
-                    .id(participant.getId())
-                    .memberId(participant.getMemberId())
-                    .memberNickname(participant.getMemberNickname())
-                    .consultationId(participant.getConsultationId())
-                    .consultationDate(participant.getConsultationDate())
-                    .profileKey(member.getProfileKey())
-                    .profileUrl(member.getProfileUrl())
-                    .build();
-        }).collect(Collectors.toList());
-
-        RegistRoomResponse registRoomResponse = RegistRoomResponse.builder()
-                .id(c.getId())
-                .category(c.getCategory())
-                .title(c.getTitle())
-                .isPrivated(c.getIsPrivated())
-                .password(c.getPassword())
-                .startTime(c.getStartTime())
-                .endTime(c.getEndTime())
-                .currentParticipants(c.getCurrentParticipants())
-                .participants(pList)
+        return RegistRoomResponse.builder()
+                .id(newConsultation.getId())
                 .build();
-
-        return registRoomResponse;
     }
 
     // 방 리스트에서 참가
@@ -176,37 +138,9 @@ public class ConsultationService {
             return null;
         }
 
-        // 참가자 리스트 조회
-        List<Participant> list = participantRepository.findByConsultationId(c.getId());
-
-        List<ParticipantResponse> pList = list.stream().map(p -> {
-            Member member = memberRepository.findById(p.getMemberId())
-                    .orElseThrow(() -> new RuntimeException("Member not found"));
-
-            return ParticipantResponse.builder()
-                    .id(p.getId())
-                    .memberId(p.getMemberId())
-                    .memberNickname(p.getMemberNickname())
-                    .consultationId(p.getConsultationId())
-                    .consultationDate(p.getConsultationDate())
-                    .profileKey(member.getProfileKey())
-                    .profileUrl(member.getProfileUrl())
-                    .build();
-        }).collect(Collectors.toList());
-
-        JoinRoomResponse joinRoomResponse = JoinRoomResponse.builder()
+        return JoinRoomResponse.builder()
                 .id(c.getId())
-                .category(c.getCategory())
-                .title(c.getTitle())
-                .isPrivated(c.getIsPrivated())
-                .password(c.getPassword())
-                .startTime(c.getStartTime())
-                .endTime(c.getEndTime())
-                .currentParticipants(c.getCurrentParticipants())
-                .participants(pList)
                 .build();
-
-        return joinRoomResponse;
     }
 
     // 랜덤 방 조회 (조건: 사용자가 선택한 카테고리, 현재 참여 인원이 5 미만인 곳
@@ -250,38 +184,9 @@ public class ConsultationService {
             return null;
         }
 
-        // 리스트 조회
-        List<Participant> list = participantRepository.findByConsultationId(c.getId());
-        
-        List<ParticipantResponse> pList = list.stream().map(participant -> {
-            Member member = memberRepository.findById(participant.getMemberId())
-                    .orElseThrow(() -> new RuntimeException("Member not found"));
-
-                    return ParticipantResponse.builder()
-                            .id(participant.getId())
-                            .memberId(participant.getMemberId())
-                            .memberNickname(participant.getMemberNickname())
-                            .consultationId(participant.getConsultationId())
-                            .consultationDate(participant.getConsultationDate())
-                            .profileKey(member.getProfileKey())
-                            .profileUrl(member.getProfileUrl())
-                            .build();
-        }).collect(Collectors.toList());
-
-        // Response 파싱
-        JoinRandomResponse joinRandomResponse = JoinRandomResponse.builder()
+        return JoinRandomResponse.builder()
                 .id(c.getId())
-                .category(c.getCategory())
-                .title(c.getTitle())
-                .isPrivated(c.getIsPrivated())
-                .password(c.getPassword())
-                .startTime(c.getStartTime())
-                .endTime(c.getEndTime())
-                .currentParticipants(c.getCurrentParticipants())
-                .participants(pList)
                 .build();
-
-        return joinRandomResponse;
     }
 
     // 회의 시작 전 퇴장
@@ -342,11 +247,11 @@ public class ConsultationService {
     }
 
     // 채팅 조회
-    public List<FindByIdResponse> findById(Long consultationId) {
+    public List<findChatingResponse> findChating(Long consultationId) {
         List<ChatingLog> chatingLog = chatingLogRepository.findByConsultationId(consultationId);
 
-        List<FindByIdResponse> findByIdResponse = chatingLog.stream()
-                .map(chating -> FindByIdResponse.builder()
+        List<findChatingResponse> findByIdResponse = chatingLog.stream()
+                .map(chating -> findChatingResponse.builder()
                         .id(chating.getId())
                         .content(chating.getContent())
                         .memberId(chating.getMemberId())
@@ -380,5 +285,41 @@ public class ConsultationService {
         }
 
         return 1;
+    }
+
+    public BroadcastInformationResponse broadcastInformation(Long id) {
+        Optional<Consultation> consultation = consultationRepository.findById(id);
+
+        // 참가자 리스트 조회
+        List<Participant> list = participantRepository.findByConsultationId(consultation.get().getId());
+
+        List<ParticipantResponse> pList = list.stream().map(participant -> {
+            Member member = memberRepository.findById(participant.getMemberId())
+                    .orElseThrow(() -> new RuntimeException("Member not found"));
+
+            return ParticipantResponse.builder()
+                    .id(participant.getId())
+                    .memberId(participant.getMemberId())
+                    .memberNickname(participant.getMemberNickname())
+                    .consultationId(participant.getConsultationId())
+                    .consultationDate(participant.getConsultationDate())
+                    .profileKey(member.getProfileKey())
+                    .profileUrl(member.getProfileUrl())
+                    .build();
+        }).collect(Collectors.toList());
+
+        BroadcastInformationResponse broadcastInformationResponse = BroadcastInformationResponse.builder()
+                .id(consultation.get().getId())
+                .category(consultation.get().getCategory())
+                .title(consultation.get().getTitle())
+                .isPrivated(consultation.get().getIsPrivated())
+                .password(consultation.get().getPassword())
+                .startTime(consultation.get().getStartTime())
+                .endTime(consultation.get().getEndTime())
+                .currentParticipants(consultation.get().getCurrentParticipants())
+                .participants(pList)
+                .build();
+
+        return broadcastInformationResponse;
     }
 }
