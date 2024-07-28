@@ -65,28 +65,30 @@ public class ComplaintService {
         } catch (ExportException e){
             // 피신고자가 정지를 안 당해있는 경우
             remainStopDate = 0;
-        }
-        // 역대 피신고자 정지 기간 및 횟수
-        int judgementCount = 0;
-        int judgementDate = 0;
-        List<Complaint> complaintList = complaintRepository.findAllByRespondentId(response.getRespondentId());
-        for(Complaint complaint : complaintList){
-            judgementCount++;
-            judgementDate += complaint.getJudgement();
-        }
+        } finally {
+            // 역대 피신고자 정지 기간 및 횟수
+            int judgementCount = 0;
+            int judgementDate = 0;
+            List<Complaint> complaintList = complaintRepository.findAllByRespondentId(response.getRespondentId());
+            for(Complaint complaint : complaintList){
+                if(!complaint.getIsResolved()) continue;
+                judgementCount++;
+                judgementDate += complaint.getJudgement();
+            }
 
-        ComplatinDetailResponse result = ComplatinDetailResponse.builder()
-                .id(id)
-                .respondentNickname(getNickName(response.getRespondentId()))
-                .complainantNickname(getNickName(response.getComplainantId()))
-                .content(response.getContent())
-                .category(response.getCategory())
-                .sendDate(response.getSendDate())
-                .stopDate(remainStopDate)
-                .judgementCount(judgementCount)
-                .judgementDate(judgementDate)
-                .build();
-        return result;
+            ComplatinDetailResponse result = ComplatinDetailResponse.builder()
+                    .id(id)
+                    .respondentNickname(getNickName(response.getRespondentId()))
+                    .complainantNickname(getNickName(response.getComplainantId()))
+                    .content(response.getContent())
+                    .category(response.getCategory())
+                    .sendDate(response.getSendDate())
+                    .stopDate(remainStopDate)
+                    .judgementCount(judgementCount)
+                    .judgementDate(judgementDate)
+                    .build();
+            return result;
+        }
     }
 
     @Transactional
