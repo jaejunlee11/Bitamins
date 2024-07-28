@@ -1,5 +1,6 @@
 package com.saessakmaeul.bitamin.complaint.controller;
 
+import com.saessakmaeul.bitamin.complaint.dto.requestDto.ComplaintRegistRequest;
 import com.saessakmaeul.bitamin.complaint.dto.responseDto.ComplaintSimpleResponse;
 import com.saessakmaeul.bitamin.complaint.dto.responseDto.ComplatinDetailResponse;
 import com.saessakmaeul.bitamin.complaint.service.ComplaintService;
@@ -37,6 +38,17 @@ public class ComplaintController {
             long userId = jwtUtil.extractUserId(token.substring(7));
             ComplatinDetailResponse response = complaintService.getComplaintDetail(id, userId);
             return ResponseEntity.ok(response);
+        } catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> postComplaint(@RequestHeader(name = "Authorization",required = false) String token, @RequestBody()ComplaintRegistRequest request) {
+        try{
+            long userId = jwtUtil.extractUserId(token.substring(7));
+            complaintService.postComplaint(request,userId);
+            return ResponseEntity.ok().build();
         } catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }

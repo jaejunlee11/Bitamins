@@ -1,5 +1,6 @@
 package com.saessakmaeul.bitamin.complaint.service;
 
+import com.saessakmaeul.bitamin.complaint.dto.requestDto.ComplaintRegistRequest;
 import com.saessakmaeul.bitamin.complaint.dto.responseDto.ComplaintSimpleResponse;
 import com.saessakmaeul.bitamin.complaint.dto.responseDto.ComplatinDetailResponse;
 import com.saessakmaeul.bitamin.complaint.entity.Complaint;
@@ -9,8 +10,10 @@ import com.saessakmaeul.bitamin.complaint.repository.UserStopRepository;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.entity.Role;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
+import jakarta.persistence.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.rmi.server.ExportException;
 import java.time.LocalDateTime;
@@ -62,28 +65,44 @@ public class ComplaintService {
         } catch (ExportException e){
             // 피신고자가 정지를 안 당해있는 경우
             remainStopDate = 0;
-        }
-        // 역대 피신고자 정지 기간 및 횟수
-        int judgementCount = 0;
-        int judgementDate = 0;
-        List<Complaint> complaintList = complaintRepository.findAllByRespondentId(response.getRespondentId());
-        for(Complaint complaint : complaintList){
-            judgementCount++;
-            judgementDate += complaint.getJudgement();
-        }
+        } finally {
+            // 역대 피신고자 정지 기간 및 횟수
+            int judgementCount = 0;
+            int judgementDate = 0;
+            List<Complaint> complaintList = complaintRepository.findAllByRespondentId(response.getRespondentId());
+            for(Complaint complaint : complaintList){
+                if(!complaint.getIsResolved()) continue;
+                judgementCount++;
+                judgementDate += complaint.getJudgement();
+            }
 
-        ComplatinDetailResponse result = ComplatinDetailResponse.builder()
-                .id(id)
-                .respondentNickname(getNickName(response.getRespondentId()))
-                .complainantNickname(getNickName(response.getComplainantId()))
-                .content(response.getContent())
-                .category(response.getCategory())
-                .sendDate(response.getSendDate())
-                .stopDate(remainStopDate)
-                .judgementCount(judgementCount)
-                .judgementDate(judgementDate)
-                .build();
-        return result;
+            ComplatinDetailResponse result = ComplatinDetailResponse.builder()
+                    .id(id)
+                    .respondentNickname(getNickName(response.getRespondentId()))
+                    .complainantNickname(getNickName(response.getComplainantId()))
+                    .content(response.getContent())
+                    .category(response.getCategory())
+                    .sendDate(response.getSendDate())
+                    .stopDate(remainStopDate)
+                    .judgementCount(judgementCount)
+                    .judgementDate(judgementDate)
+                    .build();
+            return result;
+        }
+    }
+
+    @Transactional
+    public void postComplaint(ComplaintRegistRequest request, long userId) throws Exception{
+        Complaint complaint = new Complaint();
+        complaint.setComplainantId(userId);
+        complaint.setRespondentId(request.getRespondentId());
+        complaint.setCategory(request.getCategory());
+        complaint.setContent(request.getContent());
+        complaint.setType(request.getType());
+        complaint.setIsResolved(false);
+        complaint.setJudgement(0);
+        complaint.setSendDate(LocalDateTime.now());
+        complaintRepository.save(complaint);
     }
 
     private String getNickName(long userId) throws Exception {
