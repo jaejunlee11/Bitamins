@@ -33,8 +33,7 @@ public class ComplaintService {
     private MemberRepository memberRepository;
 
     public List<ComplaintSimpleResponse> getComplaintList(long userId) throws Exception{
-        Member member =  memberRepository.findById(userId).orElseThrow(Exception::new);
-        if(!member.getRole().equals(Role.ROLE_ADMIN)) throw new Exception("admin이 아닙니다.");
+        checkAdmin(userId);
         List<Complaint> complaintList = complaintRepository.findAll();
         List<ComplaintSimpleResponse> result = new ArrayList<>();
         for(Complaint complaint : complaintList){
@@ -51,8 +50,7 @@ public class ComplaintService {
     }
 
     public ComplatinDetailResponse getComplaintDetail(long id, long userId) throws Exception{
-        Member member =  memberRepository.findById(userId).orElseThrow(() -> new Exception("해당 id를 가진 멤버가 존재하지 않습니다."));
-        if(!member.getRole().equals(Role.ROLE_ADMIN)) throw new Exception("admin이 아닙니다.");
+        checkAdmin(userId);
         Complaint response = complaintRepository.findById(id).orElseThrow(()->new Exception("해당 id를 가진 신고가 없습니다."));
         // 정지 남은 일수
         int remainStopDate = 0;
@@ -105,7 +103,32 @@ public class ComplaintService {
         complaintRepository.save(complaint);
     }
 
+    @Transactional
+    public void patchComplaint(long id, int stopDate, long userId) throws Exception {
+        checkAdmin(userId);
+        Complaint complaint = complaintRepository.findById(id).orElseThrow(()->new Exception("해당 id를 가진 신고가 없습니다."));
+        if(complaint.getIsResolved()) throw new Exception("이미 처리된 신고 입니다.");
+        complaint.setJudgement(stopDate);
+        complaint.setIsResolved(true);
+        complaintRepository.save(complaint);
+        try{
+            UserStop userStop = userStopRepository.findById(complaint.getRespondentId()).orElseThrow(Exception::new);
+            userStop.setStopDate(userStop.getStopDate().plusDays(stopDate));
+            userStopRepository.save(userStop);
+        } catch (Exception e) {
+            UserStop userStop = new UserStop();
+            userStop.setId(complaint.getRespondentId());
+            userStop.setStopDate(LocalDateTime.now().plusDays(stopDate));
+            userStopRepository.save(userStop);
+        }
+    }
+
     private String getNickName(long userId) throws Exception {
         return memberRepository.findById(userId).orElseThrow(Exception::new).getNickname();
+    }
+
+    private void checkAdmin(long userId) throws Exception {
+        Member member =  memberRepository.findById(userId).orElseThrow(() -> new Exception("해당 id를 가진 멤버가 존재하지 않습니다."));
+        if(!member.getRole().equals(Role.ROLE_ADMIN)) throw new Exception("admin이 아닙니다.");
     }
 }
