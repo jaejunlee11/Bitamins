@@ -107,6 +107,7 @@ public class ComplaintService {
     public void patchComplaint(long id, int stopDate, long userId) throws Exception {
         checkAdmin(userId);
         Complaint complaint = complaintRepository.findById(id).orElseThrow(()->new Exception("해당 id를 가진 신고가 없습니다."));
+        if(complaint.getIsResolved()) throw new Exception("이미 처리된 신고 입니다.");
         complaint.setJudgement(stopDate);
         complaint.setIsResolved(true);
         complaintRepository.save(complaint);
