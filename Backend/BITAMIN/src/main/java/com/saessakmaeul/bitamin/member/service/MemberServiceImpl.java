@@ -8,14 +8,18 @@ import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
+import com.saessakmaeul.bitamin.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +28,9 @@ public class MemberServiceImpl implements MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final HealthReportRepository healthReportRepository;
+
+    @Autowired
+    private S3Service s3Service;
 
     @Autowired
     public MemberServiceImpl(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, @Lazy PasswordEncoder passwordEncoder, HealthReportRepository healthReportRepository) {
@@ -35,7 +42,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public Long register(MemberResponseDTO memberDTO) {
+    public Long register(MemberResponseDTO memberDTO) throws IOException {
         Member member = Member.builder()
                 .email(memberDTO.getEmail())
                 .password(passwordEncoder.encode(memberDTO.getPassword()))
@@ -43,12 +50,19 @@ public class MemberServiceImpl implements MemberService {
                 .nickname(memberDTO.getNickname())
                 .dongCode(memberDTO.getDongCode())
                 .birthday(memberDTO.getBirthday())
-                .profileKey(memberDTO.getProfileKey())
-                .profileUrl(memberDTO.getProfileUrl())
                 .role(memberDTO.getRole())
                 .build();
+        member = memberRepository.save(member);
+        if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().isEmpty()) {
+            String fileName = UUID.randomUUID() + "_" + memberDTO.getProfileImage().getOriginalFilename();
+            String profileUrl = s3Service.uploadFile(memberDTO.getProfileImage());
 
-        return memberRepository.save(member).getId();
+            member.setProfileKey(fileName);
+            member.setProfileUrl(profileUrl);
+        }
+        memberRepository.save(member);
+        return member.getId();
+        // 1차 저장 후 2차 저장
     }
 
     @Override
@@ -127,7 +141,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO) {
+    @Transactional
+    public int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO) throws IOException {
         Optional<Member> optionalMember = memberRepository.findById(userId);
         if (optionalMember.isPresent()) {
             Member member = optionalMember.get();
@@ -135,8 +150,13 @@ public class MemberServiceImpl implements MemberService {
             member.setNickname(memberUpdateRequestDTO.getNickname());
             member.setDongCode(memberUpdateRequestDTO.getDongCode());
             member.setBirthday(memberUpdateRequestDTO.getBirthday());
-            member.setProfileKey(memberUpdateRequestDTO.getProfileKey());
-            member.setProfileUrl(memberUpdateRequestDTO.getProfileUrl());
+            if (memberUpdateRequestDTO.getProfileImage() != null && !memberUpdateRequestDTO.getProfileImage().isEmpty()) {
+                String fileName = UUID.randomUUID() + "_" + memberUpdateRequestDTO.getProfileImage().getOriginalFilename();
+                String profileUrl = s3Service.uploadFile(memberUpdateRequestDTO.getProfileImage());
+
+                member.setProfileKey(fileName);
+                member.setProfileUrl(profileUrl);
+            }
             memberRepository.save(member);
             return 1;
         } else {

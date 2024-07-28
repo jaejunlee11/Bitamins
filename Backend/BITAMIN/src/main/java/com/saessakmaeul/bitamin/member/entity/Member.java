@@ -33,7 +33,9 @@ public class Member {
     @Column(nullable = false)
     private Date birthday;
 
+    @Column(length = 255)
     private String profileKey;
+    @Column(length = 255)
     private String profileUrl;
 
     @Enumerated(EnumType.STRING)

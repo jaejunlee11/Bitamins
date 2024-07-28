@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Lazy;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -45,8 +46,8 @@ public class MemberController {
 
     @Operation(summary = "회원가입", description = "")
     @PostMapping("/register")
-    public Long register(@RequestBody MemberResponseDTO user) {
-        return memberService.register(user);
+    public Long register(@ModelAttribute MemberResponseDTO memberDTO) throws IOException {
+        return memberService.register(memberDTO);
     }
 
     @Operation(summary = "회원 한명 조회", description = "")
@@ -70,15 +71,13 @@ public class MemberController {
 
     @Operation(summary = "회원 정보 수정", description = "수정 완료하면 1 반환")
     @PutMapping("/update-member")
-    public ResponseEntity<Integer> updateMemberByToken(HttpServletRequest request, @RequestBody MemberUpdateRequestDTO memberUpdateRequestDTO) {
+    public ResponseEntity<Integer> updateMemberByToken(HttpServletRequest request, @ModelAttribute MemberUpdateRequestDTO memberUpdateRequestDTO) throws IOException {
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
         String token = authorizationHeader.substring(7);
         Long userId = jwtUtil.extractUserId(token);
-
         int updateResult = memberService.updateMember(userId, memberUpdateRequestDTO);
         if (updateResult == 1) {
             return ResponseEntity.ok(updateResult);
@@ -86,6 +85,7 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(updateResult);
         }
     }
+
 
     // swagger test -> Authorize 버튼 클릭해서 accesstoken 넣고 info test
     @Operation(summary = "회원 id, 닉네임 조회", description = "AccessToken 파싱해서 회원 id, 닉네임 조회")

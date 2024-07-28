@@ -4,6 +4,7 @@ import com.saessakmaeul.bitamin.member.entity.Role;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 
@@ -21,4 +22,5 @@ public class MemberResponseDTO {
     private String profileKey;
     private String profileUrl;
     private Role role;
+    private MultipartFile profileImage;
 }
