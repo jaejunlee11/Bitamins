@@ -79,7 +79,7 @@ public class ConsultationService {
 
         Consultation newConsultation;
         try {
-            newConsultation= consultationRepository.save(consultation);
+            newConsultation = consultationRepository.save(consultation);
         } catch (Exception e) {
             return null;
         }
@@ -102,6 +102,8 @@ public class ConsultationService {
 
         return RegistRoomResponse.builder()
                 .id(newConsultation.getId())
+                .isPrivated(newConsultation.getIsPrivated())
+                .password(newConsultation.getPassword())
                 .build();
     }
 
@@ -114,6 +116,12 @@ public class ConsultationService {
                 .consultationId(joinRoomRequest.getConsultationId())
                 .consultationDate(joinRoomRequest.getConsultationDate())
                 .build();
+
+        Optional<String> password = consultationRepository.findPasswordById(newParticipant.getConsultationId());
+
+        if(password.isPresent()) {
+            if(!password.get().equals(joinRoomRequest.getPassword())) return null;
+        }
 
         Participant participant;
 
