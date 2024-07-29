@@ -2,9 +2,7 @@ package com.saessakmaeul.bitamin.util;
 
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
@@ -91,7 +89,19 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        try {
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        } catch (ExpiredJwtException e) {
+            throw new RuntimeException("JWT 토큰이 만료되었습니다.", e);
+        } catch (UnsupportedJwtException e) {
+            throw new RuntimeException("지원되지 않는 JWT 토큰입니다.", e);
+        } catch (MalformedJwtException e) {
+            throw new RuntimeException("JWT 토큰이 잘못되었습니다.", e);
+        } catch (SignatureException e) {
+            throw new RuntimeException("JWT 서명 검증에 실패했습니다.", e);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("JWT 토큰이 비어있습니다.", e);
+        }
     }
 
     public String extractUsername(String token) {
@@ -111,5 +121,4 @@ public class JwtUtil {
     public String extractNickname(String token) {
         return extractClaim(token, claims -> claims.get("nickname", String.class));
     }
-
 }

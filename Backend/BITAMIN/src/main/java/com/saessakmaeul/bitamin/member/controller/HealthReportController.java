@@ -5,8 +5,10 @@ import com.saessakmaeul.bitamin.member.dto.response.HealthReportResponseDTO;
 import com.saessakmaeul.bitamin.member.service.HealthReportService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +16,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/health-report")
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@Tag(name = "HealthReport Controller", description = "회원 자가 검진 기록 관리하는 컨트롤러")
 public class HealthReportController {
 
     @Autowired
@@ -25,30 +29,38 @@ public class HealthReportController {
     @Operation(summary = "자가진단 결과 기록", description = "")
     @PostMapping
     public ResponseEntity<HealthReportResponseDTO> createHealthReport(@RequestBody HealthReportRequestDTO healthReportRequestDTO, HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(401).build(); // 인증 실패 시 401 응답
+        try {
+            String token = getTokenFromRequest(request);
+            if (token == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            Long userId = jwtUtil.extractUserId(token);
+            HealthReportResponseDTO healthReportResponseDTO = healthReportService.saveHealthReport(healthReportRequestDTO, userId);
+            return ResponseEntity.ok(healthReportResponseDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        String token = authorizationHeader.substring(7);
-        Long userId = jwtUtil.extractUserId(token);
-
-        HealthReportResponseDTO healthReportResponseDTO = healthReportService.saveHealthReport(healthReportRequestDTO, userId);
-        return ResponseEntity.ok(healthReportResponseDTO);
     }
 
     @Operation(summary = "자가진단 결과 리스트 조회", description = "")
     @GetMapping
     public ResponseEntity<List<HealthReportResponseDTO>> getHealthReports(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(401).build();
+        try {
+            String token = getTokenFromRequest(request);
+            if (token == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            Long userId = jwtUtil.extractUserId(token);
+            List<HealthReportResponseDTO> healthReports = healthReportService.getHealthReportsByUserId(userId);
+            return ResponseEntity.ok(healthReports);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
 
-        String token = authorizationHeader.substring(7);
-        Long userId = jwtUtil.extractUserId(token);
-
-        List<HealthReportResponseDTO> healthReports = healthReportService.getHealthReportsByUserId(userId);
-        return ResponseEntity.ok(healthReports);
+    @Operation(summary = "JWT 토큰 추출 메서드", description = "JWT 토큰을 추출하는 메서드")
+    private String getTokenFromRequest(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        return authorizationHeader != null && authorizationHeader.startsWith("Bearer ") ? authorizationHeader.substring(7) : null;
     }
 }
