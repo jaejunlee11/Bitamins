@@ -54,5 +54,4 @@ public class HealthReportServiceImpl implements HealthReportService {
             return dto;
         }).collect(Collectors.toList());
     }
-
 }

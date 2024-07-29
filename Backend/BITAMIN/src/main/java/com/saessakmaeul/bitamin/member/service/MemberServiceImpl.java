@@ -112,7 +112,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void deleteMember(Long memberId) {
         // 연결된 모든 테이블 데이터 삭제
-        // 회원 id랑 연결된 모든 테이블의 repository를 넣으삼.deleteByMemberId(memberId);
+        // 회원 id랑 연결된 모든 테이블의 repository를 넣어야함.deleteByMemberId(memberId);
         refreshTokenRepository.deleteByUserId(memberId);
         healthReportRepository.findByMemberId(memberId);
 
