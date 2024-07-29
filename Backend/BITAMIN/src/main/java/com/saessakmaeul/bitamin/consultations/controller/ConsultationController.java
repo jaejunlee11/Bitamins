@@ -115,9 +115,9 @@ public class ConsultationController {
     }
 
     @GetMapping("/chatings/{consultationId}")
-    public ResponseEntity<?> findById(@PathVariable("consultationId") Long consultationId) {
+    public ResponseEntity<?> findChating(@PathVariable("consultationId") Long consultationId) {
 
-        List<FindByIdResponse> chatingList = consultationService.findById(consultationId);
+        List<findChatingResponse> chatingList = consultationService.findChating(consultationId);
 
         return ResponseEntity.status(200).body(chatingList);
     }
