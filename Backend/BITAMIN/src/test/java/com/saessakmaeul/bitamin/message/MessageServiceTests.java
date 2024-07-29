@@ -43,9 +43,6 @@ public class MessageServiceTests {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
     private Member sender;
 
     private Member receiver;

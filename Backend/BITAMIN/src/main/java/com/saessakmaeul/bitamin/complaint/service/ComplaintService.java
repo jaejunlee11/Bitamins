@@ -19,6 +19,7 @@ import java.rmi.server.ExportException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -46,6 +47,7 @@ public class ComplaintService {
                     .build();
             result.add(response);
         }
+        Collections.sort(result,(o1,o2)->o2.getSendDate().compareTo(o1.getSendDate()));
         return result;
     }
 
@@ -90,7 +92,7 @@ public class ComplaintService {
     }
 
     @Transactional
-    public void postComplaint(ComplaintRegistRequest request, long userId) throws Exception{
+    public Complaint postComplaint(ComplaintRegistRequest request, long userId) throws Exception{
         Complaint complaint = new Complaint();
         complaint.setComplainantId(userId);
         complaint.setRespondentId(request.getRespondentId());
@@ -100,7 +102,7 @@ public class ComplaintService {
         complaint.setIsResolved(false);
         complaint.setJudgement(0);
         complaint.setSendDate(LocalDateTime.now());
-        complaintRepository.save(complaint);
+        return complaintRepository.save(complaint);
     }
 
     @Transactional
