@@ -162,7 +162,7 @@ public class MemberController {
         }
     }
 
-    @Operation(summary = "JWT 토큰 추출 메서드", description = "JWT 토큰을 추출하는 메서드")
+    @Operation(summary = "JWT 토큰 추출 메서드", description = "헤더에서 JWT 토큰을 추출하는 메서드")
     private String getTokenFromRequest(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
         return authorizationHeader != null && authorizationHeader.startsWith("Bearer ") ? authorizationHeader.substring(7) : null;

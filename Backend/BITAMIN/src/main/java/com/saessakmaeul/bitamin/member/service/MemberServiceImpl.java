@@ -8,7 +8,7 @@ import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
-import com.saessakmaeul.bitamin.service.S3Service;
+//import com.saessakmaeul.bitamin.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,9 +30,8 @@ public class MemberServiceImpl implements MemberService {
     private final HealthReportRepository healthReportRepository;
 
     @Autowired
-    private S3Service s3Service;
+//    private S3Service s3Service;
 
-    @Autowired
     public MemberServiceImpl(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, @Lazy PasswordEncoder passwordEncoder, HealthReportRepository healthReportRepository) {
         this.memberRepository = memberRepository;
         this.refreshTokenRepository = refreshTokenRepository;
@@ -55,10 +54,10 @@ public class MemberServiceImpl implements MemberService {
         member = memberRepository.save(member);
         if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().isEmpty()) {
             String fileName = UUID.randomUUID() + "_" + memberDTO.getProfileImage().getOriginalFilename();
-            String profileUrl = s3Service.uploadFile(memberDTO.getProfileImage());
+//            String profileUrl = s3Service.uploadFile(memberDTO.getProfileImage());
 
             member.setProfileKey(fileName);
-            member.setProfileUrl(profileUrl);
+//            member.setProfileUrl(profileUrl);
         }
         memberRepository.save(member);
         return member.getId();
@@ -152,10 +151,10 @@ public class MemberServiceImpl implements MemberService {
             member.setBirthday(memberUpdateRequestDTO.getBirthday());
             if (memberUpdateRequestDTO.getProfileImage() != null && !memberUpdateRequestDTO.getProfileImage().isEmpty()) {
                 String fileName = UUID.randomUUID() + "_" + memberUpdateRequestDTO.getProfileImage().getOriginalFilename();
-                String profileUrl = s3Service.uploadFile(memberUpdateRequestDTO.getProfileImage());
+//                String profileUrl = s3Service.uploadFile(memberUpdateRequestDTO.getProfileImage());
 
                 member.setProfileKey(fileName);
-                member.setProfileUrl(profileUrl);
+//                member.setProfileUrl(profileUrl);
             }
             memberRepository.save(member);
             return 1;
