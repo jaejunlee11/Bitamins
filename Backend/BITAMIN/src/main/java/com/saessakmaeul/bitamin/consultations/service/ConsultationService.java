@@ -13,7 +13,6 @@ import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +43,7 @@ public class ConsultationService {
 
         else consultationPage = consultationRepository.findByCategoryAndCurrentParticipantsGreaterThan(type.name(), 0, pageable);
 
-        List<SelectAllResponse> consultations = consultationPage.getContent().stream()
+        return  consultationPage.getContent().stream()
                 .map(domain -> new SelectAllResponse(
                         domain.getId(),
                         domain.getCategory(),
@@ -60,8 +59,6 @@ public class ConsultationService {
                         consultationPage.getTotalPages()
                 ))
                 .collect(Collectors.toList());
-
-        return consultations;
     }
 
     @Transactional
@@ -78,10 +75,11 @@ public class ConsultationService {
                 .build();
 
         Consultation newConsultation;
+
         try {
             newConsultation = consultationRepository.save(consultation);
-        } catch (Exception e) {
-            return null;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("db 오류 rollback");
         }
 
         // 참가자 등록
@@ -96,8 +94,8 @@ public class ConsultationService {
 
         try {
             participantRepository.save(newParticipant);
-        } catch (Exception e) {
-            return null;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("db 오류 rollback");
         }
 
         return RegistRoomResponse.builder()
@@ -117,37 +115,33 @@ public class ConsultationService {
                 .consultationDate(joinRoomRequest.getConsultationDate())
                 .build();
 
-        Optional<String> password = consultationRepository.findPasswordById(newParticipant.getConsultationId());
-
-        if(password.isPresent()) {
-            if(!password.get().equals(joinRoomRequest.getPassword())) return null;
-        }
-
-        Participant participant;
-
-        try {
-            participant = participantRepository.save(newParticipant);
-        } catch (Exception e) {
-            return null;
-        }
-
-        // 방 현재 참가자 수 수정
-        Optional<Consultation> consultation = consultationRepository.findById(participant.getConsultationId());
+        Optional<Consultation> consultation = consultationRepository.findById(joinRoomRequest.getConsultationId());
 
         if(consultation.isEmpty()) return null;
 
-        consultation.get().setCurrentParticipants(consultation.get().getCurrentParticipants() + 1);
+        if(consultation.get().getCurrentParticipants() >= 5) return null;
 
-        Consultation c;
+        if(consultation.get().getIsPrivated()) {
+            if(!consultation.get().getPassword().equals(joinRoomRequest.getPassword())) return null;
+        }
 
         try {
-            c = consultationRepository.save(consultation.get());
-        } catch (Exception e) {
-            return null;
+            participantRepository.save(newParticipant);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("db 오류 rollback");
+        }
+
+        // 방 현재 참가자 수 수정
+        consultation.get().setCurrentParticipants(consultation.get().getCurrentParticipants() + 1);
+
+        try {
+            consultationRepository.save(consultation.get());
+        } catch (RuntimeException e) {
+            throw new RuntimeException("db 오류 rollback");
         }
 
         return JoinRoomResponse.builder()
-                .id(c.getId())
+                .id(consultation.get().getId())
                 .build();
     }
 
@@ -164,6 +158,8 @@ public class ConsultationService {
 
         else return null;
 
+        if(consultation.isEmpty()) return null;
+
         // 해당 방 id 가져와서 paticipant update
         LocalDate date = consultation.get().getStartTime().toLocalDate();
 
@@ -176,24 +172,21 @@ public class ConsultationService {
 
         try {
             participantRepository.save(newParticipant);
-        }
-        catch (Exception e) {
-            return null;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("db 오류 rollback");
         }
 
         // 다시 해당 상담방 update
         consultation.get().setCurrentParticipants(consultation.get().getCurrentParticipants()+1);
 
-        Consultation c;
-
         try {
-            c = consultationRepository.save(consultation.get());
-        } catch (Exception e) {
-            return null;
+            consultationRepository.save(consultation.get());
+        } catch (RuntimeException e) {
+            throw new RuntimeException("db 오류 rollback");
         }
 
         return JoinRandomResponse.builder()
-                .id(c.getId())
+                .id(consultation.get().getId())
                 .build();
     }
 
@@ -206,19 +199,21 @@ public class ConsultationService {
 
         try {
             participantRepository.delete(participant.get());
-        } catch (EmptyResultDataAccessException e) {
-            return 0;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("db 오류 rollback");
         }
 
         Optional<Consultation> consultation = consultationRepository.findById(exitRoomBeforeStartRequest.getConsultationId());
+
+        if(consultation.isEmpty()) return 0;
 
         consultation.get().setCurrentParticipants(consultation.get().getCurrentParticipants() - 1);
 
         if(consultation.get().getCurrentParticipants() == 0) {
             try {
                 consultationRepository.delete(consultation.get());
-            } catch (Exception e) {
-                return 0;
+            } catch (RuntimeException e) {
+                throw new RuntimeException("db 오류 rollback");
             }
 
             return 1;
@@ -226,8 +221,8 @@ public class ConsultationService {
 
         try {
             consultationRepository.save(consultation.get());
-        } catch (Exception e) {
-            return 0;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("db 오류 rollback");
         }
 
         return 1;
@@ -247,8 +242,8 @@ public class ConsultationService {
 
         try {
             consultationRepository.save(consultation.get());
-        } catch (Exception e) {
-            return 0;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("db 오류 rollback");
         }
 
         return 1;
@@ -258,7 +253,7 @@ public class ConsultationService {
     public List<findChatingResponse> findChating(Long consultationId) {
         List<ChatingLog> chatingLog = chatingLogRepository.findByConsultationId(consultationId);
 
-        List<findChatingResponse> findByIdResponse = chatingLog.stream()
+        return chatingLog.stream()
                 .map(chating -> findChatingResponse.builder()
                         .id(chating.getId())
                         .content(chating.getContent())
@@ -269,8 +264,6 @@ public class ConsultationService {
                         .build()
                 )
                 .collect(Collectors.toList());
-
-        return findByIdResponse;
     }
 
     // 채팅 등록
@@ -288,8 +281,8 @@ public class ConsultationService {
 
         try {
             chatingLogRepository.save(chatingLog);
-        } catch (Exception e) {
-            return 0;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("db 오류 rollback");
         }
 
         return 1;
@@ -297,6 +290,8 @@ public class ConsultationService {
 
     public BroadcastInformationResponse broadcastInformation(Long id) {
         Optional<Consultation> consultation = consultationRepository.findById(id);
+
+        if(consultation.isEmpty()) return null;
 
         // 참가자 리스트 조회
         List<Participant> list = participantRepository.findByConsultationId(consultation.get().getId());
@@ -316,7 +311,7 @@ public class ConsultationService {
                     .build();
         }).collect(Collectors.toList());
 
-        BroadcastInformationResponse broadcastInformationResponse = BroadcastInformationResponse.builder()
+        return BroadcastInformationResponse.builder()
                 .id(consultation.get().getId())
                 .category(consultation.get().getCategory())
                 .title(consultation.get().getTitle())
@@ -327,7 +322,5 @@ public class ConsultationService {
                 .currentParticipants(consultation.get().getCurrentParticipants())
                 .participants(pList)
                 .build();
-
-        return broadcastInformationResponse;
     }
 }

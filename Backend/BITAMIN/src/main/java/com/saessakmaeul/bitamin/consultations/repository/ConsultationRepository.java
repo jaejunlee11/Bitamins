@@ -14,12 +14,6 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
     Page<Consultation> findByIsPrivatedAndCurrentParticipantsGreaterThan(boolean isPrivated, int currentParticipants, Pageable pageable);
     Page<Consultation> findByCategoryAndCurrentParticipantsGreaterThan(String category, int currentParticipants, Pageable pageable);
 
-    @Query(value = "SELECT password " +
-            "FROM consultation " +
-            "WHERE id = ?1",
-            nativeQuery = true)
-    Optional<String> findPasswordById(Long id);
-
     @Query(value = "SELECT * " +
             "FROM consultation " +
             "WHERE current_participants <= ?1 " +
