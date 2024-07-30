@@ -5,8 +5,11 @@ import com.saessakmaeul.bitamin.consultations.dto.request.*;
 import com.saessakmaeul.bitamin.consultations.dto.response.*;
 import com.saessakmaeul.bitamin.consultations.service.ConsultationService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
+import io.openvidu.java.client.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class ConsultationController {
+    private final OpenVidu openVidu;
+    private final SimpMessagingTemplate simpMessagingTemplate;
     private final ConsultationService consultationService;
     private final JwtUtil jwtUtil;
 
@@ -137,5 +142,49 @@ public class ConsultationController {
         if(result == 0) return ResponseEntity.status(404).body("채팅이 저장되지 않았습니다.");
 
         return ResponseEntity.status(200).body("정상적으로 채팅이 저장되었습니다.");
+    }
+
+    @PostMapping("/openvidu/{id}")
+    public ResponseEntity<?> joinRoom(@PathVariable Long id) throws OpenViduJavaClientException, OpenViduHttpException {
+        Session session = openVidu.getActiveSession(id.toString());
+        if (session == null) {
+            session = openVidu.createSession();
+        }
+        Connection connection = session.createConnection();
+
+        // DB에서 가져온 다른 정보들 조회
+        BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(id);
+        // 채팅방의 모든 사용자에게 브로드캐스트
+        simpMessagingTemplate.convertAndSend("/messages/" + id, broadcastInformation);
+
+        return ResponseEntity.ok(connection.getToken());
+    }
+
+    @GetMapping("/openvidu/leave/{id}")
+    public ResponseEntity<Void> leaveRoom(@PathVariable Long id) {
+//        try {
+//            Session session = openVidu.getActiveSession(id.toString());
+//            if (session != null) {
+//                session.forceUnpublish(token);
+//                if (session.getActiveConnections().isEmpty()) {
+//                    openVidu.closeSession(id.toString());
+//                }
+//
+//                // DB에서 가져온 다른 정보들 조회
+//                BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(id);
+//
+//                // 참가자 퇴장 정보 브로드캐스트
+//                simpMessagingTemplate.convertAndSend("/messages/" + id, broadcastInformation);
+//            }
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
+        // DB에서 가져온 다른 정보들 조회
+        BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(id);
+
+        // 참가자 퇴장 정보 브로드캐스트
+        simpMessagingTemplate.convertAndSend("/messages/" + id, broadcastInformation);
+
+        return ResponseEntity.ok().build();
     }
 }
