@@ -38,11 +38,11 @@ public class ConsultationService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         Page<Consultation> consultationPage;
 
-        if(type == null || type == SearchCondition.전체 ) consultationPage = consultationRepository.findAll(pageable);
+        if(type == null || type == SearchCondition.전체 ) consultationPage = consultationRepository.findByCurrentParticipantsGreaterThan(0, pageable);
 
-        else if(type == SearchCondition.비밀방) consultationPage = consultationRepository.findByIsPrivated(1, pageable);
+        else if(type == SearchCondition.비밀방) consultationPage = consultationRepository.findByIsPrivatedAndCurrentParticipantsGreaterThan(true, 0, pageable);
 
-        else consultationPage = consultationRepository.findByCategory(type.name(), pageable);
+        else consultationPage = consultationRepository.findByCategoryAndCurrentParticipantsGreaterThan(type.name(), 0, pageable);
 
         List<SelectAllResponse> consultations = consultationPage.getContent().stream()
                 .map(domain -> new SelectAllResponse(
@@ -108,6 +108,7 @@ public class ConsultationService {
         }  catch (Exception e) {
             return null;
         }
+        /** 여기서부터 socket broad cast 용 조회 로직을 따로 만들자*/
 
         // 참가자 리스트 조회
         List<Participant> list = participantRepository.findByConsultationId(c.getId());

@@ -10,8 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ConsultationRepository extends JpaRepository<Consultation, Long> {
-    Page<Consultation> findByIsPrivated(int isPrivated, Pageable pageable);
-    Page<Consultation> findByCategory(String category, Pageable pageable);
+    Page<Consultation> findByCurrentParticipantsGreaterThan(int currentParticipants, Pageable pageable);
+    Page<Consultation> findByIsPrivatedAndCurrentParticipantsGreaterThan(boolean isPrivated, int currentParticipants, Pageable pageable);
+    Page<Consultation> findByCategoryAndCurrentParticipantsGreaterThan(String category, int currentParticipants, Pageable pageable);
 
     @Query(value = "SELECT * " +
             "FROM consultation " +
