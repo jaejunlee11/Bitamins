@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -70,15 +69,15 @@ public class MessageService {
     }
 
     public MessageDetailResponse getMessageDetail(long id,long userId) throws Exception{
-        Message message = messageRepository.findById(id).orElseThrow(Exception::new);
+        Message message = messageRepository.findById(id).orElseThrow(()->new Exception("해당 id를 가진 메시지가 없습니다."));
         String nickname = null;
         // 유저가 송신자인 경우
         if(userId == message.getSenderId()){
-            nickname = memberRepository.findById(message.getRecieverId()).orElseThrow(Exception::new).getNickname();
+            nickname = memberRepository.findById(message.getRecieverId()).orElseThrow(()->new Exception("존재하지 않는 reciever 입니다.")).getNickname();
         }
         // 유저가 수신자인 경우
         else {
-            nickname = memberRepository.findById(message.getSenderId()).orElseThrow(Exception::new).getNickname();
+            nickname = memberRepository.findById(message.getSenderId()).orElseThrow(()->new Exception("존재하지 않는 sender 입니다.")).getNickname();
         }
         // 답장 조회
         List<Reply> replies = replyRepository.findByMessageId(id);
@@ -98,7 +97,7 @@ public class MessageService {
                     .build();
             repliyList.add(temp);
         }
-        Collections.sort(repliyList,(o1,o2)->o2.getSendDate().compareTo(o1.getSendDate()));
+        Collections.sort(repliyList,(o1,o2)->o1.getSendDate().compareTo(o2.getSendDate()));
 
         MessageDetailResponse result = MessageDetailResponse.builder()
                 .id(id)
@@ -115,10 +114,9 @@ public class MessageService {
     }
 
     @Transactional
-    public void registMessage(MessageRegistRequest message,Long userId) throws Exception{
+    public Message registMessage(MessageRegistRequest message,Long userId) throws Exception{
+        memberRepository.findById(message.getRecieverId()).orElseThrow(()->new Exception("reciever가 존재하지 않습니다."));
         Message registMessage = new Message();
-        System.out.println(userId);
-        System.out.println(message.getRecieverId());
         registMessage.setSenderId(userId);
         registMessage.setRecieverId(message.getRecieverId());
         registMessage.setCategory(message.getCategory());
@@ -128,11 +126,12 @@ public class MessageService {
         registMessage.setIsRead(false);
         registMessage.setCounselingDate(message.getCounselingDate());
         registMessage.setSendDate(LocalDateTime.now());
-        messageRepository.save(registMessage);
+        return messageRepository.save(registMessage);
     }
 
     @Transactional
-    public void registReply(ReplyRegistRequest reply, Long id, Long userId) throws Exception{
+    public Reply registReply(ReplyRegistRequest reply, Long id, Long userId) throws Exception{
+        memberRepository.findById(id).orElseThrow(()->new Exception("해당 id의 메시지가 없습니다."));
         Reply registReply = new Reply();
         registReply.setMessageId(id);
         registReply.setMemberId(userId);
@@ -140,50 +139,48 @@ public class MessageService {
         registReply.setIsDeleted(0);
         registReply.setIsRead(false);
         registReply.setSendDate(LocalDateTime.now());
-        replyRepository.save(registReply);
+        return replyRepository.save(registReply);
     }
 
     @Transactional
-    public void deleteMessage(Long id, Long userId) throws Exception{
-        Message message = messageRepository.findById(id).orElseThrow(Exception::new);
+    public Message deleteMessage(Long id, Long userId) throws Exception{
+        Message message = messageRepository.findById(id).orElseThrow(()->new Exception("해당 id의 메시지가 없습니다."));
         // user가 sender 인 경우 2이면 제거, 0이면 1로 변경
         if(message.getSenderId() == userId) {
             if(message.getIsDeleted()==2) {
                 messageRepository.delete(message);
-                return;
+                return message;
             }
                 message.setIsDeleted(1);
-                messageRepository.save(message);
-                return;
+                return messageRepository.save(message);
         }
         // reciever인 경우 1이면 제거 0이면 2로 변경
         if(message.getIsDeleted()==1) {
             messageRepository.delete(message);
-            return;
+            return message;
         }
         message.setIsDeleted(2);
-        messageRepository.save(message);
+        return messageRepository.save(message);
     }
 
     @Transactional
-    public void deleteReply(Long id, Long userId) throws Exception{
-        Reply reply = replyRepository.findById(id).orElseThrow(Exception::new);
+    public Reply deleteReply(Long id, Long userId) throws Exception{
+        Reply reply = replyRepository.findById(id).orElseThrow(()->new Exception("해당 id의 답장이 없습니다."));
         // user가 sender 인 경우 2이면 제거, 0이면 1로 변경
         if(reply.getMemberId() == userId) {
             if(reply.getIsDeleted()==2) {
                 replyRepository.delete(reply);
-                return;
+                return reply;
             }
             reply.setIsDeleted(1);
-            replyRepository.save(reply);
-            return;
+            return replyRepository.save(reply);
         }
         // reciever인 경우 1이면 제거 0이면 2로 변경
         if(reply.getIsDeleted()==1) {
             replyRepository.delete(reply);
-            return;
+            return reply;
         }
         reply.setIsDeleted(2);
-        replyRepository.save(reply);
+        return replyRepository.save(reply);
     }
 }

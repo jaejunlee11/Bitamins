@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.Set;
 
 @Builder
 @NoArgsConstructor
@@ -32,9 +33,14 @@ public class Member {
     @Column(nullable = false)
     private Date birthday;
 
+    @Column(length = 255)
     private String profileKey;
+    @Column(length = 255)
     private String profileUrl;
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<HealthReport> healthReports;
 }
