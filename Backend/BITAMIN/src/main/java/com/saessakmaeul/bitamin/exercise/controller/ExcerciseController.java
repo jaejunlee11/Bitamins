@@ -18,9 +18,9 @@ public class ExcerciseController {
     private JwtUtil jwtUtil;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getExcersize(@PathVariable long id, @RequestHeader String token) {
+    public ResponseEntity<?> getExcersize(@PathVariable(name = "id") long id, @RequestHeader(name = "Authorization",required = false) String token) {
         try{
-            if(jwtUtil.isTokenExpired(token.substring(7))) throw new Exception("유저가 유효하지 않습니다.");
+//            if(jwtUtil.isTokenExpired(token.substring(7))) throw new Exception("유저가 유효하지 않습니다.");
             ExcersizeDetailResponse response = excersizeService.getExcersize(id);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
