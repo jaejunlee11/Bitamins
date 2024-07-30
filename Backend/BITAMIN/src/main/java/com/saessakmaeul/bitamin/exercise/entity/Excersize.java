@@ -1,9 +1,11 @@
 package com.saessakmaeul.bitamin.exercise.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
 @Table(name = "ai_exercise")
+@Getter
 public class Excersize {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
