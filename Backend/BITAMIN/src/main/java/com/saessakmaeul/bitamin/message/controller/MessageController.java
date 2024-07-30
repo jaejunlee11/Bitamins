@@ -46,10 +46,22 @@ public class MessageController {
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<?> postMessage(@RequestBody ReplyRegistRequest request, @PathVariable("id") long id, @RequestHeader(name = "Authorization",required = false) String token) {
+    public ResponseEntity<?> postReply(@RequestBody ReplyRegistRequest request, @PathVariable("id") long id, @RequestHeader(name = "Authorization",required = false) String token) {
         try{
             long userId = jwtUtil.extractUserId(token.substring(7));
             messageService.registReply(request,id,userId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> postMessage(@RequestBody MessageRegistRequest request, @RequestHeader(name = "Authorization",required = false) String token) {
+        try{
+            long userId = jwtUtil.extractUserId(token.substring(7));
+            messageService.registMessage(request,userId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();
