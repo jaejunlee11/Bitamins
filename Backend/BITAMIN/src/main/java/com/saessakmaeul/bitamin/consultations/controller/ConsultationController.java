@@ -11,8 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
 @RequestMapping("/consultations")
@@ -37,13 +37,16 @@ public class ConsultationController {
     }
 
     @PostMapping
-    public ResponseEntity<?> registRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
-                                        @RequestBody RegistRoomRequest registRoomRequest) {
+    public ResponseEntity<?> registRoom(@RequestBody RegistRoomRequest registRoomRequest) throws OpenViduJavaClientException, OpenViduHttpException {
 
-        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
-        String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
-        registRoomRequest.setMemberId(memberId);
-        registRoomRequest.setMemberNickname(memberNickname);
+        Map<String,Object> params = new HashMap<>();
+        params.put("customSessionId", UUID.randomUUID().toString());
+
+        SessionProperties properties = SessionProperties.fromJson(params).build();
+
+        Session session = openVidu.createSession(properties);
+
+        registRoomRequest.setSessionId(session.getSessionId());
 
         RegistRoomResponse registRoomResponse = consultationService.registRoom(registRoomRequest);
 
@@ -55,12 +58,19 @@ public class ConsultationController {
 
     @PostMapping("/participants")
     public ResponseEntity<?> joinRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
-                                      @RequestBody JoinRoomRequest joinRoomRequest) {
+                                      @RequestBody JoinRoomRequest joinRoomRequest) throws OpenViduJavaClientException, OpenViduHttpException {
 
+        Map<String,Object> params = new HashMap<>();
+
+        // 입장 가능한 세션인지 확인
+        Session session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
+
+        if (session == null) return ResponseEntity.status(404).body("못 찾음");
+
+        // DB에 저장
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
         String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
 
-        joinRoomRequest.setConsultationId(joinRoomRequest.getId());
         joinRoomRequest.setMemberId(memberId);
         joinRoomRequest.setMemberNickname(memberNickname);
         joinRoomRequest.setConsultationDate(joinRoomRequest.getStartTime().toLocalDate());
@@ -69,13 +79,34 @@ public class ConsultationController {
 
         if(joinRoomResponse == null) return ResponseEntity.status(404).body("방에 참여되지 않았습니다.");
 
+        // connection 생성
+        ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
+        Connection connection = session.createConnection(properties);
+
+        joinRoomResponse.setToken(connection.getToken());
+
         return ResponseEntity.status(200).body(joinRoomResponse);
     }
 
     @PostMapping("/random-participants")
     public ResponseEntity<?> joinRandom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
-                                        @RequestBody JoinRandomRequest joinRandomRequest) {
+                                        @RequestBody JoinRandomRequest joinRandomRequest) throws OpenViduJavaClientException, OpenViduHttpException{
+        Map<String,Object> params = new HashMap<>();
 
+        Map<String, Object> map = consultationService.findRandomSessionId(joinRandomRequest);
+
+        if(map == null) return ResponseEntity.status(404).body("방 없음");
+
+        joinRandomRequest.setSessionId(map.get("sessionId").toString());
+        joinRandomRequest.setId(Long.parseLong(map.get("id").toString()));
+        joinRandomRequest.setConsultationDate(((LocalDateTime)map.get("consultationDate")).toLocalDate());
+
+        // 입장 가능한 세션인지 확인
+        Session session = openVidu.getActiveSession(joinRandomRequest.getSessionId());
+
+        if (session == null) return ResponseEntity.status(404).body("못 찾음");
+
+        // DB에 저장
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
         String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
 
@@ -85,6 +116,12 @@ public class ConsultationController {
         JoinRandomResponse joinRandomResponse = consultationService.joinRandom(joinRandomRequest);
 
         if(joinRandomResponse == null) return ResponseEntity.status(404).body("방에 참여되지 않았습니다.");
+
+        // connection 생성
+        ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
+        Connection connection = session.createConnection(properties);
+
+        joinRandomResponse.setToken(connection.getToken());
 
         return ResponseEntity.status(200).body(joinRandomResponse);
     }
@@ -143,66 +180,4 @@ public class ConsultationController {
 
         return ResponseEntity.status(200).body("정상적으로 채팅이 저장되었습니다.");
     }
-
-    @PostMapping("/openvidu")
-    public ResponseEntity<?> joinRoom(Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
-        SessionProperties properties = SessionProperties.fromJson(params).build();
-        Session session = openVidu.createSession(properties);
-
-        return ResponseEntity.status(200).body(session.getSessionId());
-//
-////        Session session = openVidu.getActiveSession(id.toString());
-////        if (session == null) {
-////            session = openVidu.createSession();
-////        }
-//        Connection connection = session.createConnection();
-
-    }
-
-    @PostMapping("/openvidu/connections/{sessionId}")
-    public ResponseEntity<?> createConnection(@PathVariable("sessionId") String sessionId,
-                                              @RequestBody(required = false) Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
-
-        Session session = openVidu.getActiveSession(sessionId);
-
-        if (session == null) return ResponseEntity.status(404).body("못 찾음");
-
-        ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
-        Connection connection = session.createConnection(properties);
-
-        // DB에서 가져온 다른 정보들 조회
-        BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(Long.parseLong((String)params.get("id")));
-        // 채팅방의 모든 사용자에게 브로드캐스트
-        simpMessagingTemplate.convertAndSend("/messages/" + Long.parseLong((String)params.get("id")), broadcastInformation);
-
-        return ResponseEntity.status(200).body(connection.getToken());
-    }
-
-//    @GetMapping("/openvidu/leave/{id}")
-//    public ResponseEntity<Void> leaveRoom(@PathVariable Long id) {
-////        try {
-////            Session session = openVidu.getActiveSession(id.toString());
-////            if (session != null) {
-////                session.forceUnpublish(token);
-////                if (session.getActiveConnections().isEmpty()) {
-////                    openVidu.closeSession(id.toString());
-////                }
-////
-////                // DB에서 가져온 다른 정보들 조회
-////                BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(id);
-////
-////                // 참가자 퇴장 정보 브로드캐스트
-////                simpMessagingTemplate.convertAndSend("/messages/" + id, broadcastInformation);
-////            }
-////        } catch (Exception e) {
-////            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-////        }
-//        // DB에서 가져온 다른 정보들 조회
-//        BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(id);
-//
-//        // 참가자 퇴장 정보 브로드캐스트
-//        simpMessagingTemplate.convertAndSend("/messages/" + id, broadcastInformation);
-//
-//        return ResponseEntity.ok().build();
-//    }
 }

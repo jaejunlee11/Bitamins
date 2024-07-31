@@ -15,7 +15,7 @@ public class SchedulingService {
 
     @Scheduled(cron = "0 0 0 * * *")
     public void deleteOldConsultations() {
-        List<Long> id = consultationRepository.findIdsOfOldConsultations();
+        List<Long> id = consultationRepository.findIdOfOldConsultations();
 
         consultationRepository.deleteAllById(id);
     }

@@ -13,10 +13,11 @@ import java.time.LocalDateTime;
 public class JoinRoomRequest {
     private Long id;
     private LocalDateTime startTime;
+    private Boolean isPrivated;
     private String password;
+    private String SessionId;
 
     private Long memberId;
     private String memberNickname;
-    private Long consultationId;
     private LocalDate consultationDate;
 }

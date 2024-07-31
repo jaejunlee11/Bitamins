@@ -16,8 +16,5 @@ public class RegistRoomRequest {
     private String password;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-
-    private Long memberId;
-    private String memberNickname;
-    private Long consultationId;
+    private String sessionId;
 }
