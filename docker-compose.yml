@@ -11,7 +11,7 @@ services:
     container_name: nginx
     image: nginx:latest
     volumes:
-      - /etc/nginx/conf.d:/etc/nginx/conf.d # Nginx 설정 파일을 컨테이너에 마운트
+      - /etc/nginx:/etc/nginx # Nginx 설정 파일을 컨테이너에 마운트
       - /etc/letsencrypt:/etc/letsencrypt # SSL 인증서 마운트
     ports:
       - "80:80" # Nginx의 80 포트를 외부에 노출
