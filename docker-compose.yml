@@ -6,8 +6,6 @@ services:
     image: spring-app
     networks:
       - app-network
-    ports:
-      - "8080:8080" # 내부 포트를 외부 포트에 매핑
 
   nginx:
     container_name: nginx
