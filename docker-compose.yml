@@ -1,10 +1,30 @@
+version: '3.8'
+
 services:
   spring:
     container_name: spring
     image: spring-app
     networks:
-      -  app-network
+      - app-network
+    ports:
+      - "8080:8080" # 내부 포트를 외부 포트에 매핑
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d # Nginx 설정 파일을 컨테이너에 마운트
+      - /etc/letsencrypt:/etc/letsencrypt # SSL 인증서 마운트
+    ports:
+      - "80:80" # Nginx의 80 포트를 외부에 노출
+      - "443:443" # Nginx의 443 포트를 외부에 노출
+    depends_on:
+      - spring
+    networks:
+      - app-network
 
 networks:
   app-network:
     external: true
+
+
