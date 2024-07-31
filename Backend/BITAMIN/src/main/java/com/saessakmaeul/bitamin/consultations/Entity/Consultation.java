@@ -39,4 +39,7 @@ public class Consultation {
     @Column(name = "current_participants")
     private int currentParticipants;
 
+    @Column(name = "session_id")
+    private String sessionId;
+
 }

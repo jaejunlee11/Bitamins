@@ -20,7 +20,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,11 +39,17 @@ public class ConsultationService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         Page<Consultation> consultationPage;
 
-        if(type == null || type == SearchCondition.전체 ) consultationPage = consultationRepository.findByCurrentParticipantsGreaterThan(0, pageable);
+        if(type == null || type == SearchCondition.전체 ) consultationPage = consultationRepository.findBySessionIdIsNotNullAndCurrentParticipantsBetween(1,4, pageable);
 
-        else if(type == SearchCondition.비밀방) consultationPage = consultationRepository.findByIsPrivatedAndCurrentParticipantsGreaterThan(true, 0, pageable);
+        else if(type == SearchCondition.비밀방) consultationPage = consultationRepository.findByIsPrivatedAndSessionIdIsNotNullAndCurrentParticipantsBetween(true, 1,4, pageable);
 
-        else consultationPage = consultationRepository.findByCategoryAndCurrentParticipantsGreaterThan(type.name(), 0, pageable);
+        else consultationPage = consultationRepository.findByCategoryAndSessionIdIsNotNullAndCurrentParticipantsBetween(type.name(), 1, 4, pageable);
+
+//        if(type == null || type == SearchCondition.전체 ) consultationPage = consultationRepository.findByCurrentParticipantsGreaterThan(0, pageable);
+//
+//        else if(type == SearchCondition.비밀방) consultationPage = consultationRepository.findByIsPrivatedAndCurrentParticipantsGreaterThan(true, 0, pageable);
+//
+//        else consultationPage = consultationRepository.findByCategoryAndCurrentParticipantsGreaterThan(type.name(), 0, pageable);
 
         return  consultationPage.getContent().stream()
                 .map(domain -> new SelectAllResponse(
@@ -53,6 +61,7 @@ public class ConsultationService {
                         domain.getStartTime(),
                         domain.getEndTime(),
                         domain.getCurrentParticipants(),
+                        domain.getSessionId(),
                         page,
                         size,
                         consultationPage.getTotalElements(),
@@ -71,7 +80,8 @@ public class ConsultationService {
                 .password(registRoomRequest.getPassword())
                 .startTime(registRoomRequest.getStartTime())
                 .endTime(registRoomRequest.getEndTime())
-                .currentParticipants(1)
+                .currentParticipants(0)
+                .sessionId(registRoomRequest.getSessionId())
                 .build();
 
         Consultation newConsultation;
@@ -82,26 +92,28 @@ public class ConsultationService {
             throw new RuntimeException("db 오류 rollback");
         }
 
-        // 참가자 등록
-        LocalDate date = newConsultation.getStartTime().toLocalDate();
-
-        Participant newParticipant = Participant.builder()
-                .memberId(registRoomRequest.getMemberId())
-                .memberNickname(registRoomRequest.getMemberNickname())
-                .consultationId(newConsultation.getId())
-                .consultationDate(date)
-                .build();
-
-        try {
-            participantRepository.save(newParticipant);
-        } catch (RuntimeException e) {
-            throw new RuntimeException("db 오류 rollback");
-        }
+//        // 참가자 등록
+//        LocalDate date = newConsultation.getStartTime().toLocalDate();
+//
+//        Participant newParticipant = Participant.builder()
+//                .memberId(registRoomRequest.getMemberId())
+//                .memberNickname(registRoomRequest.getMemberNickname())
+//                .consultationId(newConsultation.getId())
+//                .consultationDate(date)
+//                .build();
+//
+//        try {
+//            participantRepository.save(newParticipant);
+//        } catch (RuntimeException e) {
+//            throw new RuntimeException("db 오류 rollback");
+//        }
 
         return RegistRoomResponse.builder()
                 .id(newConsultation.getId())
+                .startTime(newConsultation.getStartTime())
                 .isPrivated(newConsultation.getIsPrivated())
                 .password(newConsultation.getPassword())
+                .sessionId(newConsultation.getSessionId())
                 .build();
     }
 
@@ -111,16 +123,17 @@ public class ConsultationService {
         Participant newParticipant = Participant.builder()
                 .memberId(joinRoomRequest.getMemberId())
                 .memberNickname(joinRoomRequest.getMemberNickname())
-                .consultationId(joinRoomRequest.getConsultationId())
+                .consultationId(joinRoomRequest.getId())
                 .consultationDate(joinRoomRequest.getConsultationDate())
                 .build();
 
-        Optional<Consultation> consultation = consultationRepository.findById(joinRoomRequest.getConsultationId());
+        Optional<Consultation> consultation = consultationRepository.findById(joinRoomRequest.getId());
 
         if(consultation.isEmpty()) return null;
 
         if(consultation.get().getCurrentParticipants() >= 5) return null;
 
+        // 비밀번호 확인
         if(consultation.get().getIsPrivated()) {
             if(!consultation.get().getPassword().equals(joinRoomRequest.getPassword())) return null;
         }
@@ -145,12 +158,9 @@ public class ConsultationService {
                 .build();
     }
 
-    // 랜덤 방 조회 (조건: 사용자가 선택한 카테고리, 현재 참여 인원이 5 미만인 곳
-    @Transactional
-    public JoinRandomResponse joinRandom(JoinRandomRequest joinRandomRequest) {
-        Optional<Consultation> consultation;
-
+    public Map<String, Object> findRandomSessionId(JoinRandomRequest joinRandomRequest) {
         SearchCondition type = joinRandomRequest.getType();
+        Optional<Consultation> consultation;
 
         if(type == null || type == SearchCondition.전체 ) consultation = consultationRepository.findByCurrentParticipantsLessThanEqualOrderByRand(4);
 
@@ -158,16 +168,29 @@ public class ConsultationService {
 
         else return null;
 
+
         if(consultation.isEmpty()) return null;
 
-        // 해당 방 id 가져와서 paticipant update
-        LocalDate date = consultation.get().getStartTime().toLocalDate();
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", consultation.get().getId());
+        map.put("sessionId", consultation.get().getSessionId());
+        map.put("consultationDate", consultation.get().getStartTime());
+
+        return map;
+    }
+
+    // 랜덤 방 조회 (조건: 사용자가 선택한 카테고리, 현재 참여 인원이 5 미만인 곳
+    @Transactional
+    public JoinRandomResponse joinRandom(JoinRandomRequest joinRandomRequest) {
+        Optional<Consultation> consultation = consultationRepository.findById(joinRandomRequest.getId());
+
+        if(consultation.isEmpty()) return null;
 
         Participant newParticipant = Participant.builder()
                 .memberId(joinRandomRequest.getMemberId())
                 .memberNickname(joinRandomRequest.getMemberNickname())
-                .consultationId(consultation.get().getId())
-                .consultationDate(date)
+                .consultationId(joinRandomRequest.getId())
+                .consultationDate(joinRandomRequest.getConsultationDate())
                 .build();
 
         try {
@@ -239,6 +262,8 @@ public class ConsultationService {
         if(consultation.isEmpty()) return 0;
 
         consultation.get().setCurrentParticipants(consultation.get().getCurrentParticipants() - 1);
+
+        if(consultation.get().getCurrentParticipants() == 0) consultation.get().setSessionId(null);
 
         try {
             consultationRepository.save(consultation.get());

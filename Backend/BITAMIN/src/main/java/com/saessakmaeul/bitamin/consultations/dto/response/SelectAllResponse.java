@@ -15,6 +15,7 @@ public class SelectAllResponse {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private int currentParticipants;
+    private String SessionId;
 
     // 추가 페이징 정보
     private int page;
