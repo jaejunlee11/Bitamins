@@ -5,17 +5,22 @@ import com.saessakmaeul.bitamin.consultations.dto.request.*;
 import com.saessakmaeul.bitamin.consultations.dto.response.*;
 import com.saessakmaeul.bitamin.consultations.service.ConsultationService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
+import io.openvidu.java.client.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
 @RequestMapping("/consultations")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class ConsultationController {
+    private final OpenVidu openVidu;
+    private final SimpMessagingTemplate simpMessagingTemplate;
     private final ConsultationService consultationService;
     private final JwtUtil jwtUtil;
 
@@ -32,13 +37,16 @@ public class ConsultationController {
     }
 
     @PostMapping
-    public ResponseEntity<?> registRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
-                                        @RequestBody RegistRoomRequest registRoomRequest) {
+    public ResponseEntity<?> registRoom(@RequestBody RegistRoomRequest registRoomRequest) throws OpenViduJavaClientException, OpenViduHttpException {
 
-        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
-        String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
-        registRoomRequest.setMemberId(memberId);
-        registRoomRequest.setMemberNickname(memberNickname);
+        Map<String,Object> params = new HashMap<>();
+        params.put("customSessionId", UUID.randomUUID().toString());
+
+        SessionProperties properties = SessionProperties.fromJson(params).build();
+
+        Session session = openVidu.createSession(properties);
+
+        registRoomRequest.setSessionId(session.getSessionId());
 
         RegistRoomResponse registRoomResponse = consultationService.registRoom(registRoomRequest);
 
@@ -50,12 +58,19 @@ public class ConsultationController {
 
     @PostMapping("/participants")
     public ResponseEntity<?> joinRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
-                                      @RequestBody JoinRoomRequest joinRoomRequest) {
+                                      @RequestBody JoinRoomRequest joinRoomRequest) throws OpenViduJavaClientException, OpenViduHttpException {
 
+        Map<String,Object> params = new HashMap<>();
+
+        // 입장 가능한 세션인지 확인
+        Session session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
+
+        if (session == null) return ResponseEntity.status(404).body("못 찾음");
+
+        // DB에 저장
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
         String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
 
-        joinRoomRequest.setConsultationId(joinRoomRequest.getId());
         joinRoomRequest.setMemberId(memberId);
         joinRoomRequest.setMemberNickname(memberNickname);
         joinRoomRequest.setConsultationDate(joinRoomRequest.getStartTime().toLocalDate());
@@ -64,13 +79,34 @@ public class ConsultationController {
 
         if(joinRoomResponse == null) return ResponseEntity.status(404).body("방에 참여되지 않았습니다.");
 
+        // connection 생성
+        ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
+        Connection connection = session.createConnection(properties);
+
+        joinRoomResponse.setToken(connection.getToken());
+
         return ResponseEntity.status(200).body(joinRoomResponse);
     }
 
     @PostMapping("/random-participants")
     public ResponseEntity<?> joinRandom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
-                                        @RequestBody JoinRandomRequest joinRandomRequest) {
+                                        @RequestBody JoinRandomRequest joinRandomRequest) throws OpenViduJavaClientException, OpenViduHttpException{
+        Map<String,Object> params = new HashMap<>();
 
+        Map<String, Object> map = consultationService.findRandomSessionId(joinRandomRequest);
+
+        if(map == null) return ResponseEntity.status(404).body("방 없음");
+
+        joinRandomRequest.setSessionId(map.get("sessionId").toString());
+        joinRandomRequest.setId(Long.parseLong(map.get("id").toString()));
+        joinRandomRequest.setConsultationDate(((LocalDateTime)map.get("consultationDate")).toLocalDate());
+
+        // 입장 가능한 세션인지 확인
+        Session session = openVidu.getActiveSession(joinRandomRequest.getSessionId());
+
+        if (session == null) return ResponseEntity.status(404).body("못 찾음");
+
+        // DB에 저장
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
         String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
 
@@ -80,6 +116,12 @@ public class ConsultationController {
         JoinRandomResponse joinRandomResponse = consultationService.joinRandom(joinRandomRequest);
 
         if(joinRandomResponse == null) return ResponseEntity.status(404).body("방에 참여되지 않았습니다.");
+
+        // connection 생성
+        ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
+        Connection connection = session.createConnection(properties);
+
+        joinRandomResponse.setToken(connection.getToken());
 
         return ResponseEntity.status(200).body(joinRandomResponse);
     }
@@ -115,9 +157,9 @@ public class ConsultationController {
     }
 
     @GetMapping("/chatings/{consultationId}")
-    public ResponseEntity<?> findById(@PathVariable("consultationId") Long consultationId) {
+    public ResponseEntity<?> findChating(@PathVariable("consultationId") Long consultationId) {
 
-        List<FindByIdResponse> chatingList = consultationService.findById(consultationId);
+        List<findChatingResponse> chatingList = consultationService.findChating(consultationId);
 
         return ResponseEntity.status(200).body(chatingList);
     }

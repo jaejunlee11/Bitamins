@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,10 +12,15 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class RegistRoomResponse {
+public class BroadcastInformationResponse {
     private Long id;
-    private LocalDateTime startTime;
+    private String category;
+    private String title;
     private Boolean isPrivated;
     private String password;
-    private String sessionId;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private int currentParticipants;
+
+    private List<ParticipantResponse> participants;
 }
