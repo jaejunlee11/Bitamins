@@ -7,12 +7,12 @@ import com.saessakmaeul.bitamin.consultations.service.ConsultationService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import io.openvidu.java.client.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/consultations")
@@ -144,47 +144,65 @@ public class ConsultationController {
         return ResponseEntity.status(200).body("정상적으로 채팅이 저장되었습니다.");
     }
 
-    @PostMapping("/openvidu/{id}")
-    public ResponseEntity<?> joinRoom(@PathVariable Long id) throws OpenViduJavaClientException, OpenViduHttpException {
-        Session session = openVidu.getActiveSession(id.toString());
-        if (session == null) {
-            session = openVidu.createSession();
-        }
-        Connection connection = session.createConnection();
+    @PostMapping("/openvidu")
+    public ResponseEntity<?> joinRoom(Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
+        SessionProperties properties = SessionProperties.fromJson(params).build();
+        Session session = openVidu.createSession(properties);
+
+        return ResponseEntity.status(200).body(session.getSessionId());
+//
+////        Session session = openVidu.getActiveSession(id.toString());
+////        if (session == null) {
+////            session = openVidu.createSession();
+////        }
+//        Connection connection = session.createConnection();
+
+    }
+
+    @PostMapping("/openvidu/connections/{sessionId}")
+    public ResponseEntity<?> createConnection(@PathVariable("sessionId") String sessionId,
+                                              @RequestBody(required = false) Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
+
+        Session session = openVidu.getActiveSession(sessionId);
+
+        if (session == null) return ResponseEntity.status(404).body("못 찾음");
+
+        ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
+        Connection connection = session.createConnection(properties);
 
         // DB에서 가져온 다른 정보들 조회
-        BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(id);
+        BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(Long.parseLong((String)params.get("id")));
         // 채팅방의 모든 사용자에게 브로드캐스트
-        simpMessagingTemplate.convertAndSend("/messages/" + id, broadcastInformation);
+        simpMessagingTemplate.convertAndSend("/messages/" + Long.parseLong((String)params.get("id")), broadcastInformation);
 
-        return ResponseEntity.ok(connection.getToken());
+        return ResponseEntity.status(200).body(connection.getToken());
     }
 
-    @GetMapping("/openvidu/leave/{id}")
-    public ResponseEntity<Void> leaveRoom(@PathVariable Long id) {
-//        try {
-//            Session session = openVidu.getActiveSession(id.toString());
-//            if (session != null) {
-//                session.forceUnpublish(token);
-//                if (session.getActiveConnections().isEmpty()) {
-//                    openVidu.closeSession(id.toString());
-//                }
+//    @GetMapping("/openvidu/leave/{id}")
+//    public ResponseEntity<Void> leaveRoom(@PathVariable Long id) {
+////        try {
+////            Session session = openVidu.getActiveSession(id.toString());
+////            if (session != null) {
+////                session.forceUnpublish(token);
+////                if (session.getActiveConnections().isEmpty()) {
+////                    openVidu.closeSession(id.toString());
+////                }
+////
+////                // DB에서 가져온 다른 정보들 조회
+////                BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(id);
+////
+////                // 참가자 퇴장 정보 브로드캐스트
+////                simpMessagingTemplate.convertAndSend("/messages/" + id, broadcastInformation);
+////            }
+////        } catch (Exception e) {
+////            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+////        }
+//        // DB에서 가져온 다른 정보들 조회
+//        BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(id);
 //
-//                // DB에서 가져온 다른 정보들 조회
-//                BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(id);
+//        // 참가자 퇴장 정보 브로드캐스트
+//        simpMessagingTemplate.convertAndSend("/messages/" + id, broadcastInformation);
 //
-//                // 참가자 퇴장 정보 브로드캐스트
-//                simpMessagingTemplate.convertAndSend("/messages/" + id, broadcastInformation);
-//            }
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//        }
-        // DB에서 가져온 다른 정보들 조회
-        BroadcastInformationResponse broadcastInformation = consultationService.broadcastInformation(id);
-
-        // 참가자 퇴장 정보 브로드캐스트
-        simpMessagingTemplate.convertAndSend("/messages/" + id, broadcastInformation);
-
-        return ResponseEntity.ok().build();
-    }
+//        return ResponseEntity.ok().build();
+//    }
 }
