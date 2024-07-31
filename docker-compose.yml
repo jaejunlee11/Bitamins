@@ -16,8 +16,6 @@ services:
     ports:
       - "80:80" # Nginx의 80 포트를 외부에 노출
       - "443:443" # Nginx의 443 포트를 외부에 노출
-    depends_on:
-      - spring
     networks:
       - app-network
 
