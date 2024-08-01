@@ -1,6 +1,6 @@
 package com.saessakmaeul.bitamin.config;
 
-import com.saessakmaeul.bitamin.consultations.Entity.SearchCondition;
+import com.saessakmaeul.bitamin.consultation.Entity.SearchCondition;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
