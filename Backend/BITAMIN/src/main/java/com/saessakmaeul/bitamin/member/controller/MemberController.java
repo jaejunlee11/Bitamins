@@ -32,18 +32,18 @@ public class MemberController {
         this.jwtUtil = jwtUtil;
     }
 
-    /** 회원 목록 조회 API
-     * 테스트용
-     * @return 회원 목록 */
-    @GetMapping("/list")
-    public ResponseEntity<List<MemberResponseDTO>> getMemberList() {
-        try {
-            List<MemberResponseDTO> members = memberService.getMemberList();
-            return ResponseEntity.ok(members);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
+//    /** 회원 목록 조회 API
+//     * 테스트용
+//     * @return 회원 목록 */
+//    @GetMapping("/list")
+//    public ResponseEntity<List<MemberResponseDTO>> getMemberList() {
+//        try {
+//            List<MemberResponseDTO> members = memberService.getMemberList();
+//            return ResponseEntity.ok(members);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+//        }
+//    }
 
     /** 회원가입 API
      * @param memberDTO 회원가입 요청 정보
