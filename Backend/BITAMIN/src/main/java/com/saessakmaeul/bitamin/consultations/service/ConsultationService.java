@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,19 +44,12 @@ public class ConsultationService {
 
         else consultationPage = consultationRepository.findByCategoryAndSessionIdIsNotNullAndCurrentParticipantsBetween(type.name(), 1, 4, pageable);
 
-//        if(type == null || type == SearchCondition.전체 ) consultationPage = consultationRepository.findByCurrentParticipantsGreaterThan(0, pageable);
-//
-//        else if(type == SearchCondition.비밀방) consultationPage = consultationRepository.findByIsPrivatedAndCurrentParticipantsGreaterThan(true, 0, pageable);
-//
-//        else consultationPage = consultationRepository.findByCategoryAndCurrentParticipantsGreaterThan(type.name(), 0, pageable);
-
         return  consultationPage.getContent().stream()
                 .map(domain -> new SelectAllResponse(
                         domain.getId(),
                         domain.getCategory(),
                         domain.getTitle(),
                         domain.getIsPrivated(),
-                        domain.getPassword(),
                         domain.getStartTime(),
                         domain.getEndTime(),
                         domain.getCurrentParticipants(),
@@ -92,22 +84,6 @@ public class ConsultationService {
             throw new RuntimeException("db 오류 rollback");
         }
 
-//        // 참가자 등록
-//        LocalDate date = newConsultation.getStartTime().toLocalDate();
-//
-//        Participant newParticipant = Participant.builder()
-//                .memberId(registRoomRequest.getMemberId())
-//                .memberNickname(registRoomRequest.getMemberNickname())
-//                .consultationId(newConsultation.getId())
-//                .consultationDate(date)
-//                .build();
-//
-//        try {
-//            participantRepository.save(newParticipant);
-//        } catch (RuntimeException e) {
-//            throw new RuntimeException("db 오류 rollback");
-//        }
-
         return RegistRoomResponse.builder()
                 .id(newConsultation.getId())
                 .startTime(newConsultation.getStartTime())
@@ -138,8 +114,10 @@ public class ConsultationService {
             if(!consultation.get().getPassword().equals(joinRoomRequest.getPassword())) return null;
         }
 
+        Participant participant;
+
         try {
-            participantRepository.save(newParticipant);
+            participant = participantRepository.save(newParticipant);
         } catch (RuntimeException e) {
             throw new RuntimeException("db 오류 rollback");
         }
@@ -153,8 +131,17 @@ public class ConsultationService {
             throw new RuntimeException("db 오류 rollback");
         }
 
+        Optional<Member> member = memberRepository.findById(newParticipant.getMemberId());
+
+        if(member.isEmpty()) return null;
+
         return JoinRoomResponse.builder()
-                .id(consultation.get().getId())
+                .consultationId(consultation.get().getId())
+                .id(participant.getId())
+                .memberId(member.get().getId())
+                .memberNickname(member.get().getNickname())
+                .profileKey(member.get().getProfileKey())
+                .profileUrl(member.get().getProfileUrl())
                 .build();
     }
 
@@ -167,7 +154,6 @@ public class ConsultationService {
         else if(type != SearchCondition.비밀방) consultation = consultationRepository.findByCategoryAndCurrentParticipantsLessThanEqualOrderByRand(type.name(), 4);
 
         else return null;
-
 
         if(consultation.isEmpty()) return null;
 
@@ -193,8 +179,10 @@ public class ConsultationService {
                 .consultationDate(joinRandomRequest.getConsultationDate())
                 .build();
 
+        Participant participant;
+
         try {
-            participantRepository.save(newParticipant);
+            participant = participantRepository.save(newParticipant);
         } catch (RuntimeException e) {
             throw new RuntimeException("db 오류 rollback");
         }
@@ -208,8 +196,17 @@ public class ConsultationService {
             throw new RuntimeException("db 오류 rollback");
         }
 
+        Optional<Member> member = memberRepository.findById(newParticipant.getMemberId());
+
+        if(member.isEmpty()) return null;
+
         return JoinRandomResponse.builder()
-                .id(consultation.get().getId())
+                .consultationId(consultation.get().getId())
+                .id(participant.getId())
+                .memberId(member.get().getId())
+                .memberNickname(member.get().getNickname())
+                .profileKey(member.get().getProfileKey())
+                .profileUrl(member.get().getProfileUrl())
                 .build();
     }
 
@@ -313,39 +310,40 @@ public class ConsultationService {
         return 1;
     }
 
-    public BroadcastInformationResponse broadcastInformation(Long id) {
-        Optional<Consultation> consultation = consultationRepository.findById(id);
-
-        if(consultation.isEmpty()) return null;
-
-        // 참가자 리스트 조회
-        List<Participant> list = participantRepository.findByConsultationId(consultation.get().getId());
-
-        List<ParticipantResponse> pList = list.stream().map(participant -> {
-            Member member = memberRepository.findById(participant.getMemberId())
-                    .orElseThrow(() -> new RuntimeException("Member not found"));
-
-            return ParticipantResponse.builder()
-                    .id(participant.getId())
-                    .memberId(participant.getMemberId())
-                    .memberNickname(participant.getMemberNickname())
-                    .consultationId(participant.getConsultationId())
-                    .consultationDate(participant.getConsultationDate())
-                    .profileKey(member.getProfileKey())
-                    .profileUrl(member.getProfileUrl())
-                    .build();
-        }).collect(Collectors.toList());
-
-        return BroadcastInformationResponse.builder()
-                .id(consultation.get().getId())
-                .category(consultation.get().getCategory())
-                .title(consultation.get().getTitle())
-                .isPrivated(consultation.get().getIsPrivated())
-                .password(consultation.get().getPassword())
-                .startTime(consultation.get().getStartTime())
-                .endTime(consultation.get().getEndTime())
-                .currentParticipants(consultation.get().getCurrentParticipants())
-                .participants(pList)
-                .build();
-    }
+    // 만약 나중에 Broadcast 필요한 상황이 오면 구현
+//    public BroadcastInformationResponse broadcastInformation(Long id) {
+//        Optional<Consultation> consultation = consultationRepository.findById(id);
+//
+//        if(consultation.isEmpty()) return null;
+//
+//        // 참가자 리스트 조회
+//        List<Participant> list = participantRepository.findByConsultationId(consultation.get().getId());
+//
+//        List<ParticipantResponse> pList = list.stream().map(participant -> {
+//            Member member = memberRepository.findById(participant.getMemberId())
+//                    .orElseThrow(() -> new RuntimeException("Member not found"));
+//
+//            return ParticipantResponse.builder()
+//                    .id(participant.getId())
+//                    .memberId(participant.getMemberId())
+//                    .memberNickname(participant.getMemberNickname())
+//                    .consultationId(participant.getConsultationId())
+//                    .consultationDate(participant.getConsultationDate())
+//                    .profileKey(member.getProfileKey())
+//                    .profileUrl(member.getProfileUrl())
+//                    .build();
+//        }).collect(Collectors.toList());
+//
+//        return BroadcastInformationResponse.builder()
+//                .id(consultation.get().getId())
+//                .category(consultation.get().getCategory())
+//                .title(consultation.get().getTitle())
+//                .isPrivated(consultation.get().getIsPrivated())
+//                .password(consultation.get().getPassword())
+//                .startTime(consultation.get().getStartTime())
+//                .endTime(consultation.get().getEndTime())
+//                .currentParticipants(consultation.get().getCurrentParticipants())
+//                .participants(pList)
+//                .build();
+//    }
 }
