@@ -1,7 +1,9 @@
 package com.saessakmaeul.bitamin.member.controller;
 
-import com.saessakmaeul.bitamin.member.dto.request.*;
-import com.saessakmaeul.bitamin.member.dto.response.HealthReportResponseDTO;
+import com.saessakmaeul.bitamin.member.dto.request.ChangePasswordRequest;
+import com.saessakmaeul.bitamin.member.dto.request.CheckPasswordRequest;
+import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
+import com.saessakmaeul.bitamin.member.dto.request.MemberUpdateRequestDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberBasicInfo;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.service.MemberService;
@@ -15,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Lazy;
 
 import java.io.IOException;
@@ -23,6 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/members")
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@Tag(name = "Member Controller", description = "회원 관리하는 컨트롤러")
 public class MemberController {
     private final MemberService memberService;
     private final JwtUtil jwtUtil;
@@ -32,9 +37,7 @@ public class MemberController {
         this.jwtUtil = jwtUtil;
     }
 
-    /** 회원 목록 조회 API
-     * 테스트용
-     * @return 회원 목록 */
+    @Operation(summary = "회원 목록 조회", description = "테스트용")
     @GetMapping("/list")
     public ResponseEntity<List<MemberResponseDTO>> getMemberList() {
         try {
@@ -45,9 +48,7 @@ public class MemberController {
         }
     }
 
-    /** 회원가입 API
-     * @param memberDTO 회원가입 요청 정보
-     * @return 회원 ID */
+    @Operation(summary = "회원가입", description = "")
     @PostMapping("/register")
     public ResponseEntity<Long> register(@ModelAttribute MemberResponseDTO memberDTO) {
         try {
@@ -58,9 +59,7 @@ public class MemberController {
         }
     }
 
-    /** 회원 한명 조회 API
-     * @param request HTTP 요청 객체
-     * @return 회원 정보 */
+    @Operation(summary = "회원 한명 조회", description = "")
     @GetMapping("/get-member")
     public ResponseEntity<MemberRequestDTO> getMemberByToken(HttpServletRequest request) {
         try {
@@ -77,10 +76,7 @@ public class MemberController {
         }
     }
 
-    /** 회원 정보 수정 API
-     * @param request                HTTP 요청 객체
-     * @param memberUpdateRequestDTO 회원 수정 요청 정보
-     * @return 수정 결과 (1: 성공, 0: 실패) */
+    @Operation(summary = "회원 정보 수정", description = "수정 완료하면 1 반환")
     @PutMapping("/update-member")
     public ResponseEntity<Integer> updateMemberByToken(HttpServletRequest request, @ModelAttribute MemberUpdateRequestDTO memberUpdateRequestDTO) {
         try {
@@ -97,9 +93,7 @@ public class MemberController {
         }
     }
 
-    /** 회원 id, 닉네임 조회 API (AccessToken 파싱해서 회원 id, 닉네임 조회)
-     * @param request HTTP 요청 객체
-     * @return 회원 기본 정보 (id, 닉네임) */
+    @Operation(summary = "회원 id, 닉네임 조회", description = "AccessToken 파싱해서 회원 id, 닉네임 조회")
     @GetMapping("/info")
     public ResponseEntity<MemberBasicInfo> getUserInfo(HttpServletRequest request) {
         try {
@@ -116,10 +110,7 @@ public class MemberController {
         }
     }
 
-    /** 회원 비밀번호 수정 API
-     * @param request               HTTP 요청 객체
-     * @param changePasswordRequest 비밀번호 변경 요청 정보
-     * @return 변경 결과 메시지 */
+    @Operation(summary = "회원 비밀번호 수정", description = "비밀번호 변경")
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(HttpServletRequest request, @RequestBody ChangePasswordRequest changePasswordRequest) {
         try {
@@ -136,10 +127,7 @@ public class MemberController {
         }
     }
 
-    /**
-     * 회원 비밀번호 확인 API (회원 탈퇴 전 비밀번호 확인)
-     * @param checkPasswordRequest 비밀번호 확인 요청 정보
-     * @return 비밀번호 일치 여부 (1: 일치, 0: 불일치) */
+    @Operation(summary = "회원 비밀번호 확인", description = "회원 탈퇴 전 비밀번호 확인")
     @PostMapping("/check-password")
     public ResponseEntity<Integer> checkPassword(@RequestBody CheckPasswordRequest checkPasswordRequest) {
         try {
@@ -153,11 +141,7 @@ public class MemberController {
         }
     }
 
-    /**
-     * 회원 탈퇴 API (회원 탈퇴 및 관련 정보 삭제 & 로그아웃)
-     * @param request  HTTP 요청 객체
-     * @param response HTTP 응답 객체
-     * @return 탈퇴 결과 메시지 */
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 및 관련 정보 삭제 & 로그아웃")
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteMember(HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -178,50 +162,10 @@ public class MemberController {
         }
     }
 
-    /** JWT 토큰 추출 메서드 (헤더에서 JWT 토큰을 추출하는 메서드)
-     * @param request HTTP 요청 객체
-     * @return 추출된 JWT 토큰 */
+    @Operation(summary = "JWT 토큰 추출 메서드", description = "헤더에서 JWT 토큰을 추출하는 메서드")
     private String getTokenFromRequest(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
         return authorizationHeader != null && authorizationHeader.startsWith("Bearer ") ? authorizationHeader.substring(7) : null;
-    }
-
-
-    /** 자가진단 결과 기록 API
-     * @param healthReportRequestDTO 자가진단 요청 정보
-     * @param request HTTP 요청 객체
-     * @return 자가진단 응답 정보 */
-    @PostMapping("/self-assessment")
-    public ResponseEntity<HealthReportResponseDTO> createHealthReport(@RequestBody HealthReportRequestDTO healthReportRequestDTO, HttpServletRequest request) {
-        try {
-            String token = getTokenFromRequest(request);
-            if (token == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            Long userId = jwtUtil.extractUserId(token);
-            HealthReportResponseDTO healthReportResponseDTO = memberService.saveHealthReport(healthReportRequestDTO, userId);
-            return ResponseEntity.ok(healthReportResponseDTO);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    /** 자가진단 결과 리스트 조회 API
-     * @param request HTTP 요청 객체
-     * @return 자가진단 결과 리스트 */
-    @GetMapping("/self-assessment")
-    public ResponseEntity<List<HealthReportResponseDTO>> getHealthReports(HttpServletRequest request) {
-        try {
-            String token = getTokenFromRequest(request);
-            if (token == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            Long userId = jwtUtil.extractUserId(token);
-            List<HealthReportResponseDTO> healthReports = memberService.getHealthReportsByUserId(userId);
-            return ResponseEntity.ok(healthReports);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
     }
 
 }
