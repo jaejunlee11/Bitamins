@@ -22,28 +22,14 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 //@SpringBootTest // SpringBoot Test
 //@Transactional // 각 테스트 메서드에 대한 트렌잭션 수행, 종료되면 롤백
 @ExtendWith(MockitoExtension.class)
 public class ConsultationServiceTest {
-//    @Autowired
-//    private MemberRepository memberRepository;
-//
-//    @Autowired
-//    private ConsultationRepository consultationRepository;
-
-//    @Mock
-//    private ConsultationService consultationService;
-//
-//    @InjectMocks
-//    private ConsultationServiceTest consultationServiceTest;
-
     @Mock
     private ConsultationRepository consultationRepository;
 
@@ -85,7 +71,6 @@ public class ConsultationServiceTest {
                 .birthday(new Date(1999, 3, 27))
                 .role(Role.ROLE_MEMBER)
                 .build();
-//        member1 = memberRepository.save(member1);
 
         member2 = Member.builder()
                 .id(2)
@@ -97,8 +82,6 @@ public class ConsultationServiceTest {
                 .birthday(new Date(2000, 8, 7))
                 .role(Role.ROLE_MEMBER)
                 .build();
-
-//        member2 = memberRepository.save(member2);
 
         music = Consultation.builder()
                 .id(1L)
@@ -112,8 +95,6 @@ public class ConsultationServiceTest {
                 .sessionId("1")
                 .build();
 
-//        music = consultationRepository.save(music);
-
         art = Consultation.builder()
                 .id(2L)
                 .category("미술")
@@ -125,8 +106,6 @@ public class ConsultationServiceTest {
                 .currentParticipants(0)
                 .sessionId("2")
                 .build();
-
-//        art = consultationRepository.save(art);
 
         movie = Consultation.builder()
                 .id(3L)
@@ -140,8 +119,6 @@ public class ConsultationServiceTest {
                 .sessionId("3")
                 .build();
 
-//        movie = consultationRepository.save(movie);
-
         reading = Consultation.builder()
                 .id(4L)
                 .category("독서")
@@ -153,8 +130,6 @@ public class ConsultationServiceTest {
                 .currentParticipants(0)
                 .sessionId("4")
                 .build();
-
-//        reading = consultationRepository.save(reading);
 
         conversation = Consultation.builder()
                 .id(5L)
@@ -168,8 +143,6 @@ public class ConsultationServiceTest {
                 .sessionId("5")
                 .build();
 
-//        conversation = consultationRepository.save(conversation);
-
         privated = Consultation.builder()
                 .id(6L)
                 .category("음악")
@@ -181,8 +154,6 @@ public class ConsultationServiceTest {
                 .currentParticipants(0)
                 .sessionId("6")
                 .build();
-
-//        privated = consultationRepository.save(privated);
 
         System.out.println("Test start");
     }
@@ -234,5 +205,74 @@ public class ConsultationServiceTest {
         SelectAllResponse actual = consultationService.selectAll(0, 100, type);
 
         assertEquals(expected, actual);
+        System.out.println("전체 조회 성공");
     }
+
+    @Test
+    @DisplayName("카테고리 별 조회에 대한 테스트")
+    public void selectAllByCategory() throws Exception {
+        // 1. 전체 조회
+        // Given
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "id"));
+        SearchCondition type = SearchCondition.음악;
+
+        List<Consultation> consultationList = Arrays.asList(privated, music);
+        Page<Consultation> consultationPage = new PageImpl<>(consultationList, pageable, consultationList.size());
+        List<ConsultationListResponse> list = Arrays.asList(
+                new ConsultationListResponse(privated.getId(), privated.getCategory(), privated.getTitle(), privated.getIsPrivated(), privated.getStartTime(), privated.getEndTime(), privated.getCurrentParticipants(), privated.getSessionId()),
+                new ConsultationListResponse(music.getId(), music.getCategory(), music.getTitle(), music.getIsPrivated(), music.getStartTime(), music.getEndTime(), music.getCurrentParticipants(), music.getSessionId())
+        );
+
+        // When
+        when(consultationRepository.findByCategoryAndSessionIdIsNotNullAndCurrentParticipantsBetween(type.name(), 1, 4, pageable))
+                .thenReturn(consultationPage);
+
+        SelectAllResponse expected = SelectAllResponse.builder()
+                .consultationList(list)
+                .page(0)
+                .size(100)
+                .totalElements(consultationPage.getTotalElements())
+                .totalPages(consultationPage.getTotalPages())
+                .build();
+
+        // Then
+        SelectAllResponse actual = consultationService.selectAll(0, 100, type);
+
+        assertEquals(expected, actual);
+        System.out.println("음악 성공");
+    }
+
+    @Test
+    @DisplayName("비밀방 조회에 대한 테스트")
+    public void selectAllByPrivated() throws Exception {
+        // 1. 전체 조회
+        // Given
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "id"));
+        SearchCondition type = SearchCondition.비밀방;
+
+        List<Consultation> consultationList = Arrays.asList(privated);
+        Page<Consultation> consultationPage = new PageImpl<>(consultationList, pageable, consultationList.size());
+        List<ConsultationListResponse> list = Arrays.asList(
+                new ConsultationListResponse(privated.getId(), privated.getCategory(), privated.getTitle(), privated.getIsPrivated(), privated.getStartTime(), privated.getEndTime(), privated.getCurrentParticipants(), privated.getSessionId())
+        );
+
+        // When
+        when(consultationRepository.findByIsPrivatedAndSessionIdIsNotNullAndCurrentParticipantsBetween(true,1,  4, pageable))
+                .thenReturn(consultationPage);
+
+        SelectAllResponse expected = SelectAllResponse.builder()
+                .consultationList(list)
+                .page(0)
+                .size(100)
+                .totalElements(consultationPage.getTotalElements())
+                .totalPages(consultationPage.getTotalPages())
+                .build();
+
+        // Then
+        SelectAllResponse actual = consultationService.selectAll(0, 100, type);
+
+        assertEquals(expected, actual);
+        System.out.println("비밀방 조회 성공");
+    }
+    
 }
