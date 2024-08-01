@@ -8,7 +8,7 @@ import com.saessakmaeul.bitamin.util.JwtUtil;
 import io.openvidu.java.client.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+//import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -20,7 +20,8 @@ import java.util.*;
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class ConsultationController {
     private final OpenVidu openVidu;
-    private final SimpMessagingTemplate simpMessagingTemplate;
+    // Broadcast 필요한 상황 오면 구현
+//    private final SimpMessagingTemplate simpMessagingTemplate;
     private final ConsultationService consultationService;
     private final JwtUtil jwtUtil;
 
@@ -28,7 +29,6 @@ public class ConsultationController {
     public ResponseEntity<?> selectAll(@RequestParam(value = "page", defaultValue = "0") int page,
                                        @RequestParam(value = "size", defaultValue = "100") int size,
                                        @RequestParam(value = "type") SearchCondition type) {
-
         List<SelectAllResponse> consultationList = consultationService.selectAll(page, size, type);
 
         if(consultationList == null) return ResponseEntity.status(404).body("다시 조회하세요");
@@ -38,8 +38,8 @@ public class ConsultationController {
 
     @PostMapping
     public ResponseEntity<?> registRoom(@RequestBody RegistRoomRequest registRoomRequest) throws OpenViduJavaClientException, OpenViduHttpException {
-
         Map<String,Object> params = new HashMap<>();
+
         params.put("customSessionId", UUID.randomUUID().toString());
 
         SessionProperties properties = SessionProperties.fromJson(params).build();
@@ -59,7 +59,6 @@ public class ConsultationController {
     @PostMapping("/participants")
     public ResponseEntity<?> joinRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                       @RequestBody JoinRoomRequest joinRoomRequest) throws OpenViduJavaClientException, OpenViduHttpException {
-
         Map<String,Object> params = new HashMap<>();
 
         // 입장 가능한 세션인지 확인
@@ -129,11 +128,9 @@ public class ConsultationController {
     @DeleteMapping("{consultationId}")
     public ResponseEntity<?> ExitRoomBeforeStart(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                                  @PathVariable("consultationId") Long consultationId) {
-
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
         ExitRoomBeforeStartRequest exitRoomBeforeStartRequest = new ExitRoomBeforeStartRequest(memberId, consultationId);
-        exitRoomBeforeStartRequest.setMemberId(memberId);
 
         int result = consultationService.exitRoomBeforeStart(exitRoomBeforeStartRequest);
 
@@ -145,8 +142,8 @@ public class ConsultationController {
     @PatchMapping
     public ResponseEntity<?> ExitRoomAfterStart(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                                 @RequestBody ExitRoomAfterStartRequest exitRoomAfterStartRequest) {
-
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+
         exitRoomAfterStartRequest.setMemberId(memberId);
 
         int result = consultationService.exitRoomAfterStart(exitRoomAfterStartRequest);
@@ -158,7 +155,6 @@ public class ConsultationController {
 
     @GetMapping("/chatings/{consultationId}")
     public ResponseEntity<?> findChating(@PathVariable("consultationId") Long consultationId) {
-
         List<findChatingResponse> chatingList = consultationService.findChating(consultationId);
 
         return ResponseEntity.status(200).body(chatingList);
@@ -167,7 +163,6 @@ public class ConsultationController {
     @PostMapping("/chatings")
     public ResponseEntity<?> registChating(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                            @RequestBody RegistChatingRequest registChatingRequest) {
-
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
         String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
 

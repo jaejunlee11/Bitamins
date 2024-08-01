@@ -23,7 +23,6 @@ public class WebSocketController {
                             SendMessageRequest sendMessageRequest) {
 
         sendMessageRequest.setMemberNickname(jwtUtil.extractNickname(tokenHeader.substring(7)));
-        System.out.println(sendMessageRequest.getMemberNickname());
         sendMessageRequest.setSendTime(LocalDateTime.now());
 
         // 메시지를 해당 방으로 브로드캐스트
