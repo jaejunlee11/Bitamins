@@ -4,8 +4,6 @@ import com.saessakmaeul.bitamin.member.dto.request.HealthReportRequestDTO;
 import com.saessakmaeul.bitamin.member.dto.response.HealthReportResponseDTO;
 import com.saessakmaeul.bitamin.member.service.HealthReportService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +15,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/health-report")
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
-@Tag(name = "HealthReport Controller", description = "회원 자가 검진 기록 관리하는 컨트롤러")
 public class HealthReportController {
 
     @Autowired
@@ -26,7 +23,10 @@ public class HealthReportController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @Operation(summary = "자가진단 결과 기록", description = "")
+    /** 자가진단 결과 기록 API
+     * @param healthReportRequestDTO 자가진단 요청 정보
+     * @param request HTTP 요청 객체
+     * @return 자가진단 응답 정보 */
     @PostMapping
     public ResponseEntity<HealthReportResponseDTO> createHealthReport(@RequestBody HealthReportRequestDTO healthReportRequestDTO, HttpServletRequest request) {
         try {
@@ -42,7 +42,9 @@ public class HealthReportController {
         }
     }
 
-    @Operation(summary = "자가진단 결과 리스트 조회", description = "")
+    /** 자가진단 결과 리스트 조회 API
+     * @param request HTTP 요청 객체
+     * @return 자가진단 결과 리스트 */
     @GetMapping
     public ResponseEntity<List<HealthReportResponseDTO>> getHealthReports(HttpServletRequest request) {
         try {
@@ -58,7 +60,9 @@ public class HealthReportController {
         }
     }
 
-    @Operation(summary = "JWT 토큰 추출 메서드", description = "JWT 토큰을 추출하는 메서드")
+    /** JWT 토큰 추출 메서드 (헤더에서 JWT 토큰을 추출하는 메서드)
+     * @param request HTTP 요청 객체
+     * @return 추출된 JWT 토큰 */
     private String getTokenFromRequest(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
         return authorizationHeader != null && authorizationHeader.startsWith("Bearer ") ? authorizationHeader.substring(7) : null;
