@@ -1,9 +1,7 @@
 package com.saessakmaeul.bitamin.member.controller;
 
-import com.saessakmaeul.bitamin.member.dto.request.ChangePasswordRequest;
-import com.saessakmaeul.bitamin.member.dto.request.CheckPasswordRequest;
-import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
-import com.saessakmaeul.bitamin.member.dto.request.MemberUpdateRequestDTO;
+import com.saessakmaeul.bitamin.member.dto.request.*;
+import com.saessakmaeul.bitamin.member.dto.response.HealthReportResponseDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberBasicInfo;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.service.MemberService;
@@ -186,6 +184,44 @@ public class MemberController {
     private String getTokenFromRequest(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
         return authorizationHeader != null && authorizationHeader.startsWith("Bearer ") ? authorizationHeader.substring(7) : null;
+    }
+
+
+    /** 자가진단 결과 기록 API
+     * @param healthReportRequestDTO 자가진단 요청 정보
+     * @param request HTTP 요청 객체
+     * @return 자가진단 응답 정보 */
+    @PostMapping("/self-assessment")
+    public ResponseEntity<HealthReportResponseDTO> createHealthReport(@RequestBody HealthReportRequestDTO healthReportRequestDTO, HttpServletRequest request) {
+        try {
+            String token = getTokenFromRequest(request);
+            if (token == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            Long userId = jwtUtil.extractUserId(token);
+            HealthReportResponseDTO healthReportResponseDTO = memberService.saveHealthReport(healthReportRequestDTO, userId);
+            return ResponseEntity.ok(healthReportResponseDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /** 자가진단 결과 리스트 조회 API
+     * @param request HTTP 요청 객체
+     * @return 자가진단 결과 리스트 */
+    @GetMapping("/self-assessment")
+    public ResponseEntity<List<HealthReportResponseDTO>> getHealthReports(HttpServletRequest request) {
+        try {
+            String token = getTokenFromRequest(request);
+            if (token == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            Long userId = jwtUtil.extractUserId(token);
+            List<HealthReportResponseDTO> healthReports = memberService.getHealthReportsByUserId(userId);
+            return ResponseEntity.ok(healthReports);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 }

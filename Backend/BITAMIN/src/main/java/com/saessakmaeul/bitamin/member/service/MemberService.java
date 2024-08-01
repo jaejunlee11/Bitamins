@@ -1,10 +1,8 @@
 package com.saessakmaeul.bitamin.member.service;
 
-import com.saessakmaeul.bitamin.member.dto.request.ChangePasswordRequest;
-import com.saessakmaeul.bitamin.member.dto.request.LoginRequest;
-import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
-import com.saessakmaeul.bitamin.member.dto.request.MemberUpdateRequestDTO;
+import com.saessakmaeul.bitamin.member.dto.request.*;
 import com.saessakmaeul.bitamin.member.dto.response.AuthResponse;
+import com.saessakmaeul.bitamin.member.dto.response.HealthReportResponseDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.entity.Member;
 
@@ -25,4 +23,6 @@ public interface MemberService {
     AuthResponse refreshToken(String refreshToken);
     void logout(String email);
     String getUserRole(String token);
+    HealthReportResponseDTO saveHealthReport(HealthReportRequestDTO healthReportRequestDTO, Long userId);
+    List<HealthReportResponseDTO> getHealthReportsByUserId(Long userId);
 }

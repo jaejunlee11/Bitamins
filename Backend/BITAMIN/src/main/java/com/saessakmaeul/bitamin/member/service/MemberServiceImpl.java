@@ -1,11 +1,10 @@
 package com.saessakmaeul.bitamin.member.service;
 
-import com.saessakmaeul.bitamin.member.dto.request.ChangePasswordRequest;
-import com.saessakmaeul.bitamin.member.dto.request.LoginRequest;
-import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
-import com.saessakmaeul.bitamin.member.dto.request.MemberUpdateRequestDTO;
+import com.saessakmaeul.bitamin.member.dto.request.*;
 import com.saessakmaeul.bitamin.member.dto.response.AuthResponse;
+import com.saessakmaeul.bitamin.member.dto.response.HealthReportResponseDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
+import com.saessakmaeul.bitamin.member.entity.HealthReport;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.entity.RefreshToken;
 import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
@@ -246,5 +245,41 @@ public class MemberServiceImpl implements MemberService {
         } catch (Exception e) {
             throw new RuntimeException("회원 권한 조회 실패: " + e.getMessage());
         }
+    }
+
+
+
+    @Override
+    public HealthReportResponseDTO saveHealthReport(HealthReportRequestDTO healthReportRequestDTO, Long userId) {
+        HealthReport healthReport = new HealthReport();
+        healthReport.setCheckupScore(healthReportRequestDTO.getCheckupScore());
+        healthReport.setCheckupDate(healthReportRequestDTO.getCheckupDate());
+
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid member ID"));
+        healthReport.setMember(member);
+
+        HealthReport savedHealthReport = healthReportRepository.save(healthReport);
+
+        HealthReportResponseDTO healthReportResponseDTO = new HealthReportResponseDTO();
+        healthReportResponseDTO.setId(savedHealthReport.getId());
+        healthReportResponseDTO.setCheckupScore(savedHealthReport.getCheckupScore());
+        healthReportResponseDTO.setCheckupDate(savedHealthReport.getCheckupDate());
+        healthReportResponseDTO.setMemberId(savedHealthReport.getMember().getId());
+
+        return healthReportResponseDTO;
+    }
+
+    @Override
+    public List<HealthReportResponseDTO> getHealthReportsByUserId(Long userId) {
+        List<HealthReport> healthReports = healthReportRepository.findByMemberId(userId);
+        return healthReports.stream().map(healthReport -> {
+            HealthReportResponseDTO dto = new HealthReportResponseDTO();
+            dto.setId(healthReport.getId());
+            dto.setCheckupScore(healthReport.getCheckupScore());
+            dto.setCheckupDate(healthReport.getCheckupDate());
+            dto.setMemberId(healthReport.getMember().getId());
+            return dto;
+        }).collect(Collectors.toList());
     }
 }
