@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @Setter
 public class JoinRoomRequest {
     private Long id;
-    private LocalDateTime startTime;
     private Boolean isPrivated;
     private String password;
+    private LocalDateTime startTime;
     private String SessionId;
 
     private Long memberId;
