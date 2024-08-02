@@ -6,21 +6,24 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
 @Builder
 public class MemberResponseDTO {
-    private long id;
+    private Long id;
     private String email;
     private String password;
     private String name;
     private String nickname;
     private String dongCode;
-    private Date birthday;
+    private LocalDate birthday;
     private String profileKey;
     private String profileUrl;
     private Role role;
     private MultipartFile profileImage;
+
+
+
 }
