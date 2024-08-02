@@ -102,7 +102,7 @@ public class ConsultationService {
         try {
             newConsultation = consultationRepository.save(consultation);
         } catch (RuntimeException e) {
-            throw new RuntimeException("db 오류 rollback");
+            throw new RuntimeException("db 오류 rollback" + e.getMessage());
         }
 
         return RegistRoomResponse.builder()
