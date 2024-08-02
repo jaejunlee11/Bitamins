@@ -1,22 +1,30 @@
 package com.saessakmaeul.bitamin.member.service;
 
-import com.saessakmaeul.bitamin.member.dto.request.ChangePasswordRequest;
-import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
-import com.saessakmaeul.bitamin.member.dto.request.MemberUpdateRequestDTO;
+import com.saessakmaeul.bitamin.member.dto.request.*;
+import com.saessakmaeul.bitamin.member.dto.response.AuthResponse;
+import com.saessakmaeul.bitamin.member.dto.response.HealthReportResponseDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
+import com.saessakmaeul.bitamin.member.entity.HealthReport;
 import com.saessakmaeul.bitamin.member.entity.Member;
+import com.saessakmaeul.bitamin.member.entity.RefreshToken;
 import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
 //import com.saessakmaeul.bitamin.service.S3Service;
+import com.saessakmaeul.bitamin.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +36,12 @@ public class MemberServiceImpl implements MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final HealthReportRepository healthReportRepository;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Autowired
 //    private S3Service s3Service;
@@ -161,5 +175,111 @@ public class MemberServiceImpl implements MemberService {
         } else {
             return 0;
         }
+    }
+
+
+
+    @Override
+    public AuthResponse login(LoginRequest loginRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            Member user = memberRepository.findByEmail(loginRequest.getEmail())
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+            String jwt = jwtUtil.generateAccessToken(user);
+            String refreshToken = jwtUtil.generateRefreshToken(user);
+
+            Optional<RefreshToken> existingToken = refreshTokenRepository.findById(user.getId());
+            RefreshToken token;
+            if (existingToken.isPresent()) {
+                token = existingToken.get();
+                token.setToken(refreshToken);
+                token.setExpireDate(new Date(System.currentTimeMillis() + jwtUtil.getRefreshTokenExpiration()));
+            } else {
+                token = new RefreshToken();
+                token.setToken(refreshToken);
+                token.setExpireDate(new Date(System.currentTimeMillis() + jwtUtil.getRefreshTokenExpiration()));
+                token.setUser(user);
+            }
+            refreshTokenRepository.save(token);
+
+            return new AuthResponse(jwt, refreshToken, true);
+        } catch (Exception e) {
+            throw new RuntimeException("로그인 실패: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public AuthResponse refreshToken(String cookieRefreshToken) {
+        try {
+            if (jwtUtil.isTokenExpired(cookieRefreshToken)) {
+                throw new RuntimeException("Refresh Token이 만료되었습니다.");
+            }
+            Long userId = jwtUtil.extractUserId(cookieRefreshToken);
+            Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserId(userId);
+            if (refreshToken.isPresent() && refreshToken.get().getToken().equals(cookieRefreshToken)) {
+                String newAccessToken = jwtUtil.generateAccessToken(memberRepository.findById(userId)
+                        .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
+                return new AuthResponse(newAccessToken, cookieRefreshToken, true);
+            } else {
+                throw new RuntimeException("유효한 Refresh Token이 없습니다.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("AccessToken 재생성 실패: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void logout(String email) {
+        SecurityContextHolder.clearContext();
+    }
+
+    @Override
+    public String getUserRole(String token) {
+        try {
+            return jwtUtil.extractRole(token);
+        } catch (Exception e) {
+            throw new RuntimeException("회원 권한 조회 실패: " + e.getMessage());
+        }
+    }
+
+
+
+    @Override
+    public HealthReportResponseDTO saveHealthReport(HealthReportRequestDTO healthReportRequestDTO, Long userId) {
+        HealthReport healthReport = new HealthReport();
+        healthReport.setCheckupScore(healthReportRequestDTO.getCheckupScore());
+        healthReport.setCheckupDate(healthReportRequestDTO.getCheckupDate());
+
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid member ID"));
+        healthReport.setMember(member);
+
+        HealthReport savedHealthReport = healthReportRepository.save(healthReport);
+
+        HealthReportResponseDTO healthReportResponseDTO = new HealthReportResponseDTO();
+        healthReportResponseDTO.setId(savedHealthReport.getId());
+        healthReportResponseDTO.setCheckupScore(savedHealthReport.getCheckupScore());
+        healthReportResponseDTO.setCheckupDate(savedHealthReport.getCheckupDate());
+        healthReportResponseDTO.setMemberId(savedHealthReport.getMember().getId());
+
+        return healthReportResponseDTO;
+    }
+
+    @Override
+    public List<HealthReportResponseDTO> getHealthReportsByUserId(Long userId) {
+        List<HealthReport> healthReports = healthReportRepository.findByMemberId(userId);
+        return healthReports.stream().map(healthReport -> {
+            HealthReportResponseDTO dto = new HealthReportResponseDTO();
+            dto.setId(healthReport.getId());
+            dto.setCheckupScore(healthReport.getCheckupScore());
+            dto.setCheckupDate(healthReport.getCheckupDate());
+            dto.setMemberId(healthReport.getMember().getId());
+            return dto;
+        }).collect(Collectors.toList());
     }
 }
