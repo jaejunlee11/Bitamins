@@ -1,7 +1,9 @@
 package com.saessakmaeul.bitamin.util;
 
 import com.saessakmaeul.bitamin.member.entity.Member;
+import com.saessakmaeul.bitamin.member.entity.RefreshToken;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
+import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Component
@@ -22,6 +25,9 @@ public class JwtUtil {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -77,6 +83,14 @@ public class JwtUtil {
         } catch (ExpiredJwtException e) {
             return true;
         }
+    }
+
+    // Refresh Token을 무효화
+    public void invalidateRefreshTokenByUserId(Long userId) {
+        RefreshToken token = refreshTokenRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("리프레시 토큰을 찾을 수 없습니다."));
+        token.setExpireDate(new Date(System.currentTimeMillis()));
+        refreshTokenRepository.save(token);
     }
 
     public Date extractExpiration(String token) {
