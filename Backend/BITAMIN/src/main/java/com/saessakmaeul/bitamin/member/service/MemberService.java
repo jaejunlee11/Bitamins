@@ -21,7 +21,7 @@ public interface MemberService {
     int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO) throws IOException;
     AuthResponse login(LoginRequest loginRequest);
     AuthResponse refreshToken(String refreshToken);
-    void logout(String email);
+    void logout(Long userId);
     String getUserRole(String token);
     HealthReportResponseDTO saveHealthReport(HealthReportRequestDTO healthReportRequestDTO, Long userId);
     List<HealthReportResponseDTO> getHealthReportsByUserId(Long userId);

@@ -11,6 +11,7 @@ import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
 import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.file.controller.FileController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,6 +36,7 @@ public class MemberServiceImpl implements MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final HealthReportRepository healthReportRepository;
+    private final FileController fileController;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -44,11 +46,12 @@ public class MemberServiceImpl implements MemberService {
 
     @Autowired
 
-    public MemberServiceImpl(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, @Lazy PasswordEncoder passwordEncoder, HealthReportRepository healthReportRepository) {
+    public MemberServiceImpl(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, @Lazy PasswordEncoder passwordEncoder, HealthReportRepository healthReportRepository, FileController fileController) {
         this.memberRepository = memberRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.healthReportRepository = healthReportRepository;
+        this.fileController = fileController;
     }
 
     @Override
@@ -64,14 +67,16 @@ public class MemberServiceImpl implements MemberService {
                 .role(memberDTO.getRole())
                 .build();
         member = memberRepository.save(member);
+
         if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().isEmpty()) {
             String fileName = UUID.randomUUID() + "_" + memberDTO.getProfileImage().getOriginalFilename();
-
+            fileController.upload(memberDTO.getProfileImage());
             member.setProfileKey(fileName);
+            member.setProfileUrl("/file/" + fileName);
         }
+
         memberRepository.save(member);
         return member.getId();
-        // 1차 저장 후 2차 저장
     }
 
     @Override
@@ -228,8 +233,10 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void logout(String email) {
-        SecurityContextHolder.clearContext();
+    @Transactional
+    public void logout(Long userId) {
+        SecurityContextHolder.clearContext(); // 현재 사용자의 인증 정보 제거
+        jwtUtil.invalidateRefreshTokenByUserId(userId); // 리프레시 토큰 무효화 메서드 호출
     }
 
     @Override

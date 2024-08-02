@@ -1,6 +1,7 @@
 package com.saessakmaeul.bitamin.member.controller;
 
 import com.saessakmaeul.bitamin.member.dto.request.LoginRequest;
+import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
 import com.saessakmaeul.bitamin.member.dto.response.AuthResponse;
 import com.saessakmaeul.bitamin.member.service.MemberService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
@@ -70,9 +71,7 @@ public class AuthController {
             if (cookieRefreshToken == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 쿠키에 존재하지 않습니다.");
             }
-
             AuthResponse authResponse = memberService.refreshToken(cookieRefreshToken);
-
             response.setHeader("Authorization", "Bearer " + authResponse.getAccessToken());
             return ResponseEntity.ok(authResponse);
         } catch (Exception e) {
@@ -82,12 +81,20 @@ public class AuthController {
     }
 
     /** 로그아웃 API
-     * @param loginRequest 로그아웃 요청 정보
+     * @param request HTTP 요청 객체
      * @return 로그아웃 결과 메시지 */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> logout(HttpServletRequest request) {
         try {
-            memberService.logout(loginRequest.getEmail());
+            String token = getTokenFromRequest(request);
+            if (token == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("토큰이 제공되지 않았습니다.");
+            }
+            Long userId = jwtUtil.extractUserId(token);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다.");
+            }
+            memberService.logout(userId);
             return ResponseEntity.ok("로그아웃 성공");
         } catch (Exception e) {
             logger.error("로그아웃 오류: ", e);
