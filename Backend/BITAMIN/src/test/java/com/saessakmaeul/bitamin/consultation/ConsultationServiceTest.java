@@ -3,12 +3,10 @@ package com.saessakmaeul.bitamin.consultation;
 import com.saessakmaeul.bitamin.consultation.Entity.Consultation;
 import com.saessakmaeul.bitamin.consultation.Entity.Participant;
 import com.saessakmaeul.bitamin.consultation.Entity.SearchCondition;
+import com.saessakmaeul.bitamin.consultation.dto.request.JoinRandomRequest;
 import com.saessakmaeul.bitamin.consultation.dto.request.JoinRoomRequest;
 import com.saessakmaeul.bitamin.consultation.dto.request.RegistRoomRequest;
-import com.saessakmaeul.bitamin.consultation.dto.response.ConsultationListResponse;
-import com.saessakmaeul.bitamin.consultation.dto.response.JoinRoomResponse;
-import com.saessakmaeul.bitamin.consultation.dto.response.RegistRoomResponse;
-import com.saessakmaeul.bitamin.consultation.dto.response.SelectAllResponse;
+import com.saessakmaeul.bitamin.consultation.dto.response.*;
 import com.saessakmaeul.bitamin.consultation.repository.ConsultationRepository;
 import com.saessakmaeul.bitamin.consultation.repository.ParticipantRepository;
 import com.saessakmaeul.bitamin.consultation.service.ConsultationService;
@@ -26,10 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -394,5 +389,100 @@ public class ConsultationServiceTest {
 
         assertEquals(expected, actual);
         System.out.println("상담 방 참여 성공");
+    }
+
+    @Test
+    @DisplayName("랜덤 참여 조회 테스트")
+    public void  findRandomSessionId() throws Exception {
+        // Given
+        JoinRandomRequest joinRandomRequest = JoinRandomRequest.builder()
+                .type(SearchCondition.영화)
+                .build();
+
+        Consultation consultation = Consultation.builder()
+                .id(movie.getId())
+                .sessionId(movie.getSessionId())
+                .startTime(movie.getStartTime())
+                .build();
+
+        // When
+        when(consultationRepository.findByCategoryAndCurrentParticipantsLessThanEqualOrderByRand(SearchCondition.영화.name(), 4))
+                .thenReturn(Optional.of(consultation));
+
+        Map<String, Object> expected = new HashMap<>();
+        expected.put("id", consultation.getId());
+        expected.put("sessionId", consultation.getSessionId());
+        expected.put("consultationDate", consultation.getStartTime());
+
+        // Then
+       Map<String, Object> actual = consultationService.findRandomSessionId(joinRandomRequest);
+
+       assertEquals(expected, actual);
+       System.out.println("랜덤 방 조회 성공");
+    }
+
+    @Test
+    @DisplayName("랜덤 조회 후 방 참여 테스트")
+    public void joinRandom() throws Exception {
+        // Given
+        JoinRandomRequest joinRandomRequest = JoinRandomRequest.builder()
+                .id(movie.getId())
+                .sessionId(movie.getSessionId())
+                .memberId(member1.getId())
+                .memberNickname(member1.getNickname())
+                .consultationDate(movie.getStartTime().toLocalDate())
+                .build();
+
+        Participant participant = Participant.builder()
+                .consultationId(movie.getId())
+                .consultationDate(movie.getStartTime().toLocalDate())
+                .memberId(member1.getId())
+                .memberNickname(member1.getNickname())
+                .build();
+
+        Consultation consultation = Consultation.builder()
+                .id(movie.getId())
+                .category(movie.getCategory())
+                .title(movie.getTitle())
+                .isPrivated(movie.getIsPrivated())
+                .password(movie.getPassword())
+                .startTime(movie.getStartTime())
+                .endTime(movie.getEndTime())
+                .sessionId(movie.getSessionId())
+                .currentParticipants(movie.getCurrentParticipants())
+                .build();
+
+        Member member = Member.builder()
+                .id(member1.getId())
+                .nickname(member1.getNickname())
+                .profileKey(member1.getProfileKey())
+                .profileUrl(member1.getProfileUrl())
+                .build();
+
+        // When
+        when(consultationRepository.findById(movie.getId())).thenReturn(Optional.of(consultation));
+
+        when(participantRepository.save(any(Participant.class))).thenReturn(participant);
+
+        consultation.setCurrentParticipants(consultation.getCurrentParticipants() + 1);
+
+        when(consultationRepository.save(any(Consultation.class))).thenReturn(consultation);
+
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+
+        JoinRandomResponse expected = JoinRandomResponse.builder()
+                .consultationId(consultation.getId())
+                .id(participant.getId())
+                .memberId(member.getId())
+                .memberNickname(member.getNickname())
+                .profileKey(member.getProfileKey())
+                .profileUrl(member.getProfileUrl())
+                .build();
+
+        // Then
+        JoinRandomResponse actual = consultationService.joinRandom(joinRandomRequest);
+
+        assertEquals(expected, actual);
+        System.out.println("랜덤 방 참여 성공");
     }
 }
