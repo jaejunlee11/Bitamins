@@ -64,23 +64,6 @@ public class ConsultationService {
                 .totalElements(consultationPage.getTotalElements())
                 .totalPages(consultationPage.getTotalPages())
                 .build();
-
-//        return  consultationPage.getContent().stream()
-//                .map(domain -> new SelectAllResponse(
-//                        domain.getId(),
-//                        domain.getCategory(),
-//                        domain.getTitle(),
-//                        domain.getIsPrivated(),
-//                        domain.getStartTime(),
-//                        domain.getEndTime(),
-//                        domain.getCurrentParticipants(),
-//                        domain.getSessionId(),
-//                        page,
-//                        size,
-//                        consultationPage.getTotalElements(),
-//                        consultationPage.getTotalPages()
-//                ))
-//                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -93,7 +76,6 @@ public class ConsultationService {
                 .password(registRoomRequest.getPassword())
                 .startTime(registRoomRequest.getStartTime())
                 .endTime(registRoomRequest.getEndTime())
-//                .currentParticipants(0)
                 .sessionId(registRoomRequest.getSessionId())
                 .build();
 
