@@ -3,6 +3,7 @@ package com.saessakmaeul.bitamin.consultation;
 import com.saessakmaeul.bitamin.consultation.Entity.Consultation;
 import com.saessakmaeul.bitamin.consultation.Entity.Participant;
 import com.saessakmaeul.bitamin.consultation.Entity.SearchCondition;
+import com.saessakmaeul.bitamin.consultation.dto.request.ExitRoomBeforeStartRequest;
 import com.saessakmaeul.bitamin.consultation.dto.request.JoinRandomRequest;
 import com.saessakmaeul.bitamin.consultation.dto.request.JoinRoomRequest;
 import com.saessakmaeul.bitamin.consultation.dto.request.RegistRoomRequest;
@@ -23,10 +24,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -66,6 +69,10 @@ public class ConsultationServiceTest {
     private Consultation reading;
     private Consultation conversation;
     private Consultation privated;
+
+    private Participant readingParticipant;
+    private Participant conversationParticipant1;
+    private Participant conversationParticipant2;
 
     @BeforeEach // 테스트 전 처리 (시작 시)
     public void before() {
@@ -135,7 +142,7 @@ public class ConsultationServiceTest {
                 .password(null)
                 .startTime(LocalDateTime.of(2024, 8, 1, 13, 0, 0))
                 .endTime(LocalDateTime.of(2024, 8, 1, 15, 0, 0))
-                .currentParticipants(0)
+                .currentParticipants(1)
                 .sessionId("4")
                 .build();
 
@@ -163,6 +170,30 @@ public class ConsultationServiceTest {
                 .sessionId("6")
                 .build();
 
+        readingParticipant = Participant.builder()
+                .id(1L)
+                .consultationId(4L)
+                .memberId(1L)
+                .memberNickname("user1")
+                .consultationDate(LocalDate.of(2024, 8, 1))
+                .build();
+
+        conversationParticipant1 = Participant.builder()
+                .id(2L)
+                .consultationId(5L)
+                .memberId(1L)
+                .memberNickname("user1")
+                .consultationDate(LocalDate.of(2024, 8, 1))
+                .build();
+
+        conversationParticipant2 = Participant.builder()
+                .id(3L)
+                .consultationId(5L)
+                .memberId(2L)
+                .memberNickname("user2")
+                .consultationDate(LocalDate.of(2024, 8, 1))
+                .build();
+
         System.out.println("Test start");
     }
 
@@ -170,7 +201,6 @@ public class ConsultationServiceTest {
     public void after() {
         System.out.println("Test end");
     }
-
 
     // 상담방 전체 조회
     /*
@@ -484,5 +514,95 @@ public class ConsultationServiceTest {
 
         assertEquals(expected, actual);
         System.out.println("랜덤 방 참여 성공");
+    }
+
+    @Test
+    @DisplayName("회의 시작 전 퇴장 - 방 삭제 테스트")
+    public void exitRoomBeforeStart1() throws Exception {
+        // Given
+        ExitRoomBeforeStartRequest exitRoomBeforeStartRequest = ExitRoomBeforeStartRequest.builder()
+                .memberId(member1.getId())
+                .consultationId(reading.getId())
+                .build();
+
+        Participant participant = Participant.builder()
+                .id(readingParticipant.getId())
+                .memberId(readingParticipant.getId())
+                .memberNickname(readingParticipant.getMemberNickname())
+                .consultationId(readingParticipant.getConsultationId())
+                .consultationDate(readingParticipant.getConsultationDate())
+                .build();
+
+        Consultation consultation = Consultation.builder()
+                .id(reading.getId())
+                .category(reading.getCategory())
+                .title(reading.getTitle())
+                .isPrivated(reading.getIsPrivated())
+                .password(reading.getPassword())
+                .startTime(reading.getStartTime())
+                .endTime(reading.getEndTime())
+                .currentParticipants(reading.getCurrentParticipants())
+                .sessionId(reading.getSessionId())
+                .build();
+
+        // When
+        when(participantRepository.findByMemberIdAndConsultationId(readingParticipant.getMemberId(), readingParticipant.getConsultationId())).thenReturn(Optional.of(participant));
+        when(consultationRepository.findById(readingParticipant.getConsultationId())).thenReturn(Optional.of(consultation));
+
+        // Then
+        int actual = consultationService.exitRoomBeforeStart(exitRoomBeforeStartRequest);
+
+        verify(participantRepository).delete(participant);
+        verify(consultationRepository).delete(consultation);
+
+        assertEquals(1, actual);
+        System.out.println("방 삭제 성공");
+    }
+
+    @Test
+    @DisplayName("회의 시작 전 퇴장 - 참여인원 갱신 테스트")
+    public void exitRoomBeforeStart2() throws Exception {
+        // Given
+        ExitRoomBeforeStartRequest exitRoomBeforeStartRequest = ExitRoomBeforeStartRequest.builder()
+                .memberId(member1.getId())
+                .consultationId(conversation.getId())
+                .build();
+
+        Participant participant = Participant.builder()
+                .id(conversationParticipant1.getId())
+                .memberId(conversationParticipant1.getId())
+                .memberNickname(conversationParticipant1.getMemberNickname())
+                .consultationId(conversationParticipant1.getConsultationId())
+                .consultationDate(conversationParticipant1.getConsultationDate())
+                .build();
+
+        Consultation consultation = Consultation.builder()
+                .id(conversation.getId())
+                .category(conversation.getCategory())
+                .title(conversation.getTitle())
+                .isPrivated(conversation.getIsPrivated())
+                .password(conversation.getPassword())
+                .startTime(conversation.getStartTime())
+                .endTime(conversation.getEndTime())
+                .currentParticipants(conversation.getCurrentParticipants())
+                .sessionId(conversation.getSessionId())
+                .build();
+
+        // When
+        when(participantRepository.findByMemberIdAndConsultationId(conversationParticipant1.getMemberId(), conversationParticipant1.getConsultationId())).thenReturn(Optional.of(participant));
+
+        when(consultationRepository.findById(conversationParticipant1.getConsultationId())).thenReturn(Optional.of(consultation));
+
+        consultation.setCurrentParticipants(conversation.getCurrentParticipants() - 1);
+
+        when(consultationRepository.save(any(Consultation.class))).thenReturn(consultation);
+
+        // Then
+        int actual = consultationService.exitRoomBeforeStart(exitRoomBeforeStartRequest);
+
+        verify(participantRepository).delete(participant);
+
+        assertEquals(1, actual);
+        System.out.println("인원 갱신 성공");
     }
 }
