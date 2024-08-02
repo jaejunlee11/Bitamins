@@ -10,11 +10,11 @@ public class SelectAllResponse {
     private Long id;
     private String category;
     private String title;
-    private int isPrivate;
-    private String password;
+    private Boolean isPrivated;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private int currentParticipants;
+    private String sessionId;
 
     // 추가 페이징 정보
     private int page;

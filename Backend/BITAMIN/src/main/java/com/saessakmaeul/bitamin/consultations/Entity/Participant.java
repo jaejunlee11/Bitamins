@@ -1,13 +1,17 @@
 package com.saessakmaeul.bitamin.consultations.Entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
-@Getter
 @Table(name = "participant")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,4 +29,5 @@ public class Participant {
 
     @Column(name = "consultation_date")
     private LocalDate consultationDate;
+
 }

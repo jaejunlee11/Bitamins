@@ -1,13 +1,15 @@
 package com.saessakmaeul.bitamin.consultations.Entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "consultaiton")
+@Table(name = "consultation")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class Consultation {
@@ -23,7 +25,7 @@ public class Consultation {
     private String title;
 
     @Column(name = "is_privated")
-    private int isPrivated;
+    private Boolean isPrivated;
 
     @Column
     private String password;
@@ -36,5 +38,8 @@ public class Consultation {
 
     @Column(name = "current_participants")
     private int currentParticipants;
+
+    @Column(name = "session_id")
+    private String sessionId;
 
 }
