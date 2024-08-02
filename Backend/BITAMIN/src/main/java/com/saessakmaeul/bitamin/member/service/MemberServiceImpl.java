@@ -43,7 +43,6 @@ public class MemberServiceImpl implements MemberService {
     private JwtUtil jwtUtil;
 
     @Autowired
-//    private S3Service s3Service;
 
     public MemberServiceImpl(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, @Lazy PasswordEncoder passwordEncoder, HealthReportRepository healthReportRepository) {
         this.memberRepository = memberRepository;
