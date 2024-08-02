@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberService {
-    Long register(MemberResponseDTO memberDTO) throws IOException;
+    Long register(MemberRequestDTO memberDTO) throws IOException;
     Optional<Member> getMember(String email);
     List<MemberResponseDTO> getMemberList();
     boolean changePassword(Long userId, ChangePasswordRequest changePasswordRequest);
     boolean checkPassword(String email, String password);
-    void deleteMember(Long memberId);
-    MemberRequestDTO getMemberById(Long userId);
+    void deleteMember(Long userId);
+    MemberResponseDTO getMemberById(Long userId);
     int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO) throws IOException;
     AuthResponse login(LoginRequest loginRequest);
     AuthResponse refreshToken(String refreshToken);
