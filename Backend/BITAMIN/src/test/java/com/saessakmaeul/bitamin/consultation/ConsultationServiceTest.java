@@ -2,7 +2,9 @@ package com.saessakmaeul.bitamin.consultation;
 
 import com.saessakmaeul.bitamin.consultation.Entity.Consultation;
 import com.saessakmaeul.bitamin.consultation.Entity.SearchCondition;
+import com.saessakmaeul.bitamin.consultation.dto.request.RegistRoomRequest;
 import com.saessakmaeul.bitamin.consultation.dto.response.ConsultationListResponse;
+import com.saessakmaeul.bitamin.consultation.dto.response.RegistRoomResponse;
 import com.saessakmaeul.bitamin.consultation.dto.response.SelectAllResponse;
 import com.saessakmaeul.bitamin.consultation.repository.ConsultationRepository;
 import com.saessakmaeul.bitamin.consultation.service.ConsultationService;
@@ -22,12 +24,12 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
-//@SpringBootTest // SpringBoot Test
-//@Transactional // 각 테스트 메서드에 대한 트렌잭션 수행, 종료되면 롤백
 @ExtendWith(MockitoExtension.class)
 public class ConsultationServiceTest {
     @Mock
@@ -173,7 +175,6 @@ public class ConsultationServiceTest {
     @Test
     @DisplayName("전체 조회에 대한 테스트")
     public void selectAll() throws Exception {
-        // 1. 전체 조회
         // Given
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "id"));
         SearchCondition type = SearchCondition.전체;
@@ -211,7 +212,6 @@ public class ConsultationServiceTest {
     @Test
     @DisplayName("카테고리 별 조회에 대한 테스트")
     public void selectAllByCategory() throws Exception {
-        // 1. 전체 조회
         // Given
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "id"));
         SearchCondition type = SearchCondition.음악;
@@ -245,7 +245,6 @@ public class ConsultationServiceTest {
     @Test
     @DisplayName("비밀방 조회에 대한 테스트")
     public void selectAllByPrivated() throws Exception {
-        // 1. 전체 조회
         // Given
         Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "id"));
         SearchCondition type = SearchCondition.비밀방;
@@ -274,5 +273,47 @@ public class ConsultationServiceTest {
         assertEquals(expected, actual);
         System.out.println("비밀방 조회 성공");
     }
-    
+
+    @Test
+    @DisplayName("상담 방 생성에 대한 테스트")
+    public void registRoom() throws Exception {
+        // Given
+        RegistRoomRequest registRoomRequest = RegistRoomRequest.builder()
+                .category("미술")
+                .title("서로 얼굴 그려주기 해요~~")
+                .isPrivated(false)
+                .password(null)
+                .startTime(LocalDateTime.of(2024, 8, 2, 9, 30, 0))
+                .endTime(LocalDateTime.of(2024, 8, 2, 11, 30, 0))
+                .sessionId("7")
+                .build();
+
+        Consultation consultation = Consultation.builder()
+                .id(7L)
+                .category("미술")
+                .title("서로 얼굴 그려주기 해요~~")
+                .isPrivated(false)
+                .password(null)
+                .startTime(LocalDateTime.of(2024, 8, 2, 9, 30, 0))
+                .endTime(LocalDateTime.of(2024, 8, 2, 11, 30, 0))
+                .sessionId("7")
+                .build();
+
+        // When
+        when(consultationRepository.save(any(Consultation.class))).thenReturn(consultation);
+
+        RegistRoomResponse expected = RegistRoomResponse.builder()
+                .id(consultation.getId())
+                .isPrivated(consultation.getIsPrivated())
+                .password(consultation.getPassword())
+                .startTime(consultation.getStartTime())
+                .sessionId(consultation.getSessionId())
+                .build();
+
+        // Then
+        RegistRoomResponse actual = consultationService.registRoom(registRoomRequest);
+
+        assertEquals(expected, actual);
+        System.out.println("상담 방 생성 성공");
+    }
 }
