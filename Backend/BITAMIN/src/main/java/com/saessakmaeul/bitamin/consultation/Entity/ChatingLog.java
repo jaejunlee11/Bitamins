@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 public class ChatingLog {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
 
