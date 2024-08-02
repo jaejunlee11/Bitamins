@@ -27,7 +27,7 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-     /** 로그인 API
+    /** 로그인 API
      * @param loginRequest 로그인 요청 정보
      * @param response HTTP 응답 객체
      * @return AccessToken과 RefreshToken을 포함한 응답 */
