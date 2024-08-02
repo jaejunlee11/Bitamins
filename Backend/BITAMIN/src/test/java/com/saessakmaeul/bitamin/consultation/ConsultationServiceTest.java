@@ -1,15 +1,20 @@
 package com.saessakmaeul.bitamin.consultation;
 
 import com.saessakmaeul.bitamin.consultation.Entity.Consultation;
+import com.saessakmaeul.bitamin.consultation.Entity.Participant;
 import com.saessakmaeul.bitamin.consultation.Entity.SearchCondition;
+import com.saessakmaeul.bitamin.consultation.dto.request.JoinRoomRequest;
 import com.saessakmaeul.bitamin.consultation.dto.request.RegistRoomRequest;
 import com.saessakmaeul.bitamin.consultation.dto.response.ConsultationListResponse;
+import com.saessakmaeul.bitamin.consultation.dto.response.JoinRoomResponse;
 import com.saessakmaeul.bitamin.consultation.dto.response.RegistRoomResponse;
 import com.saessakmaeul.bitamin.consultation.dto.response.SelectAllResponse;
 import com.saessakmaeul.bitamin.consultation.repository.ConsultationRepository;
+import com.saessakmaeul.bitamin.consultation.repository.ParticipantRepository;
 import com.saessakmaeul.bitamin.consultation.service.ConsultationService;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.entity.Role;
+import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +39,12 @@ import static org.mockito.ArgumentMatchers.any;
 public class ConsultationServiceTest {
     @Mock
     private ConsultationRepository consultationRepository;
+
+    @Mock
+    private ParticipantRepository participantRepository;
+
+    @Mock
+    private MemberRepository memberRepository;
 
     @InjectMocks
     private ConsultationService consultationService;
@@ -315,5 +326,73 @@ public class ConsultationServiceTest {
 
         assertEquals(expected, actual);
         System.out.println("상담 방 생성 성공");
+    }
+
+    @Test
+    @DisplayName("상담 방 참여에 대한 테스트")
+    public void join() throws Exception {
+        //Given
+        JoinRoomRequest joinRoomRequest = JoinRoomRequest.builder()
+                .id(music.getId())
+                .isPrivated(music.getIsPrivated())
+                .password(music.getPassword())
+                .startTime(music.getStartTime())
+                .sessionId(music.getSessionId())
+                .consultationDate(music.getStartTime().toLocalDate())
+                .memberId(member1.getId())
+                .memberNickname(member1.getNickname())
+                .build();
+
+        Participant participant = Participant.builder()
+                .consultationId(music.getId())
+                .consultationDate(music.getStartTime().toLocalDate())
+                .memberId(member1.getId())
+                .memberNickname(member1.getNickname())
+                .build();
+
+        Consultation consultation = Consultation.builder()
+                .id(music.getId())
+                .category(music.getCategory())
+                .title(music.getTitle())
+                .isPrivated(music.getIsPrivated())
+                .password(music.getPassword())
+                .startTime(music.getStartTime())
+                .endTime(music.getEndTime())
+                .sessionId(music.getSessionId())
+                .currentParticipants(music.getCurrentParticipants())
+                .build();
+
+        Member member = Member.builder()
+                .id(member1.getId())
+                .nickname(member1.getNickname())
+                .profileKey(member1.getProfileKey())
+                .profileUrl(member1.getProfileUrl())
+                .build();
+
+        // When
+        when(consultationRepository.findById(music.getId())).thenReturn(Optional.of(consultation));
+
+        when(participantRepository.save(any(Participant.class))).thenReturn(participant);
+
+        consultation.setCurrentParticipants(consultation.getCurrentParticipants() + 1);
+
+        when(consultationRepository.save(any(Consultation.class))).thenReturn(consultation);
+
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+
+
+        JoinRoomResponse expected = JoinRoomResponse.builder()
+                .consultationId(music.getId())
+                .memberId(member1.getId())
+                .memberNickname(member1.getNickname())
+                .profileKey(member1.getProfileKey())
+                .profileUrl(member1.getProfileUrl())
+                .build();
+
+        // Then
+        JoinRoomResponse actual = consultationService.joinRoom(joinRoomRequest);
+
+        assertEquals(expected, actual);
+        System.out.println("상담 방 참여 성공");
     }
 }
