@@ -3,10 +3,7 @@ package com.saessakmaeul.bitamin.consultation;
 import com.saessakmaeul.bitamin.consultation.Entity.Consultation;
 import com.saessakmaeul.bitamin.consultation.Entity.Participant;
 import com.saessakmaeul.bitamin.consultation.Entity.SearchCondition;
-import com.saessakmaeul.bitamin.consultation.dto.request.ExitRoomBeforeStartRequest;
-import com.saessakmaeul.bitamin.consultation.dto.request.JoinRandomRequest;
-import com.saessakmaeul.bitamin.consultation.dto.request.JoinRoomRequest;
-import com.saessakmaeul.bitamin.consultation.dto.request.RegistRoomRequest;
+import com.saessakmaeul.bitamin.consultation.dto.request.*;
 import com.saessakmaeul.bitamin.consultation.dto.response.*;
 import com.saessakmaeul.bitamin.consultation.repository.ConsultationRepository;
 import com.saessakmaeul.bitamin.consultation.repository.ParticipantRepository;
@@ -517,7 +514,7 @@ public class ConsultationServiceTest {
     }
 
     @Test
-    @DisplayName("회의 시작 전 퇴장 - 방 삭제 테스트")
+    @DisplayName("상담 시작 전 퇴장 - 방 삭제 테스트")
     public void exitRoomBeforeStart1() throws Exception {
         // Given
         ExitRoomBeforeStartRequest exitRoomBeforeStartRequest = ExitRoomBeforeStartRequest.builder()
@@ -560,7 +557,7 @@ public class ConsultationServiceTest {
     }
 
     @Test
-    @DisplayName("회의 시작 전 퇴장 - 참여인원 갱신 테스트")
+    @DisplayName("상담 시작 전 퇴장 - 참여인원 갱신 테스트")
     public void exitRoomBeforeStart2() throws Exception {
         // Given
         ExitRoomBeforeStartRequest exitRoomBeforeStartRequest = ExitRoomBeforeStartRequest.builder()
@@ -601,6 +598,97 @@ public class ConsultationServiceTest {
         int actual = consultationService.exitRoomBeforeStart(exitRoomBeforeStartRequest);
 
         verify(participantRepository).delete(participant);
+
+        assertEquals(1, actual);
+        System.out.println("인원 갱신 성공");
+    }
+
+    @Test
+    @DisplayName("상담 시작 후 퇴장 - sessionId null 테스트")
+    public void exitRoomAfterStart1() throws Exception {
+        // Given
+        ExitRoomAfterStartRequest exitRoomAfterStartRequest = ExitRoomAfterStartRequest.builder()
+                .memberId(member1.getId())
+                .consultationId(reading.getId())
+                .build();
+
+        Participant participant = Participant.builder()
+                .id(readingParticipant.getId())
+                .memberId(readingParticipant.getId())
+                .memberNickname(readingParticipant.getMemberNickname())
+                .consultationId(readingParticipant.getConsultationId())
+                .consultationDate(readingParticipant.getConsultationDate())
+                .build();
+
+        Consultation consultation = Consultation.builder()
+                .id(reading.getId())
+                .category(reading.getCategory())
+                .title(reading.getTitle())
+                .isPrivated(reading.getIsPrivated())
+                .password(reading.getPassword())
+                .startTime(reading.getStartTime())
+                .endTime(reading.getEndTime())
+                .currentParticipants(reading.getCurrentParticipants())
+                .sessionId(reading.getSessionId())
+                .build();
+
+        // When
+        when(participantRepository.findByMemberIdAndConsultationId(readingParticipant.getMemberId(), readingParticipant.getConsultationId())).thenReturn(Optional.of(participant));
+
+        when(consultationRepository.findById(readingParticipant.getConsultationId())).thenReturn(Optional.of(consultation));
+
+        consultation.setCurrentParticipants(reading.getCurrentParticipants() - 1);
+        consultation.setSessionId(null);
+
+        when(consultationRepository.save(any(Consultation.class))).thenReturn(consultation);
+
+        // Then
+        int actual = consultationService.exitRoomAfterStart(exitRoomAfterStartRequest);
+
+        assertEquals(1, actual);
+        System.out.println("session Id 갱신 성공");
+    }
+
+    @Test
+    @DisplayName("상담 시작 후 퇴장 - 참여인원 갱신 테스트")
+    public void exitRoomAfterStart2() throws Exception {
+        // Given
+        ExitRoomAfterStartRequest exitRoomAfterStartRequest = ExitRoomAfterStartRequest.builder()
+                .memberId(member1.getId())
+                .consultationId(conversation.getId())
+                .build();
+
+        Participant participant = Participant.builder()
+                .id(conversationParticipant1.getId())
+                .memberId(conversationParticipant1.getId())
+                .memberNickname(conversationParticipant1.getMemberNickname())
+                .consultationId(conversationParticipant1.getConsultationId())
+                .consultationDate(conversationParticipant1.getConsultationDate())
+                .build();
+
+        Consultation consultation = Consultation.builder()
+                .id(conversation.getId())
+                .category(conversation.getCategory())
+                .title(conversation.getTitle())
+                .isPrivated(conversation.getIsPrivated())
+                .password(conversation.getPassword())
+                .startTime(conversation.getStartTime())
+                .endTime(conversation.getEndTime())
+                .currentParticipants(conversation.getCurrentParticipants())
+                .sessionId(conversation.getSessionId())
+                .build();
+
+        // When
+        when(participantRepository.findByMemberIdAndConsultationId(conversationParticipant1.getMemberId(), conversationParticipant1.getConsultationId())).thenReturn(Optional.of(participant));
+
+        when(consultationRepository.findById(conversationParticipant1.getConsultationId())).thenReturn(Optional.of(consultation));
+
+        consultation.setCurrentParticipants(conversation.getCurrentParticipants() - 1);
+
+        when(consultationRepository.save(any(Consultation.class))).thenReturn(consultation);
+
+        // Then
+        int actual = consultationService.exitRoomAfterStart(exitRoomAfterStartRequest);
 
         assertEquals(1, actual);
         System.out.println("인원 갱신 성공");
