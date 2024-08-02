@@ -10,7 +10,6 @@ import com.saessakmaeul.bitamin.member.entity.RefreshToken;
 import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
-//import com.saessakmaeul.bitamin.service.S3Service;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -68,10 +67,8 @@ public class MemberServiceImpl implements MemberService {
         member = memberRepository.save(member);
         if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().isEmpty()) {
             String fileName = UUID.randomUUID() + "_" + memberDTO.getProfileImage().getOriginalFilename();
-//            String profileUrl = s3Service.uploadFile(memberDTO.getProfileImage());
 
             member.setProfileKey(fileName);
-//            member.setProfileUrl(profileUrl);
         }
         memberRepository.save(member);
         return member.getId();
@@ -165,10 +162,8 @@ public class MemberServiceImpl implements MemberService {
             member.setBirthday(memberUpdateRequestDTO.getBirthday());
             if (memberUpdateRequestDTO.getProfileImage() != null && !memberUpdateRequestDTO.getProfileImage().isEmpty()) {
                 String fileName = UUID.randomUUID() + "_" + memberUpdateRequestDTO.getProfileImage().getOriginalFilename();
-//                String profileUrl = s3Service.uploadFile(memberUpdateRequestDTO.getProfileImage());
 
                 member.setProfileKey(fileName);
-//                member.setProfileUrl(profileUrl);
             }
             memberRepository.save(member);
             return 1;
