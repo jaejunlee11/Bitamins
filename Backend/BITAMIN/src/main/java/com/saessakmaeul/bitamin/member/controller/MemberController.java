@@ -3,6 +3,7 @@ package com.saessakmaeul.bitamin.member.controller;
 import com.saessakmaeul.bitamin.member.dto.request.*;
 import com.saessakmaeul.bitamin.member.dto.response.HealthReportResponseDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberBasicInfo;
+import com.saessakmaeul.bitamin.member.dto.response.MemberListResponseDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.repository.DongCodeRepository;
 import com.saessakmaeul.bitamin.member.service.MemberService;
@@ -44,9 +45,9 @@ public class MemberController {
      * 테스트용
      * @return 회원 목록 */
     @GetMapping("/list")
-    public ResponseEntity<List<MemberResponseDTO>> getMemberList() {
+    public ResponseEntity<List<MemberListResponseDTO>> getMemberList() {
         try {
-            List<MemberResponseDTO> members = memberService.getMemberList();
+            List<MemberListResponseDTO> members = memberService.getMemberList();
             return ResponseEntity.ok(members);
         } catch (Exception e) {
             logger.error("회원 목록 조회 오류: ", e);
