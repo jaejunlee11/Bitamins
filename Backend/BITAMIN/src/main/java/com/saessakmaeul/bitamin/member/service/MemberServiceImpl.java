@@ -4,14 +4,14 @@ import com.saessakmaeul.bitamin.member.dto.request.*;
 import com.saessakmaeul.bitamin.member.dto.response.AuthResponse;
 import com.saessakmaeul.bitamin.member.dto.response.HealthReportResponseDTO;
 import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
-import com.saessakmaeul.bitamin.member.entity.HealthReport;
-import com.saessakmaeul.bitamin.member.entity.Member;
-import com.saessakmaeul.bitamin.member.entity.RefreshToken;
+import com.saessakmaeul.bitamin.member.entity.*;
+import com.saessakmaeul.bitamin.member.repository.DongCodeRepository;
 import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import com.saessakmaeul.bitamin.util.file.controller.FileController;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,6 +39,8 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final HealthReportRepository healthReportRepository;
     private final FileController fileController;
+    private final DongCodeRepository dongCodeRepository;
+
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -45,39 +49,58 @@ public class MemberServiceImpl implements MemberService {
     private JwtUtil jwtUtil;
 
     @Autowired
-
-    public MemberServiceImpl(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, @Lazy PasswordEncoder passwordEncoder, HealthReportRepository healthReportRepository, FileController fileController) {
+    public MemberServiceImpl(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, @Lazy PasswordEncoder passwordEncoder, HealthReportRepository healthReportRepository, FileController fileController, DongCodeRepository dongCodeRepository) {
         this.memberRepository = memberRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.healthReportRepository = healthReportRepository;
         this.fileController = fileController;
+        this.dongCodeRepository = dongCodeRepository;
     }
 
     @Override
     @Transactional
-    public Long register(MemberResponseDTO memberDTO) throws IOException {
+    public Long register(MemberRequestDTO memberDTO) throws IOException {
+        String dongCode = findDongCode(memberDTO.getSidoName(), memberDTO.getGugunName(), memberDTO.getDongName());
         Member member = Member.builder()
                 .email(memberDTO.getEmail())
                 .password(passwordEncoder.encode(memberDTO.getPassword()))
                 .name(memberDTO.getName())
                 .nickname(memberDTO.getNickname())
-                .dongCode(memberDTO.getDongCode())
+                .dongCode(dongCode)
                 .birthday(memberDTO.getBirthday())
-                .role(memberDTO.getRole())
+                .role(Role.ROLE_MEMBER)
                 .build();
         member = memberRepository.save(member);
+
+        // ID 값 로그 출력
+        System.out.println("Saved member ID: " + member.getId());
 
         if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().isEmpty()) {
             String fileName = UUID.randomUUID() + "_" + memberDTO.getProfileImage().getOriginalFilename();
             fileController.upload(memberDTO.getProfileImage());
             member.setProfileKey(fileName);
             member.setProfileUrl("/file/" + fileName);
+            memberRepository.save(member); // 프로필 이미지 설정 후 다시 저장
         }
 
-        memberRepository.save(member);
         return member.getId();
     }
+
+
+    // sidoName, gugunName, dongName으로 dongCode 찾는 메서드
+    public String findDongCode(String sidoName, String gugunName, String dongName) {
+        if (gugunName == null || gugunName.trim().isEmpty()) {
+            gugunName = "";
+        }
+        if (dongName == null || dongName.trim().isEmpty()) {
+            dongName = "";
+        }
+        return dongCodeRepository.findDongCode(sidoName, gugunName, dongName)
+                .orElseThrow(() -> new IllegalArgumentException("해당 주소에 대한 동 코드를 찾을 수 없습니다."));
+    }
+
+
 
     @Override
     public Optional<Member> getMember(String email) {
@@ -135,19 +158,18 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberRequestDTO getMemberById(Long userId) {
+    public MemberResponseDTO getMemberById(Long userId) {
         Optional<Member> optionalMember = memberRepository.findById(userId);
         if (optionalMember.isPresent()) {
             Member member = optionalMember.get();
-            return MemberRequestDTO.builder()
+            return MemberResponseDTO.builder()
+                    .id(member.getId())
                     .email(member.getEmail())
                     .password(member.getPassword())
                     .name(member.getName())
                     .nickname(member.getNickname())
                     .dongCode(member.getDongCode())
                     .birthday(member.getBirthday())
-                    .profileKey(member.getProfileKey())
-                    .profileUrl(member.getProfileUrl())
                     .build();
         } else {
             return null;
@@ -162,11 +184,14 @@ public class MemberServiceImpl implements MemberService {
             Member member = optionalMember.get();
             member.setName(memberUpdateRequestDTO.getName());
             member.setNickname(memberUpdateRequestDTO.getNickname());
-            member.setDongCode(memberUpdateRequestDTO.getDongCode());
             member.setBirthday(memberUpdateRequestDTO.getBirthday());
+
+            if (memberUpdateRequestDTO.getSidoName() != null || memberUpdateRequestDTO.getGugunName() != null || memberUpdateRequestDTO.getDongName() != null) {
+                String dongCode = findDongCode(memberUpdateRequestDTO.getSidoName(), memberUpdateRequestDTO.getGugunName(), memberUpdateRequestDTO.getDongName());
+                member.setDongCode(dongCode);
+            }
             if (memberUpdateRequestDTO.getProfileImage() != null && !memberUpdateRequestDTO.getProfileImage().isEmpty()) {
                 String fileName = UUID.randomUUID() + "_" + memberUpdateRequestDTO.getProfileImage().getOriginalFilename();
-
                 member.setProfileKey(fileName);
             }
             memberRepository.save(member);
@@ -194,14 +219,16 @@ public class MemberServiceImpl implements MemberService {
 
             Optional<RefreshToken> existingToken = refreshTokenRepository.findById(user.getId());
             RefreshToken token;
+            LocalDateTime expireDate = LocalDateTime.now().plus(jwtUtil.getRefreshTokenExpiration(), ChronoUnit.MILLIS);
+
             if (existingToken.isPresent()) {
                 token = existingToken.get();
                 token.setToken(refreshToken);
-                token.setExpireDate(new Date(System.currentTimeMillis() + jwtUtil.getRefreshTokenExpiration()));
+                token.setExpireDate(expireDate);
             } else {
                 token = new RefreshToken();
                 token.setToken(refreshToken);
-                token.setExpireDate(new Date(System.currentTimeMillis() + jwtUtil.getRefreshTokenExpiration()));
+                token.setExpireDate(expireDate);
                 token.setUser(user);
             }
             refreshTokenRepository.save(token);
@@ -254,7 +281,7 @@ public class MemberServiceImpl implements MemberService {
     public HealthReportResponseDTO saveHealthReport(HealthReportRequestDTO healthReportRequestDTO, Long userId) {
         HealthReport healthReport = new HealthReport();
         healthReport.setCheckupScore(healthReportRequestDTO.getCheckupScore());
-        healthReport.setCheckupDate(healthReportRequestDTO.getCheckupDate());
+        healthReport.setCheckupDate(LocalDate.now());
 
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid member ID"));
@@ -270,6 +297,9 @@ public class MemberServiceImpl implements MemberService {
 
         return healthReportResponseDTO;
     }
+
+
+
 
     @Override
     public List<HealthReportResponseDTO> getHealthReportsByUserId(Long userId) {
