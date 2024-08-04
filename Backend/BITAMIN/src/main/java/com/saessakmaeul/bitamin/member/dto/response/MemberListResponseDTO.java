@@ -11,19 +11,17 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
-public class MemberResponseDTO {
+public class MemberListResponseDTO {
+    private Long id;
     private String email;
     private String password;
     private String name;
     private String nickname;
-    private String sidoName;
-    private String gugunName;
-    private String dongName;
-    private String locName;
-    private String lat;
-    private String lng;
+    private String dongCode;
     private LocalDate birthday;
     private String profileKey;
     private String profileUrl;
+    private Role role;
     private MultipartFile profileImage;
+
 }
