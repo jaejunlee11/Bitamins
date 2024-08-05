@@ -20,6 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(),
                         HttpMethod.DELETE.name(), HttpMethod.HEAD.name(), HttpMethod.OPTIONS.name(),
                         HttpMethod.PATCH.name())
+                .allowCredentials(true)
                 .maxAge(1800); // Pre-flight Caching
     }
 
