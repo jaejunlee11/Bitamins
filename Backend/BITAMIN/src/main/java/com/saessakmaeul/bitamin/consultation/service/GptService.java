@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.saessakmaeul.bitamin.config.GptConfig;
-import com.saessakmaeul.bitamin.consultation.dto.request.ChatCompletion;
+import com.saessakmaeul.bitamin.consultation.dto.request.GptCompletion;
+import com.saessakmaeul.bitamin.consultation.dto.response.GptResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +32,7 @@ public class GptService {
     @Value("${openai.api.url}")
     private String promptUrl;
 
-    public String prompt(ChatCompletion chatCompletion) {
+    public GptResponse prompt(GptCompletion gptCompletion) {
         System.out.println("[+] 신규 프롬프트를 수행합니다.");
 
         Map<String, Object> resultMap = new HashMap<>();
@@ -40,7 +41,7 @@ public class GptService {
         HttpHeaders headers = gptConfig.httpHeaders();
 
         // [STEP5] 통신을 위한 RestTemplate을 구성합니다.
-        HttpEntity<ChatCompletion> requestEntity = new HttpEntity<>(chatCompletion, headers);
+        HttpEntity<GptCompletion> requestEntity = new HttpEntity<>(gptCompletion, headers);
         ResponseEntity<String> response = gptConfig
                 .restTemplate()
                 .exchange(promptUrl, HttpMethod.POST, requestEntity, String.class);
@@ -62,6 +63,6 @@ public class GptService {
 
         System.out.println("text : " + text);
         
-        return text;
+        return new GptResponse(text);
     }
 }

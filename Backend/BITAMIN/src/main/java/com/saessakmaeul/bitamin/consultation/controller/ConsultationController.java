@@ -4,6 +4,7 @@ import com.saessakmaeul.bitamin.consultation.Entity.SearchCondition;
 import com.saessakmaeul.bitamin.consultation.dto.request.*;
 import com.saessakmaeul.bitamin.consultation.dto.response.*;
 import com.saessakmaeul.bitamin.consultation.service.ConsultationService;
+import com.saessakmaeul.bitamin.consultation.service.GptService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import io.openvidu.java.client.*;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class ConsultationController {
     // Broadcast 필요한 상황 오면 구현
 //    private final SimpMessagingTemplate simpMessagingTemplate;
     private final ConsultationService consultationService;
+    private final GptService GptService;
     private final JwtUtil jwtUtil;
 
     @GetMapping
@@ -174,5 +176,20 @@ public class ConsultationController {
         if(result == 0) return ResponseEntity.status(404).body("채팅이 저장되지 않았습니다.");
 
         return ResponseEntity.status(200).body("정상적으로 채팅이 저장되었습니다.");
+    }
+
+    @PostMapping("/moderators")
+    public ResponseEntity<?> selectPrompt(@RequestBody GptCompletion gptCompletion) {
+
+        gptCompletion.setModel("gpt-4o");
+
+        for(GptRequest msg : gptCompletion.getMessages()) {
+            msg.setRole("system");
+        }
+
+        System.out.println("param :: " + gptCompletion.toString());
+
+        GptResponse gptResponse = GptService.prompt(gptCompletion);
+        return ResponseEntity.status(200).body(gptResponse);
     }
 }
