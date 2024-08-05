@@ -34,7 +34,7 @@ public class AuthController {
     /** 로그인 API
      * @param loginRequest 로그인 요청 정보
      * @param response HTTP 응답 객체
-     * @return AccessToken과 RefreshToken을 포함한 응답 */
+     * @return AccessToken을 포함한 응답 (RefreshToken은 HttpOnly 쿠키에 저장) */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         try {
@@ -48,12 +48,16 @@ public class AuthController {
             refreshTokenCookie.setMaxAge((int) jwtUtil.getRefreshTokenExpiration() / 1000);
             response.addCookie(refreshTokenCookie);
 
+            // 보안 강화를 위해 응답 본문에서 refresh token 삭제
+            authResponse.setRefreshToken(null);
+
             return ResponseEntity.ok(authResponse);
         } catch (Exception e) {
             logger.error("로그인 오류: ", e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: " + e.getMessage());
         }
     }
+
 
     /** AccessToken 재생성 API
      * @param request HTTP 요청 객체
