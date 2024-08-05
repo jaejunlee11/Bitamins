@@ -27,7 +27,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -252,7 +251,8 @@ public class MemberService {
             if (jwtUtil.isTokenExpired(cookieRefreshToken)) {
                 throw new RuntimeException("Refresh Token이 만료되었습니다.");
             }
-            Long userId = jwtUtil.extractUserId(cookieRefreshToken);
+            String email = jwtUtil.extractEmail(cookieRefreshToken);
+            Long userId = memberRepository.findIdByEmail(email);
             Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserId(userId);
             if (refreshToken.isPresent() && refreshToken.get().getToken().equals(cookieRefreshToken)) {
                 String newAccessToken = jwtUtil.generateAccessToken(memberRepository.findById(userId)

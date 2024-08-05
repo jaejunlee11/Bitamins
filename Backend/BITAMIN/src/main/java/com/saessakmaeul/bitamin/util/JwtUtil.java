@@ -10,8 +10,6 @@ import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -56,23 +54,23 @@ public class JwtUtil {
         return generateRefreshTokenWithMinimalInfo(member.getEmail(), refreshTokenExpiration);
     }
 
-    private String generateAccessTokenWithFullInfo(Member member, long expiration) {
+    private String generateAccessTokenWithFullInfo(Member member, long accessTokenExpiration) {
         return Jwts.builder()
                 .setSubject(member.getEmail())
                 .claim("id", member.getId())
                 .claim("nickname", member.getNickname())
                 .claim("role", member.getRole())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(key)
                 .compact();
     }
 
-    private String generateRefreshTokenWithMinimalInfo(String email, long expiration) {
+    private String generateRefreshTokenWithMinimalInfo(String email, long refreshTokenExpiration) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
                 .signWith(key)
                 .compact();
     }
@@ -122,12 +120,6 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public Long extractUserIdFromPrincipal(UserDetails userDetails) {
-        return memberRepository.findByEmail(userDetails.getUsername())
-                .map(Member::getId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + userDetails.getUsername()));
-    }
-
     public Long extractUserId(String token) {
         return extractClaim(token, claims -> claims.get("id", Long.class));
     }
@@ -138,5 +130,9 @@ public class JwtUtil {
 
     public String extractRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+
+    public String extractEmail(String token) {
+        return extractClaim(token, Claims::getSubject); // 이메일 추출 메서드
     }
 }
