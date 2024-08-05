@@ -74,24 +74,24 @@ public class ConsultationServiceTest {
     @BeforeEach // 테스트 전 처리 (시작 시)
     public void before() {
         member1 = Member.builder()
-                .id(1)
+                .id(1L)
                 .email("user1@user")
                 .password("password")
                 .name("user1")
                 .nickname("user1")
                 .dongCode("1111010200")
-                .birthday(new Date(1999, 3, 27))
+                .birthday(LocalDate.of(1999, 3, 27))
                 .role(Role.ROLE_MEMBER)
                 .build();
 
         member2 = Member.builder()
-                .id(2)
+                .id(2L)
                 .email("user2@user")
                 .password("password")
                 .name("user2")
                 .nickname("user2")
                 .dongCode("1111010200")
-                .birthday(new Date(2000, 8, 7))
+                .birthday(LocalDate.of(2000, 8, 7))
                 .role(Role.ROLE_MEMBER)
                 .build();
 
