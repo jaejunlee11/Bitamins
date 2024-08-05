@@ -160,6 +160,8 @@ public class MemberService {
                         .sidoName(dongInformation.getSidoName())
                         .gugunName(dongInformation.getGugunName())
                         .dongName(dongInformation.getDongName())
+                        .xCoordinate(dongInformation.getXCoordinate())
+                        .yCoordinate(dongInformation.getYCoordinate())
                         .lat(dongInformation.getLat())
                         .lng(dongInformation.getLng())
                         .birthday(member.getBirthday())
