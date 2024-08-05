@@ -312,6 +312,10 @@ public class ConsultationService {
 
         return 1;
     }
+//    public String findCategoryAndNickname(Long consultationId) {
+//        String category = consultationRepository.findById(consultationId).get().getCategory();
+//    }
+
 
     // 만약 나중에 Broadcast 필요한 상황이 오면 구현
 //    public BroadcastInformationResponse broadcastInformation(Long id) {

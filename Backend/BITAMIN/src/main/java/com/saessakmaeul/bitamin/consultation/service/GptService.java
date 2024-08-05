@@ -63,6 +63,6 @@ public class GptService {
 
         System.out.println("text : " + text);
         
-        return new GptResponse(text);
+        return new GptResponse("assistant", text);
     }
 }
