@@ -25,9 +25,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/members")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
-public class MemberController {
+@RequestMapping("/members") public class MemberController {
     private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
     private static final String BEARER_PREFIX = "Bearer ";
 
