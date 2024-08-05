@@ -24,15 +24,15 @@ public class WebConfig implements WebMvcConfigurer {
 
 
 
-    @Override
-    public void addFormatters(FormatterRegistry registry) {
-        registry.addConverter(new StringToSerchConditionConverter());
-    }
-
-    private static class StringToSerchConditionConverter implements Converter<String, SearchCondition> {
-        @Override
-        public SearchCondition convert(String source) {
-            return SearchCondition.fromString(source);
-        }
-    }
+//    @Override
+//    public void addFormatters(FormatterRegistry registry) {
+//        registry.addConverter(new StringToSerchConditionConverter());
+//    }
+//
+//    private static class StringToSerchConditionConverter implements Converter<String, SearchCondition> {
+//        @Override
+//        public SearchCondition convert(String source) {
+//            return SearchCondition.fromString(source);
+//        }
+//    }
 }
