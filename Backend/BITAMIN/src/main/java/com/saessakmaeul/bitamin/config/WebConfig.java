@@ -15,7 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("https://i11b105.p.ssafy.io","http://i11b105.p.ssafy.io","http://localhost:5173","https://localhost:5173","http://localhost:5174","https://localhost:5174","http://127.0.0.1:5173","https://127.0.0.1:5173")
                 .allowedMethods("GET", "POST", "PUT", "PATCH","DELETE", "OPTIONS")
-                .allowedHeaders("*")
+                .allowedHeaders("Content-Type", "Authorization")
                 .maxAge(3000);
     }
 
