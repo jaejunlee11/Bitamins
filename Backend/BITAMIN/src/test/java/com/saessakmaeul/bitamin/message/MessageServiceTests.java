@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -86,7 +87,7 @@ public class MessageServiceTests {
                 .name("Sender Name")
                 .nickname("sender")
                 .dongCode("1111010200")
-                .birthday(new Date(1990 - 1900, Calendar.JANUARY, 1))  // Setting a sample birthday
+                .birthday(LocalDate.of(1990 - 1900, Calendar.JANUARY, 1))  // Setting a sample birthday
                 .role(Role.ROLE_MEMBER)
                 .build();
         sender = memberRepository.save(sender);
@@ -97,7 +98,7 @@ public class MessageServiceTests {
                 .name("Receiver Name")
                 .nickname("receiver")
                 .dongCode("1111010200")
-                .birthday(new Date(1992 - 1900, Calendar.FEBRUARY, 2))  // Setting a sample birthday
+                .birthday(LocalDate.of(1992 - 1900, Calendar.FEBRUARY, 2))  // Setting a sample birthday
                 .role(Role.ROLE_MEMBER)
                 .build();
         receiver = memberRepository.save(receiver);
@@ -108,7 +109,7 @@ public class MessageServiceTests {
                 .name("Receiver Name")
                 .nickname("dummy")
                 .dongCode("1111010200")
-                .birthday(new Date(1992 - 1900, Calendar.FEBRUARY, 2))  // Setting a sample birthday
+                .birthday(LocalDate.of(1992 - 1900, Calendar.FEBRUARY, 2))  // Setting a sample birthday
                 .role(Role.ROLE_MEMBER)
                 .build();
         dummy = memberRepository.save(dummy);

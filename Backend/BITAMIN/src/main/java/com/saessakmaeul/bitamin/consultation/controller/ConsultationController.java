@@ -183,9 +183,9 @@ public class ConsultationController {
 
         gptCompletion.setModel("gpt-4o");
 
-        for(GptRequest msg : gptCompletion.getMessages()) {
-            msg.setRole("system");
-        }
+//        for(GptRequest msg : gptCompletion.getMessages()) {
+//            msg.setRole("system");
+//        }
 
         System.out.println("param :: " + gptCompletion.toString());
 
