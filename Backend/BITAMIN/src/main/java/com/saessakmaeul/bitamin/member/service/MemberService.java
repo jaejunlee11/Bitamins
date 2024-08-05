@@ -11,6 +11,8 @@ import com.saessakmaeul.bitamin.util.JwtUtil;
 import com.saessakmaeul.bitamin.util.file.controller.FileController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -59,15 +61,17 @@ public class MemberService {
                 .build();
         member = memberRepository.save(member);
 
-        // ID 값 로그 출력
-        System.out.println("Saved member ID: " + member.getId());
-
         if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().isEmpty()) {
-            String fileName = UUID.randomUUID() + "_" + memberDTO.getProfileImage().getOriginalFilename();
-            fileController.upload(memberDTO.getProfileImage());
-            member.setProfileKey(fileName);
-            member.setProfileUrl("/file/" + fileName);
-            memberRepository.save(member); // 프로필 이미지 설정 후 다시 저장
+            // 파일 업로드 후 파일 이름을 받아옴
+            ResponseEntity<String> uploadResponse = fileController.upload(memberDTO.getProfileImage());
+            if (uploadResponse.getStatusCode() == HttpStatus.OK) {
+                String fileName = uploadResponse.getBody();
+                member.setProfileKey(fileName);
+                member.setProfileUrl("/file/" + fileName);
+                memberRepository.save(member); // 프로필 이미지 설정 후 다시 저장
+            } else {
+                throw new IOException("파일 업로드 실패: " + uploadResponse.getBody());
+            }
         }
 
         return member.getId();
@@ -156,6 +160,8 @@ public class MemberService {
                         .lat(dongInformation.getLat())
                         .lng(dongInformation.getLng())
                         .birthday(member.getBirthday())
+                        .profileKey(member.getProfileKey())
+                        .profileUrl(member.getProfileUrl())
                         .build();
             } else {
                 System.out.println("No information found for the given dongCode.");
@@ -168,32 +174,40 @@ public class MemberService {
     }
 
 
-        @Transactional
-        public int updateMember (Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO) throws IOException {
-            Optional<Member> optionalMember = memberRepository.findById(userId);
-            if (optionalMember.isPresent()) {
-                Member member = optionalMember.get();
-                member.setName(memberUpdateRequestDTO.getName());
-                member.setNickname(memberUpdateRequestDTO.getNickname());
-                member.setBirthday(memberUpdateRequestDTO.getBirthday());
+    @Transactional
+    public int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO) throws IOException {
+        Optional<Member> optionalMember = memberRepository.findById(userId);
+        if (optionalMember.isPresent()) {
+            Member member = optionalMember.get();
+            member.setName(memberUpdateRequestDTO.getName());
+            member.setNickname(memberUpdateRequestDTO.getNickname());
+            member.setBirthday(memberUpdateRequestDTO.getBirthday());
 
-                if (memberUpdateRequestDTO.getSidoName() != null || memberUpdateRequestDTO.getGugunName() != null || memberUpdateRequestDTO.getDongName() != null) {
-                    String dongCode = findDongCode(memberUpdateRequestDTO.getSidoName(), memberUpdateRequestDTO.getGugunName(), memberUpdateRequestDTO.getDongName());
-                    member.setDongCode(dongCode);
-                }
-                if (memberUpdateRequestDTO.getProfileImage() != null && !memberUpdateRequestDTO.getProfileImage().isEmpty()) {
-                    String fileName = UUID.randomUUID() + "_" + memberUpdateRequestDTO.getProfileImage().getOriginalFilename();
-                    member.setProfileKey(fileName);
-                }
-                memberRepository.save(member);
-                return 1;
-            } else {
-                return 0;
+            if (memberUpdateRequestDTO.getSidoName() != null || memberUpdateRequestDTO.getGugunName() != null || memberUpdateRequestDTO.getDongName() != null) {
+                String dongCode = findDongCode(memberUpdateRequestDTO.getSidoName(), memberUpdateRequestDTO.getGugunName(), memberUpdateRequestDTO.getDongName());
+                member.setDongCode(dongCode);
             }
+
+            if (memberUpdateRequestDTO.getProfileImage() != null && !memberUpdateRequestDTO.getProfileImage().isEmpty()) {
+                ResponseEntity<String> uploadResponse = fileController.upload(memberUpdateRequestDTO.getProfileImage());
+                if (uploadResponse.getStatusCode() == HttpStatus.OK) {
+                    String fileName = uploadResponse.getBody();
+                    member.setProfileKey(fileName);
+                    member.setProfileUrl("/file/" + fileName);
+                } else {
+                    throw new IOException("파일 업로드 실패: " + uploadResponse.getBody());
+                }
+            }
+            memberRepository.save(member);
+            return 1;
+        } else {
+            return 0;
         }
+    }
 
 
-        public AuthResponse login (LoginRequest loginRequest){
+
+    public AuthResponse login (LoginRequest loginRequest){
             try {
                 Authentication authentication = authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
