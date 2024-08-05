@@ -18,7 +18,6 @@ import java.util.*;
 @RestController
 @RequestMapping("/consultations")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class ConsultationController {
     private final OpenVidu openVidu;
     // Broadcast 필요한 상황 오면 구현
@@ -178,18 +177,16 @@ public class ConsultationController {
         return ResponseEntity.status(200).body("정상적으로 채팅이 저장되었습니다.");
     }
 
-    @PostMapping("/moderators")
-    public ResponseEntity<?> selectPrompt(@RequestBody GptCompletion gptCompletion) {
-
-        gptCompletion.setModel("gpt-4o");
-
-//        for(GptRequest msg : gptCompletion.getMessages()) {
-//            msg.setRole("system");
-//        }
+    @PostMapping("/moderators/{category}")
+    public ResponseEntity<?> selectPrompt(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+                                          @PathVariable("category") SearchCondition category,
+                                          @RequestBody GptCompletion gptCompletion) {
+        String nickname = jwtUtil.extractNickname(tokenHeader.substring(7));
 
         System.out.println("param :: " + gptCompletion.toString());
 
-        GptResponse gptResponse = GptService.prompt(gptCompletion);
+        GptResponse gptResponse = GptService.prompt(category, nickname, gptCompletion);
+
         return ResponseEntity.status(200).body(gptResponse);
     }
 }
