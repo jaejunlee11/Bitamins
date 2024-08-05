@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -59,7 +60,6 @@ public class MemberService {
                 .birthday(memberDTO.getBirthday())
                 .role(Role.ROLE_MEMBER)
                 .build();
-        member = memberRepository.save(member);
 
         if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().isEmpty()) {
             // 파일 업로드 후 파일 이름을 받아옴
@@ -68,11 +68,12 @@ public class MemberService {
                 String fileName = uploadResponse.getBody();
                 member.setProfileKey(fileName);
                 member.setProfileUrl("/file/" + fileName);
-                memberRepository.save(member); // 프로필 이미지 설정 후 다시 저장
             } else {
                 throw new IOException("파일 업로드 실패: " + uploadResponse.getBody());
             }
         }
+
+        member = memberRepository.save(member);
 
         return member.getId();
     }
@@ -113,6 +114,7 @@ public class MemberService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public boolean changePassword(Long userId, ChangePasswordRequest changePasswordRequest) {
         Optional<Member> optionalMember = memberRepository.findById(userId);
         if (optionalMember.isPresent()) {
@@ -126,6 +128,7 @@ public class MemberService {
         return false;
     }
 
+    @Transactional
     public boolean checkPassword(String email, String password) {
         Member member = getMember(email).orElseThrow(() -> new RuntimeException("User not found"));
         return passwordEncoder.matches(password, member.getPassword());
@@ -206,106 +209,107 @@ public class MemberService {
     }
 
 
+    @Transactional
+    public AuthResponse login(LoginRequest loginRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    public AuthResponse login (LoginRequest loginRequest){
-            try {
-                Authentication authentication = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
-                );
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            Member user = memberRepository.findByEmail(loginRequest.getEmail())
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-                Member user = memberRepository.findByEmail(loginRequest.getEmail())
-                        .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+            String jwt = jwtUtil.generateAccessToken(user);
+            String refreshToken = jwtUtil.generateRefreshToken(user);
 
-                String jwt = jwtUtil.generateAccessToken(user);
-                String refreshToken = jwtUtil.generateRefreshToken(user);
+            Optional<RefreshToken> existingToken = refreshTokenRepository.findById(user.getId());
+            RefreshToken token;
+            LocalDateTime expireDate = LocalDateTime.now().plus(jwtUtil.getRefreshTokenExpiration(), ChronoUnit.MILLIS);
 
-                Optional<RefreshToken> existingToken = refreshTokenRepository.findById(user.getId());
-                RefreshToken token;
-                LocalDateTime expireDate = LocalDateTime.now().plus(jwtUtil.getRefreshTokenExpiration(), ChronoUnit.MILLIS);
-
-                if (existingToken.isPresent()) {
-                    token = existingToken.get();
-                    token.setToken(refreshToken);
-                    token.setExpireDate(expireDate);
-                } else {
-                    token = new RefreshToken();
-                    token.setToken(refreshToken);
-                    token.setExpireDate(expireDate);
-                    token.setUser(user);
-                }
-                refreshTokenRepository.save(token);
-
-                return new AuthResponse(jwt, refreshToken, true);
-            } catch (Exception e) {
-                throw new RuntimeException("로그인 실패: " + e.getMessage());
+            if (existingToken.isPresent()) {
+                token = existingToken.get();
+                token.setToken(refreshToken);
+                token.setExpireDate(expireDate);
+            } else {
+                token = new RefreshToken();
+                token.setToken(refreshToken);
+                token.setExpireDate(expireDate);
+                token.setUser(user);
             }
-        }
+            refreshTokenRepository.save(token);
 
-        public AuthResponse refreshToken (String cookieRefreshToken){
-            try {
-                if (jwtUtil.isTokenExpired(cookieRefreshToken)) {
-                    throw new RuntimeException("Refresh Token이 만료되었습니다.");
-                }
-                Long userId = jwtUtil.extractUserId(cookieRefreshToken);
-                Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserId(userId);
-                if (refreshToken.isPresent() && refreshToken.get().getToken().equals(cookieRefreshToken)) {
-                    String newAccessToken = jwtUtil.generateAccessToken(memberRepository.findById(userId)
-                            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
-                    return new AuthResponse(newAccessToken, cookieRefreshToken, true);
-                } else {
-                    throw new RuntimeException("유효한 Refresh Token이 없습니다.");
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("AccessToken 재생성 실패: " + e.getMessage());
-            }
-        }
-
-        @Transactional
-        public void logout (Long userId){
-            SecurityContextHolder.clearContext(); // 현재 사용자의 인증 정보 제거
-            jwtUtil.invalidateRefreshTokenByUserId(userId); // 리프레시 토큰 무효화 메서드 호출
-        }
-
-        public String getUserRole (String token){
-            try {
-                return jwtUtil.extractRole(token);
-            } catch (Exception e) {
-                throw new RuntimeException("회원 권한 조회 실패: " + e.getMessage());
-            }
-        }
-
-
-        public HealthReportResponseDTO saveHealthReport (HealthReportRequestDTO healthReportRequestDTO, Long userId){
-            HealthReport healthReport = new HealthReport();
-            healthReport.setCheckupScore(healthReportRequestDTO.getCheckupScore());
-            healthReport.setCheckupDate(LocalDate.now());
-
-            Member member = memberRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid member ID"));
-            healthReport.setMember(member);
-
-            HealthReport savedHealthReport = healthReportRepository.save(healthReport);
-
-            HealthReportResponseDTO healthReportResponseDTO = new HealthReportResponseDTO();
-            healthReportResponseDTO.setId(savedHealthReport.getId());
-            healthReportResponseDTO.setCheckupScore(savedHealthReport.getCheckupScore());
-            healthReportResponseDTO.setCheckupDate(savedHealthReport.getCheckupDate());
-            healthReportResponseDTO.setMemberId(savedHealthReport.getMember().getId());
-
-            return healthReportResponseDTO;
-        }
-
-
-        public List<HealthReportResponseDTO> getHealthReportsByUserId (Long userId){
-            List<HealthReport> healthReports = healthReportRepository.findByMemberId(userId);
-            return healthReports.stream().map(healthReport -> {
-                HealthReportResponseDTO dto = new HealthReportResponseDTO();
-                dto.setId(healthReport.getId());
-                dto.setCheckupScore(healthReport.getCheckupScore());
-                dto.setCheckupDate(healthReport.getCheckupDate());
-                dto.setMemberId(healthReport.getMember().getId());
-                return dto;
-            }).collect(Collectors.toList());
+            return new AuthResponse(jwt, refreshToken, true);
+        } catch (Exception e) {
+            throw new RuntimeException("로그인 실패: " + e.getMessage());
         }
     }
+
+    public AuthResponse refreshToken(String cookieRefreshToken) {
+        try {
+            if (jwtUtil.isTokenExpired(cookieRefreshToken)) {
+                throw new RuntimeException("Refresh Token이 만료되었습니다.");
+            }
+            Long userId = jwtUtil.extractUserId(cookieRefreshToken);
+            Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserId(userId);
+            if (refreshToken.isPresent() && refreshToken.get().getToken().equals(cookieRefreshToken)) {
+                String newAccessToken = jwtUtil.generateAccessToken(memberRepository.findById(userId)
+                        .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
+                return new AuthResponse(newAccessToken, cookieRefreshToken, true);
+            } else {
+                throw new RuntimeException("유효한 Refresh Token이 없습니다.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("AccessToken 재생성 실패: " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public void logout(Long userId) {
+        SecurityContextHolder.clearContext(); // 현재 사용자의 인증 정보 제거
+        jwtUtil.invalidateRefreshTokenByUserId(userId); // 리프레시 토큰 무효화 메서드 호출
+    }
+
+    public String getUserRole(String token) {
+        try {
+            return jwtUtil.extractRole(token);
+        } catch (Exception e) {
+            throw new RuntimeException("회원 권한 조회 실패: " + e.getMessage());
+        }
+    }
+
+
+    @Transactional
+    public HealthReportResponseDTO saveHealthReport(HealthReportRequestDTO healthReportRequestDTO, Long userId) {
+        HealthReport healthReport = new HealthReport();
+        healthReport.setCheckupScore(healthReportRequestDTO.getCheckupScore());
+        healthReport.setCheckupDate(LocalDate.now());
+
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid member ID"));
+        healthReport.setMember(member);
+
+        HealthReport savedHealthReport = healthReportRepository.save(healthReport);
+
+        HealthReportResponseDTO healthReportResponseDTO = new HealthReportResponseDTO();
+        healthReportResponseDTO.setId(savedHealthReport.getId());
+        healthReportResponseDTO.setCheckupScore(savedHealthReport.getCheckupScore());
+        healthReportResponseDTO.setCheckupDate(savedHealthReport.getCheckupDate());
+        healthReportResponseDTO.setMemberId(savedHealthReport.getMember().getId());
+
+        return healthReportResponseDTO;
+    }
+
+
+    public List<HealthReportResponseDTO> getHealthReportsByUserId(Long userId) {
+        List<HealthReport> healthReports = healthReportRepository.findByMemberId(userId);
+        return healthReports.stream().map(healthReport -> {
+            HealthReportResponseDTO dto = new HealthReportResponseDTO();
+            dto.setId(healthReport.getId());
+            dto.setCheckupScore(healthReport.getCheckupScore());
+            dto.setCheckupDate(healthReport.getCheckupDate());
+            dto.setMemberId(healthReport.getMember().getId());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+}
