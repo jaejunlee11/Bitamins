@@ -1,7 +1,6 @@
 package com.saessakmaeul.bitamin.member.controller;
 
 import com.saessakmaeul.bitamin.member.dto.request.LoginRequest;
-import com.saessakmaeul.bitamin.member.dto.request.MemberRequestDTO;
 import com.saessakmaeul.bitamin.member.dto.response.AuthResponse;
 import com.saessakmaeul.bitamin.member.service.MemberService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
@@ -21,12 +20,16 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private static final String BEARER_PREFIX = "Bearer ";
+
+    private final MemberService memberService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    private MemberService memberService;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    public AuthController(MemberService memberService, JwtUtil jwtUtil) {
+        this.memberService = memberService;
+        this.jwtUtil = jwtUtil;
+    }
 
     /** 로그인 API
      * @param loginRequest 로그인 요청 정보
@@ -37,12 +40,12 @@ public class AuthController {
         try {
             AuthResponse authResponse = memberService.login(loginRequest);
 
-            response.setHeader("Authorization", "Bearer " + authResponse.getAccessToken());
+            response.setHeader("Authorization", BEARER_PREFIX + authResponse.getAccessToken());
 
             Cookie refreshTokenCookie = new Cookie("refresh_token", authResponse.getRefreshToken());
             refreshTokenCookie.setHttpOnly(true);
             refreshTokenCookie.setPath("/");
-            refreshTokenCookie.setMaxAge((int) jwtUtil.getRefreshTokenExpiration() / 1000); // 초 단위로 설정
+            refreshTokenCookie.setMaxAge((int) jwtUtil.getRefreshTokenExpiration() / 1000);
             response.addCookie(refreshTokenCookie);
 
             return ResponseEntity.ok(authResponse);
@@ -59,20 +62,12 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         try {
-            String cookieRefreshToken = null;
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if ("refresh_token".equals(cookie.getName())) {
-                        cookieRefreshToken = cookie.getValue();
-                    }
-                }
-            }
+            String cookieRefreshToken = getRefreshTokenFromCookies(request.getCookies());
             if (cookieRefreshToken == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 쿠키에 존재하지 않습니다.");
             }
             AuthResponse authResponse = memberService.refreshToken(cookieRefreshToken);
-            response.setHeader("Authorization", "Bearer " + authResponse.getAccessToken());
+            response.setHeader("Authorization", BEARER_PREFIX + authResponse.getAccessToken());
             return ResponseEntity.ok(authResponse);
         } catch (Exception e) {
             logger.error("AccessToken 재생성 오류: ", e);
@@ -112,7 +107,6 @@ public class AuthController {
             if (token == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
-
             String role = memberService.getUserRole(token);
             return ResponseEntity.ok(role);
         } catch (Exception e) {
@@ -125,8 +119,19 @@ public class AuthController {
      * @return 추출된 JWT 토큰 */
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        if (bearerToken != null && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(BEARER_PREFIX.length());
+        }
+        return null;
+    }
+
+    private String getRefreshTokenFromCookies(Cookie[] cookies) {
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refresh_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
         return null;
     }

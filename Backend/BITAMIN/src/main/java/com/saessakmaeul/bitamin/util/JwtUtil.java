@@ -16,8 +16,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.security.Key;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
-import java.util.Optional;
 import java.util.function.Function;
 
 @Component
@@ -85,11 +86,10 @@ public class JwtUtil {
         }
     }
 
-    // Refresh Token을 무효화
     public void invalidateRefreshTokenByUserId(Long userId) {
         RefreshToken token = refreshTokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("리프레시 토큰을 찾을 수 없습니다."));
-        token.setExpireDate(new Date(System.currentTimeMillis()));
+        token.setExpireDate(LocalDateTime.now(ZoneId.systemDefault()));
         refreshTokenRepository.save(token);
     }
 
