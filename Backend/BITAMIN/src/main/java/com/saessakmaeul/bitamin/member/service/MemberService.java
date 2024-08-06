@@ -80,12 +80,6 @@ public class MemberService {
 
     // sidoName, gugunName, dongName으로 dongCode 찾는 메서드
     public String findDongCode(String sidoName, String gugunName, String dongName) {
-        if (gugunName == null || gugunName.trim().isEmpty()) {
-            gugunName = "";
-        }
-        if (dongName == null || dongName.trim().isEmpty()) {
-            dongName = "";
-        }
         return dongCodeRepository.findDongCode(sidoName, gugunName, dongName)
                 .orElseThrow(() -> new IllegalArgumentException("해당 주소에 대한 동 코드를 찾을 수 없습니다."));
     }
