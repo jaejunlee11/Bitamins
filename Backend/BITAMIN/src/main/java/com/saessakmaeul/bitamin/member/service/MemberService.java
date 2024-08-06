@@ -163,7 +163,6 @@ public class MemberService {
                         .build();
             } else {
                 System.out.println("No information found for the given dongCode.");
-
             }
         } else {
             return null;
