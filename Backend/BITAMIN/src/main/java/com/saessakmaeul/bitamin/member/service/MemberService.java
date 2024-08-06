@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -219,7 +221,9 @@ public class MemberService {
 
             Optional<RefreshToken> existingToken = refreshTokenRepository.findById(user.getId());
             RefreshToken token;
-            LocalDateTime expireDate = LocalDateTime.now().plus(jwtUtil.getRefreshTokenExpiration(), ChronoUnit.MILLIS);
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+            LocalDateTime localDateTimeInKorea = zonedDateTime.toLocalDateTime();
+            LocalDateTime expireDate = localDateTimeInKorea.plus(jwtUtil.getRefreshTokenExpiration(), ChronoUnit.MILLIS);
 
             if (existingToken.isPresent()) {
                 token = existingToken.get();
