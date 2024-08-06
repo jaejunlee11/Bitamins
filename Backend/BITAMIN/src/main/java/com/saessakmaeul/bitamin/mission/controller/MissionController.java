@@ -6,9 +6,6 @@ import com.saessakmaeul.bitamin.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @RestController
 @RequestMapping("/missions")
 @RequiredArgsConstructor
@@ -16,7 +13,6 @@ public class MissionController {
 
     private final MissionService missionService;
     private final JwtUtil jwtUtil;
-    private static final Logger logger = LoggerFactory.getLogger(MissionController.class);
 
     // 데일리 미션 조회
     @GetMapping
