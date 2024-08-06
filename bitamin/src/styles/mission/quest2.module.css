@@ -477,3 +477,15 @@
     margin-top: 10px;
     display: inline-block;
 }
+
+
+/* mission/quest2.module.css */
+.hasMission::after {
+    content: '•';
+    color: red;
+    position: absolute;
+    bottom: 0.2em;
+    right: 0.2em;
+    font-size: 1.2em;
+    line-height: 1;
+}
