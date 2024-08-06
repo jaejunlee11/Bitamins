@@ -71,7 +71,7 @@ public class AuthController {
             }
             AuthResponse authResponse = memberService.refreshToken(cookieRefreshToken);
             response.setHeader("Authorization", BEARER_PREFIX + authResponse.getAccessToken());
-            return ResponseEntity.ok(authResponse);
+            return ResponseEntity.ok("토큰이 재발급 되었습니다.");
         } catch (Exception e) {
             logger.error("AccessToken 재생성 오류: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("AccessToken 재생성 실패: " + e.getMessage());
