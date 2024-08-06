@@ -41,7 +41,7 @@ public class AuthController {
 
             response.setHeader("Authorization", BEARER_PREFIX + authResponse.getAccessToken());
 
-            Cookie refreshTokenCookie = new Cookie("refresh_token", authResponse.getRefreshToken());
+            Cookie refreshTokenCookie = new Cookie("refreshToken", authResponse.getRefreshToken());
             refreshTokenCookie.setHttpOnly(true);
             refreshTokenCookie.setPath("/");
             refreshTokenCookie.setMaxAge((int) jwtUtil.getRefreshTokenExpiration() / 1000);
@@ -131,7 +131,7 @@ public class AuthController {
     private String getRefreshTokenFromCookies(Cookie[] cookies) {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refresh_token".equals(cookie.getName())) {
+                if ("refreshToken".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }
