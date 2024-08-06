@@ -1,6 +1,7 @@
-// src/components/ConsultationList.tsx
 import React, { useEffect, useState } from 'react'
 import useConsultationStore from 'store/useConsultationStore'
+import { joinRoom } from 'api/consultationAPI'
+import { useNavigate } from 'react-router-dom'
 
 const ConsultationList: React.FC = () => {
   const { consultations, fetchAndSetConsultations } = useConsultationStore(
@@ -11,6 +12,11 @@ const ConsultationList: React.FC = () => {
   )
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [password, setPassword] = useState<string>('')
+  const [selectedConsultation, setSelectedConsultation] = useState<
+    number | null
+  >(null)
+  const navigate = useNavigate()
 
   const loadConsultations = async () => {
     try {
@@ -25,6 +31,25 @@ const ConsultationList: React.FC = () => {
   useEffect(() => {
     loadConsultations()
   }, [fetchAndSetConsultations])
+
+  const handleJoinRoom = async (consultation: any) => {
+    try {
+      const joinData = {
+        id: consultation.id,
+        isPrivated: consultation.isPrivated,
+        password: consultation.isPrivated ? password : null,
+        startTime: consultation.startTime,
+        sessionId: consultation.sessionId,
+      }
+      const joinResponse = await joinRoom(joinData)
+      console.log('Join Room Response:', joinResponse)
+      alert('Successfully joined the room!')
+      navigate('/some-path') // 원하는 경로로 이동
+    } catch (error) {
+      alert('Failed to join the room')
+      console.error('Error joining room:', error)
+    }
+  }
 
   if (loading) return <div>Loading...</div>
   if (error) return <div>{error}</div>
@@ -56,6 +81,33 @@ const ConsultationList: React.FC = () => {
             <p>
               <strong>Session ID:</strong> {consultation.sessionId}
             </p>
+            {consultation.isPrivated ? (
+              <div>
+                {selectedConsultation === consultation.id ? (
+                  <div>
+                    <input
+                      type="password"
+                      placeholder="Enter password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button onClick={() => handleJoinRoom(consultation)}>
+                      Join Room
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setSelectedConsultation(consultation.id)}
+                  >
+                    Enter Password to Join
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button onClick={() => handleJoinRoom(consultation)}>
+                Join Room
+              </button>
+            )}
             <br />
           </li>
         ))}
