@@ -29,7 +29,7 @@ public class ConsultationController {
     @GetMapping
     public ResponseEntity<?> selectAll(@RequestParam(value = "page", defaultValue = "0") int page,
                                        @RequestParam(value = "size", defaultValue = "100") int size,
-                                       @RequestParam(value = "type") SearchCondition type) {
+                                       @RequestParam(value = "type", defaultValue = "전체") SearchCondition type) {
         SelectAllResponse consultationList = consultationService.selectAll(page, size, type);
 
         if(consultationList == null) return ResponseEntity.status(404).body("다시 조회하세요");
