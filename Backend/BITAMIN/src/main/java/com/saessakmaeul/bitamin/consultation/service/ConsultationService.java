@@ -19,10 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -313,6 +310,32 @@ public class ConsultationService {
         }
 
         return 1;
+    }
+
+    // 쪽지 보낼 수 있는 명단 조회
+    public List<RecentParticipantResponse> findRecentParticipants(Long memberId) {
+        List<Participant> participantList = participantRepository.findByMemberId(memberId);
+
+        List<Long> consultationIdList = new ArrayList<>();
+
+        for(Participant participant : participantList) {
+            consultationIdList.add(participant.getConsultationId());
+        }
+
+        List<Long> memberIdList = new ArrayList<>();
+        memberIdList.add(memberId);
+
+        List<Participant> participants = participantRepository.findByConsultationIdInAndMemberIdNotIn(consultationIdList, memberIdList);
+
+        return participants.stream()
+                .map(domain -> new RecentParticipantResponse(
+                        domain.getId(),
+                        domain.getMemberId(),
+                        domain.getMemberNickname(),
+                        domain.getConsultationId(),
+                        domain.getConsultationDate()
+                ))
+                .toList();
     }
 
     // 만약 나중에 Broadcast 필요한 상황이 오면 구현

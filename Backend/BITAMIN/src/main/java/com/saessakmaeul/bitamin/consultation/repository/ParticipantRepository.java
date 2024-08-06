@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
-    List<Participant> findByConsultationId(Long consultationId);
+//    List<Participant> findByConsultationId(Long consultationId);
     Optional<Participant> findByMemberIdAndConsultationId(Long memberId, Long consultationId);
+    List<Participant> findByMemberId(Long memberId);
+    List<Participant> findByConsultationIdInAndMemberIdNotIn(List<Long> consultationIdList, List<Long> memberIdList);
 }
