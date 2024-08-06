@@ -53,5 +53,31 @@ public class MissionService {
                 .build();
     }
 
+    // 미션 교체
+    public MissionResponse changeMission(Long missionId) {
+        // 모든 미션 조회
+        List<Mission> missions = missionRepository.findAll();
+
+        // 모든 미션 -> 현재 미션을 제외한 미션 리스트 생성
+        List<Mission> filteredMissions;
+        filteredMissions = missions.stream()
+                .filter(mission -> mission.getId() != missionId)
+                .toList();
+
+        System.out.println(filteredMissions);
+
+        // 무작위 미션 선택
+        Random random = new Random();
+        Mission randomMission = filteredMissions.get(random.nextInt(filteredMissions.size()));
+
+        // MissionResponse로 반환
+        return MissionResponse.builder()
+                .id(randomMission.getId())
+                .missionName(randomMission.getMissionName())
+                .missionDescription(randomMission.getMissionDescription())
+                .missionLevel(randomMission.getMissionLevel())
+                .build();
+    }
+
 
 }
