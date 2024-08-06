@@ -45,7 +45,6 @@ public class AuthController {
             refreshTokenCookie.setHttpOnly(true);
             refreshTokenCookie.setPath("/");
             refreshTokenCookie.setMaxAge((int) jwtUtil.getRefreshTokenExpiration() / 1000);
-            System.out.println("Refresh Token 만료 시간 (밀리초): " + ((int)jwtUtil.getRefreshTokenExpiration() / 1000));
             response.addCookie(refreshTokenCookie);
 
             // 보안 강화를 위해 응답 본문에서 refresh token 삭제
