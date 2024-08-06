@@ -1,3 +1,4 @@
+import ConsultationList from '@/stories/organisms/ConsultationList'
 import { useState, useCallback } from 'react'
 import styles from 'styles/counsultation/CounsultationListPage.module.css'
 
@@ -27,6 +28,7 @@ const ConsultationListPage: React.FC = () => {
 
   return (
     <>
+      <ConsultationList />
       <div className={styles.div}>
         <div className={styles.child} />
         <div className={styles.item} />
