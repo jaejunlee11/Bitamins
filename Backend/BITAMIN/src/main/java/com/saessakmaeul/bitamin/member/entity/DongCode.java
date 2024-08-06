@@ -27,8 +27,11 @@ public class DongCode {
     @Column(name = "dong_name", length = 40)
     private String dongName;
 
-    @Column(name = "loc_name", length = 40)
-    private String locName;
+    @Column(name = "x_coordinate", length = 20)
+    private String xCoordinate;
+
+    @Column(name = "y_coordinate", length = 20)
+    private String yCoordinate;
 
     @Column(name = "lat", length = 40)
     private String lat;

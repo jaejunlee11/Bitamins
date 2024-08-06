@@ -27,7 +27,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,12 +80,6 @@ public class MemberService {
 
     // sidoName, gugunName, dongName으로 dongCode 찾는 메서드
     public String findDongCode(String sidoName, String gugunName, String dongName) {
-        if (gugunName == null || gugunName.trim().isEmpty()) {
-            gugunName = "";
-        }
-        if (dongName == null || dongName.trim().isEmpty()) {
-            dongName = "";
-        }
         return dongCodeRepository.findDongCode(sidoName, gugunName, dongName)
                 .orElseThrow(() -> new IllegalArgumentException("해당 주소에 대한 동 코드를 찾을 수 없습니다."));
     }
@@ -160,6 +153,8 @@ public class MemberService {
                         .sidoName(dongInformation.getSidoName())
                         .gugunName(dongInformation.getGugunName())
                         .dongName(dongInformation.getDongName())
+                        .xCoordinate(dongInformation.getXCoordinate())
+                        .yCoordinate(dongInformation.getYCoordinate())
                         .lat(dongInformation.getLat())
                         .lng(dongInformation.getLng())
                         .birthday(member.getBirthday())
@@ -168,7 +163,6 @@ public class MemberService {
                         .build();
             } else {
                 System.out.println("No information found for the given dongCode.");
-
             }
         } else {
             return null;
@@ -250,7 +244,9 @@ public class MemberService {
             if (jwtUtil.isTokenExpired(cookieRefreshToken)) {
                 throw new RuntimeException("Refresh Token이 만료되었습니다.");
             }
-            Long userId = jwtUtil.extractUserId(cookieRefreshToken);
+            String email = jwtUtil.extractEmail(cookieRefreshToken);
+            Member member = memberRepository.findByEmail(email).orElseThrow(Exception::new);
+            Long userId = member.getId();
             Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserId(userId);
             if (refreshToken.isPresent() && refreshToken.get().getToken().equals(cookieRefreshToken)) {
                 String newAccessToken = jwtUtil.generateAccessToken(memberRepository.findById(userId)
