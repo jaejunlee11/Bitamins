@@ -49,8 +49,23 @@ export const joinRoom = async (joinData: JoinData) => {
   return response.data
 }
 
+export const fetchRandomParticipants = async (type: string) => {
+  console.log(type)
+  try {
+    const response = await axiosInstance.post(
+      '/consultations/random-participants',
+      { type }
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error fetching random participants:', error)
+    throw error
+  }
+}
+
 export default {
   fetchConsultations,
   createRoom,
   joinRoom,
+  fetchRandomParticipants,
 }
