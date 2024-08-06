@@ -1,5 +1,7 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import MainPage from 'stories/pages/main/MainPage'
+import MissionPage from 'stories/pages/mission/MissionPage'
 import LoginPage from 'stories/pages/account/LoginPage'
 import SignUpPage from 'stories/pages/account/SignUpPage'
 import SurveyPage from 'stories/pages/account/SurveyPage'
@@ -45,6 +47,7 @@ const AppRouter: React.FC = () => {
       <Route path="/participantlist" element={<ParticipantListPage />} />
       <Route path="/reply" element={<ReplyPage />} />
       <Route path="/admin" element={<AdiminPage />} />
+      <Route path="/mission" element={<MissionPage />} />
     </Routes>
   )
 }
