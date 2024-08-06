@@ -312,4 +312,20 @@ public class MemberService {
             return dto;
         }).collect(Collectors.toList());
     }
+
+    public int duplicateCheckEmail(String email) {
+        int result = memberRepository.countByEmail(email);
+        if (result == 1) {
+            return 1;
+        }
+        return 0;
+    }
+
+    public int duplicateCheckNickname(String nickname) {
+        int result = memberRepository.countByNickname(nickname);
+        if (result == 1) {
+            return 1;
+        }
+        return 0;
+    }
 }
