@@ -19,7 +19,7 @@ public class Message {
     private long senderId;
 
     @Column(name = "reciever_id")
-    private long recieverId;
+    private long receiverId;
 
     @Column(name = "category")
     private String category;
