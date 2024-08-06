@@ -1,4 +1,3 @@
-// src/api/consultationAPI.ts
 import axiosInstance from 'api/axiosInstance'
 
 export const fetchConsultations = async (
@@ -28,6 +27,7 @@ interface RoomData {
 
 export const createRoom = async (roomData: RoomData) => {
   const response = await axiosInstance.post('/consultations', roomData)
+  console.log('Create Room Response:', response.data) // 응답 데이터 확인
   return response.data
 }
 
@@ -40,10 +40,12 @@ interface JoinData {
 }
 
 export const joinRoom = async (joinData: JoinData) => {
+  console.log('Join Data:', joinData) // joinData 확인
   const response = await axiosInstance.post(
     '/consultations/participants',
     joinData
   )
+  console.log('Join Room Response:', response.data) // 응답 데이터 확인
   return response.data
 }
 

@@ -1,4 +1,3 @@
-// src/pages/CreateRoomPage.tsx
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createRoom, joinRoom } from 'api/consultationAPI'
@@ -29,22 +28,23 @@ const CreateRoomPage: React.FC = () => {
         startTime: startDateTime.toISOString(),
         endTime: endDateTime.toISOString(),
       }
-      console.log('에러가')
+
       const response = await createRoom(roomData)
+      console.log('Create Room Response:', response) // 응답 데이터 확인
       setRoomData(roomData)
-      console.log('어디서')
 
       const joinData = {
-        id: response.consultationId,
+        id: response.id, // 수정된 부분
         isPrivated: response.isPrivated,
         password: response.password,
         startTime: response.startTime,
         sessionId: response.sessionId,
       }
-      console.log('날까요')
+
+      console.log('Join Data:', joinData) // joinData 확인
 
       const joinResponse = await joinRoom(joinData) // 자동으로 참여 요청
-      console.log('알려줘')
+      console.log('Join Room Response:', joinResponse) // 응답 데이터 확인
       setJoinData(joinData)
       setParticipant(joinResponse.data) // zustand 스토어에 저장
       alert('Room created and joined successfully!')
