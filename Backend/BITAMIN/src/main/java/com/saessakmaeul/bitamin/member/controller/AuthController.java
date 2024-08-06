@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -34,7 +33,7 @@ public class AuthController {
     /** 로그인 API
      * @param loginRequest 로그인 요청 정보
      * @param response HTTP 응답 객체
-     * @return AccessToken과 RefreshToken을 포함한 응답 */
+     * @return AccessToken을 포함한 응답 (RefreshToken은 HttpOnly 쿠키에 저장) */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         try {
@@ -42,11 +41,14 @@ public class AuthController {
 
             response.setHeader("Authorization", BEARER_PREFIX + authResponse.getAccessToken());
 
-            Cookie refreshTokenCookie = new Cookie("refresh_token", authResponse.getRefreshToken());
+            Cookie refreshTokenCookie = new Cookie("refreshToken", authResponse.getRefreshToken());
             refreshTokenCookie.setHttpOnly(true);
             refreshTokenCookie.setPath("/");
             refreshTokenCookie.setMaxAge((int) jwtUtil.getRefreshTokenExpiration() / 1000);
             response.addCookie(refreshTokenCookie);
+
+            // 보안 강화를 위해 응답 본문에서 refresh token 삭제
+            authResponse.setRefreshToken(null);
 
             return ResponseEntity.ok(authResponse);
         } catch (Exception e) {
@@ -54,6 +56,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: " + e.getMessage());
         }
     }
+
 
     /** AccessToken 재생성 API
      * @param request HTTP 요청 객체
@@ -68,7 +71,7 @@ public class AuthController {
             }
             AuthResponse authResponse = memberService.refreshToken(cookieRefreshToken);
             response.setHeader("Authorization", BEARER_PREFIX + authResponse.getAccessToken());
-            return ResponseEntity.ok(authResponse);
+            return ResponseEntity.ok("토큰이 재발급 되었습니다.");
         } catch (Exception e) {
             logger.error("AccessToken 재생성 오류: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("AccessToken 재생성 실패: " + e.getMessage());
@@ -128,7 +131,7 @@ public class AuthController {
     private String getRefreshTokenFromCookies(Cookie[] cookies) {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refresh_token".equals(cookie.getName())) {
+                if ("refreshToken".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }

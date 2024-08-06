@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/file")
@@ -34,7 +35,7 @@ public class FileController {
          </form>
      */
     @PostMapping("/upload")
-    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
         try {
             // 디렉토리가 존재하지 않으면 생성
             File uploadDir = new File(UPLOAD_DIR);
@@ -42,11 +43,12 @@ public class FileController {
                 uploadDir.mkdirs();
             }
 
-            // 파일 저장
-            Path filePath = Paths.get(UPLOAD_DIR + file.getOriginalFilename());
+            // 파일 이름 중복 방지를 위해 UUID 사용
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            Path filePath = Paths.get(UPLOAD_DIR, fileName);
             file.transferTo(filePath);
 
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(fileName);
         } catch (IOException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

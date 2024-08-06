@@ -42,7 +42,9 @@ public class ConsultationService {
 
         else if(type == SearchCondition.비밀방) consultationPage = consultationRepository.findByIsPrivatedAndSessionIdIsNotNullAndCurrentParticipantsBetween(true, 1,4, pageable);
 
-        else consultationPage = consultationRepository.findByCategoryAndSessionIdIsNotNullAndCurrentParticipantsBetween(type.name(), 1, 4, pageable);
+        else if(type != SearchCondition.요약) consultationPage = consultationRepository.findByCategoryAndSessionIdIsNotNullAndCurrentParticipantsBetween(type.name(), 1, 4, pageable);
+
+        else return null;
 
         List<ConsultationListResponse> list  = consultationPage.getContent().stream()
                 .map(domain -> new ConsultationListResponse(
@@ -154,7 +156,7 @@ public class ConsultationService {
 
         if(type == null || type == SearchCondition.전체 ) consultation = consultationRepository.findByCurrentParticipantsLessThanEqualOrderByRand(4);
 
-        else if(type != SearchCondition.비밀방) consultation = consultationRepository.findByCategoryAndCurrentParticipantsLessThanEqualOrderByRand(type.name(), 4);
+        else if(type != SearchCondition.비밀방 && type != SearchCondition.요약) consultation = consultationRepository.findByCategoryAndCurrentParticipantsLessThanEqualOrderByRand(type.name(), 4);
 
         else return null;
 

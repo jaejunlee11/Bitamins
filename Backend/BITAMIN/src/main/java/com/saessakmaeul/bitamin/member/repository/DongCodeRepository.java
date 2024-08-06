@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface DongCodeRepository extends JpaRepository<DongCode, String> {
 
-    @Query("SELECT new com.saessakmaeul.bitamin.member.dto.response.DongCodeResponseDTO (d.sidoName, d.gugunName, d.dongName, d.locName, d.lat, d.lng) FROM DongCode d WHERE d.dongCode = :dongCode")
+    @Query("SELECT new com.saessakmaeul.bitamin.member.dto.response.DongCodeResponseDTO (d.sidoName, d.gugunName, d.dongName, d.xCoordinate, d.yCoordinate, d.lat, d.lng) FROM DongCode d WHERE d.dongCode = :dongCode")
     Optional<DongCodeResponseDTO> findNamesByDongCode(@Param("dongCode") String dongCode);
 
 
