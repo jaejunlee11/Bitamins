@@ -245,7 +245,8 @@ public class MemberService {
                 throw new RuntimeException("Refresh Token이 만료되었습니다.");
             }
             String email = jwtUtil.extractEmail(cookieRefreshToken);
-            Long userId = memberRepository.findIdByEmail(email);
+            Member member = memberRepository.findByEmail(email).orElseThrow(Exception::new);
+            Long userId = member.getId();
             Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserId(userId);
             if (refreshToken.isPresent() && refreshToken.get().getToken().equals(cookieRefreshToken)) {
                 String newAccessToken = jwtUtil.generateAccessToken(memberRepository.findById(userId)
