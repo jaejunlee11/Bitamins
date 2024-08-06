@@ -2,7 +2,6 @@ package com.saessakmaeul.bitamin.util;
 
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.entity.RefreshToken;
-import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -21,10 +20,6 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-
-    @Autowired
-    private MemberRepository memberRepository;
-
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
@@ -54,23 +49,23 @@ public class JwtUtil {
         return generateRefreshTokenWithMinimalInfo(member.getEmail(), refreshTokenExpiration);
     }
 
-    private String generateAccessTokenWithFullInfo(Member member, long accessTokenExpiration) {
+    private String generateAccessTokenWithFullInfo(Member member, long expiration) {
         return Jwts.builder()
                 .setSubject(member.getEmail())
                 .claim("id", member.getId())
                 .claim("nickname", member.getNickname())
                 .claim("role", member.getRole())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
                 .compact();
     }
 
-    private String generateRefreshTokenWithMinimalInfo(String email, long refreshTokenExpiration) {
+    private String generateRefreshTokenWithMinimalInfo(String email, long expiration) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
                 .compact();
     }
