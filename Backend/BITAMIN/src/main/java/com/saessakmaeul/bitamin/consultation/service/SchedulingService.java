@@ -13,7 +13,7 @@ import java.util.List;
 public class SchedulingService {
     private final ConsultationRepository consultationRepository;
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
     public void deleteOldConsultations() {
         List<Long> id = consultationRepository.findIdOfOldConsultations();
 

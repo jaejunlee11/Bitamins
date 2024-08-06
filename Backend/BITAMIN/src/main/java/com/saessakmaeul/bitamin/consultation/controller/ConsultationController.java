@@ -201,4 +201,13 @@ public class ConsultationController {
 
         return ResponseEntity.status(200).body(gptResponses);
     }
+
+    @GetMapping("/recent-participants")
+    public ResponseEntity<?> findRecentParticipants(@RequestHeader(value = "Authorization", required = false) String tokenHeader) {
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+
+        List<RecentParticipantResponse> participants = consultationService.findRecentParticipants(memberId);
+
+        return ResponseEntity.status(200).body(participants);
+    }
 }
