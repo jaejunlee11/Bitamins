@@ -34,7 +34,7 @@ public class MessageService {
     public List<MessageSimpleResponse> getAllMessages(long userId) throws Exception{
         List<MessageSimpleResponse> result = new ArrayList<>();
         // 내가 수신자인 경우
-        List<Message> messages = messageRepository.findByRecieverId(userId);
+        List<Message> messages = messageRepository.findByReceiverId(userId);
         for (Message message : messages) {
             if(message.getIsDeleted()==2) continue;
             Member member = memberRepository.findById(message.getSenderId()).orElseThrow(Exception::new);
@@ -53,7 +53,7 @@ public class MessageService {
         messages = messageRepository.findBySenderId(userId);
         for (Message message : messages) {
             if(message.getIsDeleted()==1) continue;
-            Member member = memberRepository.findById(message.getRecieverId()).orElseThrow(Exception::new);
+            Member member = memberRepository.findById(message.getReceiverId()).orElseThrow(Exception::new);
             MessageSimpleResponse dto = MessageSimpleResponse.builder()
                     .id(message.getId())
                     .nickname(member.getNickname())
@@ -73,7 +73,7 @@ public class MessageService {
         String nickname = null;
         // 유저가 송신자인 경우
         if(userId == message.getSenderId()){
-            nickname = memberRepository.findById(message.getRecieverId()).orElseThrow(()->new Exception("존재하지 않는 reciever 입니다.")).getNickname();
+            nickname = memberRepository.findById(message.getReceiverId()).orElseThrow(()->new Exception("존재하지 않는 reciever 입니다.")).getNickname();
         }
         // 유저가 수신자인 경우
         else {
@@ -115,10 +115,10 @@ public class MessageService {
 
     @Transactional
     public Message registMessage(MessageRegistRequest message,Long userId) throws Exception{
-        memberRepository.findById(message.getRecieverId()).orElseThrow(()->new Exception("reciever가 존재하지 않습니다."));
+        memberRepository.findById(message.getReceiverId()).orElseThrow(()->new Exception("reciever가 존재하지 않습니다."));
         Message registMessage = new Message();
         registMessage.setSenderId(userId);
-        registMessage.setRecieverId(message.getRecieverId());
+        registMessage.setReceiverId(message.getReceiverId());
         registMessage.setCategory(message.getCategory());
         registMessage.setTitle(message.getTitle());
         registMessage.setContent(message.getContent());
@@ -131,7 +131,7 @@ public class MessageService {
 
     @Transactional
     public Reply registReply(ReplyRegistRequest reply, Long id, Long userId) throws Exception{
-        memberRepository.findById(id).orElseThrow(()->new Exception("해당 id의 메시지가 없습니다."));
+        messageRepository.findById(id).orElseThrow(()->new Exception("해당 id의 메시지가 없습니다."));
         Reply registReply = new Reply();
         registReply.setMessageId(id);
         registReply.setMemberId(userId);
