@@ -10,7 +10,6 @@ export const fetchConsultations = async (
     const response = await axiosInstance.get('/consultations', {
       params: { page, size, type },
     })
-    console.log('API Response:', response.data) // API 응답 데이터 확인
     return response.data
   } catch (error) {
     console.error('Error fetching consultations:', error)
@@ -18,6 +17,38 @@ export const fetchConsultations = async (
   }
 }
 
+interface RoomData {
+  category: string
+  title: string
+  isPrivated: number
+  password?: string | null
+  startTime: string
+  endTime: string
+}
+
+export const createRoom = async (roomData: RoomData) => {
+  const response = await axiosInstance.post('/consultations', roomData)
+  return response.data
+}
+
+interface JoinData {
+  id: number
+  isPrivated: number
+  password: string | null
+  startTime: string
+  sessionId: string
+}
+
+export const joinRoom = async (joinData: JoinData) => {
+  const response = await axiosInstance.post(
+    '/consultations/participants',
+    joinData
+  )
+  return response.data
+}
+
 export default {
   fetchConsultations,
+  createRoom,
+  joinRoom,
 }

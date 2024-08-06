@@ -1,7 +1,7 @@
 // src/store/useConsultationStore.ts
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { fetchConsultations } from 'api/consultationAPI'
+import { fetchConsultations, createRoom, joinRoom } from 'api/consultationAPI'
 
 interface Consultation {
   id: number
@@ -14,8 +14,38 @@ interface Consultation {
   sessionId: string
 }
 
+interface Participant {
+  consultationId: number
+  token: string
+  id: number
+  memberId: number
+  nickname: string
+  profileKey: string
+  profileUrl: string
+}
+
+interface RoomData {
+  category: string
+  title: string
+  isPrivated: number
+  password?: string | null
+  startTime: string
+  endTime: string
+}
+
+interface JoinData {
+  id: number
+  isPrivated: number
+  password: string | null
+  startTime: string
+  sessionId: string
+}
+
 interface ConsultationState {
   consultations: Consultation[]
+  participant: Participant | null
+  roomData: RoomData | null
+  joinData: JoinData | null
   totalPages: number
   page: number
   size: number
@@ -25,12 +55,18 @@ interface ConsultationState {
     size: number,
     type: string
   ) => Promise<void>
+  setParticipant: (participant: Participant) => void
+  setRoomData: (roomData: RoomData) => void
+  setJoinData: (joinData: JoinData) => void
 }
 
 const useConsultationStore = create<ConsultationState>()(
   persist(
     (set) => ({
       consultations: [],
+      participant: null,
+      roomData: null,
+      joinData: null,
       totalPages: 0,
       page: 0,
       size: 10,
@@ -59,6 +95,9 @@ const useConsultationStore = create<ConsultationState>()(
           throw new Error('Failed to fetch consultations')
         }
       },
+      setParticipant: (participant: Participant) => set({ participant }),
+      setRoomData: (roomData: RoomData) => set({ roomData }),
+      setJoinData: (joinData: JoinData) => set({ joinData }),
     }),
     {
       name: 'consultation-storage',

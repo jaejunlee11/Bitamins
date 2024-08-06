@@ -1,5 +1,7 @@
-import ConsultationList from '@/stories/organisms/ConsultationList'
-import { useState, useCallback } from 'react'
+// src/pages/ConsultationListPage.tsx
+import React, { useState, useCallback } from 'react'
+import ConsultationList from 'stories/organisms/ConsultationList'
+import CreateRoomPage from 'stories/organisms/CreateRoomPage'
 import styles from 'styles/counsultation/CounsultationListPage.module.css'
 
 const ConsultationListPage: React.FC = () => {
@@ -29,6 +31,7 @@ const ConsultationListPage: React.FC = () => {
   return (
     <>
       <ConsultationList />
+      <CreateRoomPage />
       <div className={styles.div}>
         <div className={styles.child} />
         <div className={styles.item} />

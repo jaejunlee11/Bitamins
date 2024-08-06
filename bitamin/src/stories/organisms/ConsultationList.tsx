@@ -12,17 +12,17 @@ const ConsultationList: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const loadConsultations = async () => {
-      try {
-        await fetchAndSetConsultations(0, 100, '전체')
-      } catch (err) {
-        setError('Failed to fetch consultations')
-      } finally {
-        setLoading(false)
-      }
+  const loadConsultations = async () => {
+    try {
+      await fetchAndSetConsultations(0, 100, '전체')
+    } catch (err) {
+      setError('Failed to fetch consultations')
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     loadConsultations()
   }, [fetchAndSetConsultations])
 
