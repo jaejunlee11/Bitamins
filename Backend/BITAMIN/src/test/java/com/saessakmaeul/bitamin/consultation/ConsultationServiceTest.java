@@ -693,4 +693,57 @@ public class ConsultationServiceTest {
         assertEquals(1, actual);
         System.out.println("인원 갱신 성공");
     }
+
+    @Test
+    @DisplayName("최근 상담 참여자 리스트 조회 테스트")
+    public void findRecentParticipants() throws Exception {
+        // Given
+        Participant p1 = Participant.builder()
+                .id(conversationParticipant1.getId())
+                .memberId(conversationParticipant1.getId())
+                .memberNickname(conversationParticipant1.getMemberNickname())
+                .consultationId(conversationParticipant1.getConsultationId())
+                .consultationDate(conversationParticipant1.getConsultationDate())
+                .build();
+
+        Participant p2 = Participant.builder()
+                .id(conversationParticipant2.getId())
+                .memberId(conversationParticipant2.getId())
+                .memberNickname(conversationParticipant2.getMemberNickname())
+                .consultationId(conversationParticipant2.getConsultationId())
+                .consultationDate(conversationParticipant2.getConsultationDate())
+                .build();
+
+        List<Participant> participantList = Arrays.asList(p1, p2);
+
+        List<Participant> participants = Arrays.asList(p2);
+
+        // When
+        when(participantRepository.findByMemberId(p1.getMemberId())).thenReturn(participantList);
+
+        List<Long> consultationIdList = new ArrayList<>();
+        for(Participant p : participantList) {
+            consultationIdList.add(p.getConsultationId());
+        }
+
+        List<Long> memberIdList = new ArrayList<>();
+        memberIdList.add(p1.getMemberId());
+
+        when(participantRepository.findByConsultationIdInAndMemberIdNotIn(consultationIdList, memberIdList)).thenReturn(participants);
+
+        List<RecentParticipantResponse> expected = participants.stream()
+                .map(domain -> new RecentParticipantResponse(
+                        domain.getId(),
+                        domain.getMemberId(),
+                        domain.getMemberNickname(),
+                        domain.getConsultationId(),
+                        domain.getConsultationDate()
+                ))
+                .toList();
+        // Then
+        List<RecentParticipantResponse> actual = consultationService.findRecentParticipants(p1.getMemberId());
+
+        assertEquals(expected, actual);
+        System.out.println("최근 참여자 조회 성공");
+    }
 }
