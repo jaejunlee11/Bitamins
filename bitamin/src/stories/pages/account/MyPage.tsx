@@ -3,6 +3,7 @@ import PhotoUpload from 'stories/organisms/PhotoUpload'
 import styles from 'styles/account/MyPage.module.css'
 import HospitalMap from 'stories/organisms/HospitalMap'
 import Button from 'stories/atoms/Button'
+import { Navigate } from 'react-router-dom'
 
 const MyPage: React.FC = () => {
   const [isPhotoUploadOpen, setIsPhotoUploadOpen] = useState(false)

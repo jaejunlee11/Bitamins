@@ -14,6 +14,7 @@ const useAuthStore = create(
     (set) => ({
       accessToken: null,
       refreshToken: null,
+      username: null,
       setAccessToken: (token) => set({ accessToken: token }),
       setRefreshToken: (token) => set({ refreshToken: token }),
       clearAuth: () => set({ accessToken: null, refreshToken: null }),

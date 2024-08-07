@@ -1,8 +1,38 @@
-import { FunctionComponent, useCallback } from 'react'
+import { FunctionComponent, useCallback, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import useAuthStore from '@/store/useAuthStore'
+import { useCookies } from 'react-cookie'
 
-const HeaderAfterLogin: FunctionComponent = () => {
+const HeaderAfterLogin: FunctionComponent<{ username: string }> = ({
+  username,
+}) => {
+  const navigate = useNavigate()
+  const { accessToken, refreshToken, clearAuth } = useAuthStore()
+  const [, , removeCookie] = useCookies(['refreshToken'])
+  const [dropdownVisible, setDropdownVisible] = useState(false)
+
   const onBItAMinTextClick = useCallback(() => {
-    // Add your code here
+    navigate('/home')
+  }, [navigate])
+
+  const onCounselClick = useCallback(() => {
+    navigate('/counselationlist')
+  }, [navigate])
+
+  const onLogoutClick = useCallback(() => {
+    // 액세스 토큰과 리프레시 토큰을 삭제
+    clearAuth()
+    removeCookie('refreshToken', { path: '/' })
+    console.log('Logged out successfully!')
+    console.log('Access Token:', accessToken)
+    console.log('Refresh Token:', refreshToken)
+    alert('Logged out successfully!')
+    navigate('/loginex')
+  }, [navigate, clearAuth, removeCookie, accessToken, refreshToken])
+
+  // 이름 누르면 토글 뜨도록
+  const toggleDropdown = useCallback(() => {
+    setDropdownVisible((prev) => !prev)
   }, [])
 
   return (
@@ -17,7 +47,7 @@ const HeaderAfterLogin: FunctionComponent = () => {
         <div className="flex flex-row items-center justify-start gap-[3.125rem] text-black">
           <div
             className="w-[3.75rem] h-[4.625rem] flex flex-col items-center justify-center p-[0.312rem] box-border gap-[0.312rem] cursor-pointer"
-            onClick={onBItAMinTextClick}
+            onClick={onCounselClick}
           >
             <div className="w-[4.563rem] h-[1.438rem] flex flex-row items-end justify-center">
               <div className="relative">상담</div>
@@ -65,11 +95,14 @@ const HeaderAfterLogin: FunctionComponent = () => {
                 alt=""
                 src="PersonCircle.svg"
               />
-              <div className="w-[4.5rem] h-[1.188rem] flex flex-row items-center justify-start gap-[0.25rem]">
+              <div
+                className="w-[4.5rem] h-[1.188rem] flex flex-row items-center justify-start gap-[0.25rem] cursor-pointer"
+                onClick={toggleDropdown}
+              >
                 <div className="h-[1.563rem] flex flex-row items-center justify-center">
                   <div className="w-[3.313rem] relative flex items-center h-[1.5rem] shrink-0">
                     <span className="w-full">
-                      <span>김싸피</span>
+                      <span>{username}</span>
                       <span className="font-nanumbarunpen text-[1.063rem]">
                         <span>{` `}</span>
                         <span className="text-[0.75rem]">님</span>
@@ -97,24 +130,26 @@ const HeaderAfterLogin: FunctionComponent = () => {
               />
             </div>
           </div>
-          <div className="w-[5.75rem] shadow-[4px_4px_25px_rgba(0,_0,_0,_0.25)] flex flex-col items-start justify-start mt-[-0.125rem] text-[0.563rem] text-gray">
-            <div
-              className="self-stretch bg-white h-[1.188rem] flex flex-col items-start justify-center py-[0.375rem] px-[1.5rem] box-border cursor-pointer"
-              onClick={onBItAMinTextClick}
-            >
-              <div className="w-[2.688rem] flex flex-col items-center justify-start">
-                <div className="relative">마이페이지</div>
+          {dropdownVisible && (
+            <div className="w-[5.75rem] shadow-[4px_4px_25px_rgba(0,_0,_0,_0.25)] flex flex-col items-start justify-start mt-[-0.125rem] text-[0.563rem] text-gray">
+              <div
+                className="self-stretch bg-white h-[1.188rem] flex flex-col items-start justify-center py-[0.375rem] px-[1.5rem] box-border cursor-pointer"
+                onClick={() => navigate('/mypage')}
+              >
+                <div className="w-[2.688rem] flex flex-col items-center justify-start">
+                  <div className="relative">마이페이지</div>
+                </div>
+              </div>
+              <div
+                className="self-stretch rounded-t-none rounded-b-8xs bg-white h-[1.25rem] flex flex-col items-start justify-center py-[0.375rem] px-[1.5rem] box-border cursor-pointer"
+                onClick={onLogoutClick}
+              >
+                <div className="w-[2.688rem] flex flex-col items-center justify-start">
+                  <div className="self-stretch relative">로그아웃</div>
+                </div>
               </div>
             </div>
-            <div
-              className="self-stretch rounded-t-none rounded-b-8xs bg-white h-[1.25rem] flex flex-col items-start justify-center py-[0.375rem] px-[1.5rem] box-border cursor-pointer"
-              onClick={onBItAMinTextClick}
-            >
-              <div className="w-[2.688rem] flex flex-col items-center justify-start">
-                <div className="self-stretch relative">로그아웃</div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

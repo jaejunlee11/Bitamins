@@ -1,10 +1,55 @@
-import { useCallback } from 'react'
+import { useState, useCallback } from 'react'
+import axiosInstance, { setAccessToken } from 'api/axiosInstance' // 경로 수정
+import useAuthStore from 'store/useAuthStore' // 경로 수정
+import { useCookies } from 'react-cookie'
+import { useNavigate } from 'react-router-dom'
 import styles from 'styles/account/LoginPage.module.css'
 
 const LoginPage: React.FC = () => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [, setCookie] = useCookies(['refreshToken']) // `cookies` 대신 `_`를 사용
+  const navigate = useNavigate()
+
+  const {
+    setAccessToken: setAuthAccessToken,
+    setRefreshToken: setAuthRefreshToken,
+    clearAuth,
+  } = useAuthStore()
+
+  // 이거 없애도 되려낭
   const onBItAMinTextClick = useCallback(() => {
     // Add your code here
   }, [])
+
+  const handleLogin = async () => {
+    try {
+      console.log('Login request data:', { email, password })
+      const response = await axiosInstance.post('/auth/login', {
+        email,
+        password,
+      })
+
+      const { accessToken, refreshToken } = response.data
+      console.log('Server response:', response.data) // 서버 응답 확인
+      setAccessToken(accessToken) // axiosInstance에 accessToken 설정
+      setAuthAccessToken(accessToken) // zustand 상태 관리에 accessToken 설정
+      setAuthRefreshToken(refreshToken) // zustand 상태 관리에 refreshToken 설정
+      setCookie('refreshToken', refreshToken, {
+        path: '/',
+        secure: true,
+        sameSite: 'strict', // 또는 'lax' 또는 'none'으로 설정
+      })
+
+      alert('Login successful!')
+      navigate('/home')
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || error.message || 'Login failed'
+      alert(`Login failed: ${errorMessage}`)
+      console.error('Login error:', error)
+    }
+  }
 
   return (
     <div className={styles.div}>
@@ -54,17 +99,26 @@ const LoginPage: React.FC = () => {
           <div className={styles.component64}>
             <div className={styles.component61}>
               <div className={styles.component61Child} />
-              <div className={styles.div11}>이메일</div>
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="이메일"
+                className={styles.div11}
+              />
             </div>
             <div className={styles.component62}>
               <div className={styles.component61Child} />
-              <div className={styles.div11}>비밀번호</div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="비밀번호"
+                className={styles.div11}
+              />
             </div>
             <div className={styles.component55}>
-              <div
-                className={styles.component55Child}
-                onClick={onBItAMinTextClick}
-              />
+              <div className={styles.component55Child} onClick={handleLogin} />
               <b className={styles.b1}>로그인</b>
             </div>
             <div className={styles.component56}>
