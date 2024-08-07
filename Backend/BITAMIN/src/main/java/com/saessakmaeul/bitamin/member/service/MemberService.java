@@ -76,8 +76,6 @@ public class MemberService {
     }
 
 
-
-
     // sidoName, gugunName, dongName으로 dongCode 찾는 메서드
     public String findDongCode(String sidoName, String gugunName, String dongName) {
         return dongCodeRepository.findDongCode(sidoName, gugunName, dongName)
@@ -100,7 +98,6 @@ public class MemberService {
                         .password(member.getPassword())
                         .birthday(member.getBirthday())
                         .dongCode(member.getDongCode())
-                        .profileKey(member.getProfileKey())
                         .profileUrl(member.getProfileUrl())
                         .role(member.getRole())
                         .build())
@@ -158,7 +155,6 @@ public class MemberService {
                         .lat(dongInformation.getLat())
                         .lng(dongInformation.getLng())
                         .birthday(member.getBirthday())
-                        .profileKey(member.getProfileKey())
                         .profileUrl(member.getProfileUrl())
                         .build();
             } else {
@@ -188,6 +184,8 @@ public class MemberService {
             if (image != null && !image.isEmpty()) {
                 String fileUrl = s3Service.uploadFile(image);
                 member.setProfileUrl(fileUrl);
+            } else {
+                member.setProfileUrl(null);
             }
             memberRepository.save(member);
             return 1;
