@@ -41,6 +41,9 @@ const LoginPage: React.FC = () => {
         sameSite: 'strict', // 또는 'lax' 또는 'none'으로 설정
       })
 
+      // 세션 스토리지에 인증 상태 저장
+      sessionStorage.setItem('isAuthenticated', 'true')
+
       alert('Login successful!')
       navigate('/home')
     } catch (error: any) {
@@ -50,6 +53,10 @@ const LoginPage: React.FC = () => {
       console.error('Login error:', error)
     }
   }
+
+  const handleSignUp = useCallback(() => {
+    navigate('/signup')
+  }, [navigate])
 
   return (
     <div className={styles.div}>
@@ -86,7 +93,9 @@ const LoginPage: React.FC = () => {
         <div className={styles.div7}>
           <div className={styles.div8}>로그인</div>
           <div className={styles.div9}>/</div>
-          <div className={styles.div2}>회원가입</div>
+          <div className={styles.div2} onClick={handleSignUp}>
+            회원가입
+          </div>
         </div>
       </div>
       <div className={styles.component66}>
@@ -122,10 +131,7 @@ const LoginPage: React.FC = () => {
               <b className={styles.b1}>로그인</b>
             </div>
             <div className={styles.component56}>
-              <div
-                className={styles.component56Child}
-                onClick={onBItAMinTextClick}
-              />
+              <div className={styles.component56Child} onClick={handleSignUp} />
               <b className={styles.b2}>회원가입</b>
             </div>
             <div className={styles.component60}>
