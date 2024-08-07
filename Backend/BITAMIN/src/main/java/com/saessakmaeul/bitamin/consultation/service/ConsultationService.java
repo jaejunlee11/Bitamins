@@ -183,6 +183,8 @@ public class ConsultationService {
             c.add(p1.getConsultationId().getId());
         }
 
+        if(c.isEmpty()) return null;
+
         SearchCondition type = joinRandomRequest.getType();
         Optional<Consultation> consultation;
 
