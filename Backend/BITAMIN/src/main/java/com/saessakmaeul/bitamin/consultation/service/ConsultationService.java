@@ -67,9 +67,32 @@ public class ConsultationService {
 
     @Transactional
     public RegistRoomResponse registRoom(RegistRoomRequest registRoomRequest) {
+        // enum을 통한 category 데이터 검증
+        String category ="";
+
+        switch (registRoomRequest.getCategory()) {
+            case 음악 :
+                category = "음악";
+                break;
+            case 미술 :
+                category = "미술";
+                break;
+            case 영화 :
+                category = "영화";
+                break;
+            case 독서 :
+                category = "독서";
+                break;
+                case 대화 :
+                category = "대화";
+                break;
+        }
+
+        if(category.isEmpty()) return null;
+
         // 방 등록
         Consultation consultation = Consultation.builder()
-                .category(registRoomRequest.getCategory())
+                .category(category)
                 .title(registRoomRequest.getTitle())
                 .isPrivated(registRoomRequest.getIsPrivated())
                 .password(registRoomRequest.getPassword())
