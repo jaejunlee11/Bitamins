@@ -1,6 +1,7 @@
 package com.saessakmaeul.bitamin.mission.service;
 
 import com.saessakmaeul.bitamin.mission.dto.request.MemberMissionRequest;
+import com.saessakmaeul.bitamin.mission.dto.response.CompletedMemberMissionResponse;
 import com.saessakmaeul.bitamin.mission.dto.response.MemberMissionResponse;
 import com.saessakmaeul.bitamin.mission.dto.response.MissionResponse;
 import com.saessakmaeul.bitamin.mission.entity.MemberMission;
@@ -88,12 +89,14 @@ public class MissionService {
     }
 
 
-    public MissionResponse completedMission(Long memberId, String date) {
+    // 유저가 완료한 미션 조회
+    public CompletedMemberMissionResponse completedMission(Long memberId, String date) {
         // 유저가 미션 수행한 날짜 형변환
         LocalDate completeDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
 
         // 유저가 해당 날짜에 한 미션 ID 조회
         Optional<MemberMission> memberMissionOpt = memberMissionRepository.findByUserIdAndCompleteDate(memberId, completeDate);
+        MemberMission completedMemberMission = memberMissionOpt.orElseThrow(() -> new RuntimeException("해당 날짜에 수행한 미션이 없습니다."));
         Long completedMissionId = memberMissionOpt.map(MemberMission::getMissionId).orElse(null);
 
         // 미션 ID가 null인 경우 null 반환
@@ -111,11 +114,16 @@ public class MissionService {
         }
 
         // MissionResponse로 반환
-        return MissionResponse.builder()
-                .id(completedMission.getId())
+        return CompletedMemberMissionResponse.builder()
+                .id(completedMemberMission.getId())
+                .missionId(completedMission.getId())
                 .missionName(completedMission.getMissionName())
                 .missionDescription(completedMission.getMissionDescription())
                 .missionLevel(completedMission.getMissionLevel())
+                .completeDate(completedMemberMission.getCompleteDate())
+                .imageUrl(completedMemberMission.getImageUrl())
+                .missionReview(completedMemberMission.getMissionReview())
+                .userId(completedMemberMission.getUserId())
                 .build();
     }
 
