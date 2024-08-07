@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import useConsultationStore from 'store/useConsultationStore'
-import { fetchRandomParticipants, joinRoom } from 'api/consultationAPI'
 
 const ConsultationList: React.FC = () => {
-  const { consultations, fetchAndSetConsultations } = useConsultationStore(
-    (state) => ({
-      consultations: state.consultations,
-      fetchAndSetConsultations: state.fetchAndSetConsultations,
-    })
-  )
+  const {
+    consultations,
+    fetchAndSetConsultations,
+    joinRoomAndSetState,
+    joinRandomParticipantsAndSetState,
+  } = useConsultationStore((state) => ({
+    consultations: state.consultations,
+    fetchAndSetConsultations: state.fetchAndSetConsultations,
+    joinRoomAndSetState: state.joinRoomAndSetState,
+    joinRandomParticipantsAndSetState: state.joinRandomParticipantsAndSetState,
+  }))
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [password, setPassword] = useState<string>('')
-  const [selectedConsultationId, setSelectedConsultationId] = useState<
-    number | null
-  >(null)
+  const [passwords, setPasswords] = useState<{ [key: number]: string }>({})
 
   const loadConsultations = async () => {
     try {
@@ -30,17 +31,6 @@ const ConsultationList: React.FC = () => {
     loadConsultations()
   }, [fetchAndSetConsultations])
 
-  const handleFetchRandomParticipants = async (type: string) => {
-    try {
-      const response = await fetchRandomParticipants(type)
-      console.log('Random Participants:', response)
-      alert(`Fetched random participants for ${type}`)
-    } catch (error) {
-      alert('Failed to fetch random participants')
-      console.error('Error fetching random participants:', error)
-    }
-  }
-
   const handleJoinRoom = async (
     consultationId: number,
     sessionId: string,
@@ -50,16 +40,34 @@ const ConsultationList: React.FC = () => {
       const joinData = {
         id: consultationId,
         isPrivated,
-        password: isPrivated ? password : null,
+        password: isPrivated ? passwords[consultationId] : null,
         startTime: new Date().toISOString(),
         sessionId,
+        token: '', // token will be set by the API response
       }
-      const response = await joinRoom(joinData)
-      console.log('Join Room Response:', response)
+      await joinRoomAndSetState(joinData)
       alert('Joined room successfully!')
     } catch (error) {
       alert('Failed to join room')
       console.error('Error joining room:', error)
+    }
+  }
+
+  const handlePasswordChange = (consultationId: number, value: string) => {
+    setPasswords((prevPasswords) => ({
+      ...prevPasswords,
+      [consultationId]: value,
+    }))
+  }
+
+  const handleJoinRandomParticipants = async (type: string) => {
+    try {
+      console.log('입장')
+      await joinRandomParticipantsAndSetState(type)
+      alert(`Fetched random participants for ${type}`)
+    } catch (error) {
+      alert('Failed to fetch random participants')
+      console.error('Error fetching random participants:', error)
     }
   }
 
@@ -98,8 +106,10 @@ const ConsultationList: React.FC = () => {
                 <input
                   type="password"
                   placeholder="Enter password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={passwords[consultation.id] || ''}
+                  onChange={(e) =>
+                    handlePasswordChange(consultation.id, e.target.value)
+                  }
                 />
                 <button
                   onClick={() =>
@@ -132,25 +142,27 @@ const ConsultationList: React.FC = () => {
       </ul>
       <div>
         <h2>Fetch Random Participants</h2>
-        <button onClick={() => handleFetchRandomParticipants('')}>전체</button>
+        <button onClick={() => handleJoinRandomParticipants('전체')}>
+          전체
+        </button>
         <br />
-        <button onClick={() => handleFetchRandomParticipants('음악')}>
+        <button onClick={() => handleJoinRandomParticipants('음악')}>
           음악
         </button>
         <br />
-        <button onClick={() => handleFetchRandomParticipants('미술')}>
+        <button onClick={() => handleJoinRandomParticipants('미술')}>
           미술
         </button>
         <br />
-        <button onClick={() => handleFetchRandomParticipants('영화')}>
+        <button onClick={() => handleJoinRandomParticipants('영화')}>
           영화
         </button>
         <br />
-        <button onClick={() => handleFetchRandomParticipants('독서')}>
+        <button onClick={() => handleJoinRandomParticipants('독서')}>
           독서
         </button>
         <br />
-        <button onClick={() => handleFetchRandomParticipants('대화')}>
+        <button onClick={() => handleJoinRandomParticipants('대화')}>
           대화
         </button>
         <br />

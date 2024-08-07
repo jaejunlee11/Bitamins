@@ -18,7 +18,9 @@ const CreateRoomPage: React.FC = () => {
     e.preventDefault()
     try {
       const startDateTime = new Date(startTime)
-      const endDateTime = new Date(startDateTime.getTime() + 2 * 60 * 60 * 1000) // 2시간 후
+      const endDateTime = new Date(
+        startDateTime.getTime() + 24 * 14 * 60 * 60 * 1000
+      ) // 2시간 후
 
       const roomData = {
         category,
@@ -39,6 +41,7 @@ const CreateRoomPage: React.FC = () => {
         password: response.password,
         startTime: response.startTime,
         sessionId: response.sessionId,
+        token: response.token,
       }
 
       console.log('Join Data:', joinData) // joinData 확인

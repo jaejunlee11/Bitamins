@@ -33,7 +33,7 @@ export const createRoom = async (roomData: RoomData) => {
 
 interface JoinData {
   id: number
-  isPrivated: number
+  isPrivated: boolean
   password: string | null
   startTime: string
   sessionId: string
@@ -48,7 +48,7 @@ export const joinRoom = async (joinData: JoinData) => {
   return response.data
 }
 
-export const fetchRandomParticipants = async (type: string) => {
+export const joinRandomParticipants = async (type: string) => {
   console.log(type)
   try {
     const response = await axiosInstance.post(
@@ -66,5 +66,5 @@ export default {
   fetchConsultations,
   createRoom,
   joinRoom,
-  fetchRandomParticipants,
+  joinRandomParticipants,
 }
