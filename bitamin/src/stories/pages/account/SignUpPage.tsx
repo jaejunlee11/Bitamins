@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axiosInstance, { setAccessToken } from 'api/axiosInstance' // 경로 수정
+import axiosInstance from 'api/axiosInstance' // 경로 수정
 import useAuthStore from 'store/useAuthStore' // 경로 수정
 import { useCookies } from 'react-cookie'
 import { useNavigate } from 'react-router-dom'
@@ -16,7 +16,7 @@ const SignUpPage: React.FC = () => {
     sidoName: '',
     gugunName: '',
     dongName: '',
-    profileImage: 'null', // 파일은 null로 초기화
+    profileImage: null as File | null, // 파일은 null로 초기화
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -27,7 +27,6 @@ const SignUpPage: React.FC = () => {
   const {
     setAccessToken: setAuthAccessToken,
     setRefreshToken: setAuthRefreshToken,
-    clearAuth,
   } = useAuthStore()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,11 +60,9 @@ const SignUpPage: React.FC = () => {
     formData.append('name', signupForm.name)
     formData.append('nickname', signupForm.nickname)
     formData.append('password', signupForm.password)
-    formData.append('sidoName', signupForm.sidoName)
-    // formData.append('birthday', signupForm.birthday)
-    // formData.append('gugunName', signupForm.gugunName)
-    // formData.append('dongName', signupForm.dongName)
-    // 필수 아닌 정보 입력
+    if (signupForm.profileImage) {
+      formData.append('profileImage', signupForm.profileImage)
+    }
     if (signupForm.birthday) {
       formData.append('birthday', signupForm.birthday)
     }
@@ -78,22 +75,20 @@ const SignUpPage: React.FC = () => {
     if (signupForm.dongName) {
       formData.append('dongName', signupForm.dongName)
     }
-    // FormData의 모든 값을 출력하여 확인합니다.
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`)
-    }
 
     try {
-      console.log('Sign-up request data:', Array.from(formData.entries())) // 요청 데이터 확인
       const response = await axiosInstance.post(
-        'https://i11b105.p.ssafy.io/api/members/register',
-        formData
+        '/api/members/register',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
       )
-      console.log('Server response:', response.data) // 서버 응답 확인
 
       const { accessToken, refreshToken } = response.data
 
-      setAccessToken(accessToken) // axiosInstance에 accessToken 설정
       setAuthAccessToken(accessToken) // zustand 상태 관리에 accessToken 설정
       setAuthRefreshToken(refreshToken) // zustand 상태 관리에 refreshToken 설정
       setCookie('refreshToken', refreshToken, {

@@ -1,10 +1,9 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, ChangeEvent } from 'react'
 import PhotoUpload from 'stories/organisms/PhotoUpload'
 import styles from 'styles/account/MyPage.module.css'
 import HospitalMap from 'stories/organisms/HospitalMap'
 import Button from 'stories/atoms/Button'
-// import { useNavigate } from 'react-router-dom'
-import { fetchUserInfo } from '@/api/userAPI'
+import { fetchUserInfo, updateUserInfo } from '@/api/userAPI'
 
 const MyPage: React.FC = () => {
   const [userInfo, setUserInfo] = useState({
@@ -15,17 +14,37 @@ const MyPage: React.FC = () => {
     sidoName: '',
     gugunName: '',
     dongName: '',
+    profileImage: null as File | null, // 파일은 null로 초기화
+  })
+
+  const [location, setLocation] = useState({
+    lat: '',
+    lng: '',
   })
 
   const [isPhotoUploadOpen, setIsPhotoUploadOpen] = useState(false)
   const [isFrameOpen, setFrameOpen] = useState(false)
   const [isFrame1Open, setFrame1Open] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
     const getUserInfo = async () => {
       try {
         const data = await fetchUserInfo()
-        setUserInfo(data)
+        setUserInfo({
+          email: data.email,
+          name: data.name,
+          nickname: data.nickname,
+          birthday: data.birthday,
+          sidoName: data.sidoName,
+          gugunName: data.gugunName,
+          dongName: data.dongName,
+          profileImage: null,
+        })
+        setLocation({
+          lat: data.lat,
+          lng: data.lng,
+        })
       } catch (error) {
         console.error(error)
       }
@@ -62,81 +81,117 @@ const MyPage: React.FC = () => {
     // Add your code here
   }, [])
 
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value, files } = e.target
+    if (name === 'profileImage' && files) {
+      setUserInfo((prevUserInfo) => ({
+        ...prevUserInfo,
+        profileImage: files[0],
+      }))
+    } else {
+      setUserInfo((prevUserInfo) => ({
+        ...prevUserInfo,
+        [name]: value,
+      }))
+    }
+  }
+
+  const handleUpdateUserInfo = async () => {
+    console.log(userInfo)
+    try {
+      await updateUserInfo(userInfo)
+      alert('정보가 성공적으로 수정되었습니다.')
+    } catch (error) {
+      console.error(error)
+      alert('정보 수정에 실패했습니다.')
+    }
+  }
+
   return (
     <>
       <Button
-        label={'정보 수정'}
+        label={isEditing ? '취소' : '정보 수정'}
         type={'DEFAULT'}
-        onClick={() => {
-          console.log('정보수정 버튼 클릭')
-        }}
+        onClick={() => setIsEditing(!isEditing)}
       />
       <div className={styles.div}>
         <div className={styles.child} />
         <div className={styles.item} />
         <div className={styles.frameParent}>
-          <div className={styles.frameWrapper}>
-            <div className={styles.frameGroup}>
-              <div className={styles.userProfile03Wrapper}>
-                <img
-                  className={styles.userProfile03Icon}
-                  alt=""
-                  src="user-profile-03.svg"
-                />
-              </div>
-              <div className={styles.eMail}>{userInfo.email}</div>
+          {isEditing ? (
+            <div>
+              <input
+                type="text"
+                name="email"
+                value={userInfo.email}
+                onChange={handleInputChange}
+              />
+              <input
+                type="text"
+                name="name"
+                value={userInfo.name}
+                onChange={handleInputChange}
+              />
+              <input
+                type="text"
+                name="nickname"
+                value={userInfo.nickname}
+                onChange={handleInputChange}
+              />
+              <input
+                type="date"
+                name="birthday"
+                value={userInfo.birthday}
+                onChange={handleInputChange}
+              />
+              <input
+                type="text"
+                name="sidoName"
+                value={userInfo.sidoName}
+                onChange={handleInputChange}
+              />
+              <input
+                type="text"
+                name="gugunName"
+                value={userInfo.gugunName}
+                onChange={handleInputChange}
+              />
+              <input
+                type="text"
+                name="dongName"
+                value={userInfo.dongName}
+                onChange={handleInputChange}
+              />
+              <input
+                type="file"
+                name="profileImage"
+                accept="image/*"
+                onChange={handleInputChange}
+              />
+              <Button
+                label={'저장'}
+                type={'DEFAULT'}
+                onClick={handleUpdateUserInfo}
+              />
             </div>
-          </div>
-          <div className={styles.frameWrapper}>
-            <div className={styles.frameGroup}>
-              <div className={styles.userProfile03Container}>
+          ) : (
+            <div>
+              <div>{userInfo.email}</div>
+              <div>{userInfo.name}</div>
+              <div>{userInfo.nickname}</div>
+              <div>{userInfo.birthday}</div>
+              <div>{userInfo.sidoName}</div>
+              <div>{userInfo.gugunName}</div>
+              <div>{userInfo.dongName}</div>
+              {userInfo.profileImage && (
                 <img
-                  className={styles.userProfile03Icon}
-                  alt=""
-                  src="user-profile-03.svg"
+                  src={URL.createObjectURL(userInfo.profileImage)}
+                  alt="Profile"
+                  className={styles.profileImage}
                 />
-              </div>
-              <div className={styles.eMail}>{userInfo.name}</div>
+              )}
             </div>
-          </div>
-          <div className={styles.frameWrapper}>
-            <div className={styles.frameGroup}>
-              <div className={styles.userProfile03Container}>
-                <img
-                  className={styles.userProfile03Icon}
-                  alt=""
-                  src="user-profile-03.svg"
-                />
-              </div>
-              <div className={styles.eMail}>{userInfo.nickname}</div>
-            </div>
-          </div>
-          <div className={styles.frameWrapper}>
-            <div className={styles.frameGroup}>
-              <div className={styles.userProfile03Container}>
-                <img
-                  className={styles.userProfile03Icon}
-                  alt=""
-                  src="user-profile-03.svg"
-                />
-              </div>
-              <div className={styles.eMail}>{userInfo.sidoName}</div>
-              <div className={styles.eMail}>{userInfo.gugunName}</div>
-              <div className={styles.eMail}>{userInfo.dongName}</div>
-            </div>
-          </div>
-          <div className={styles.frameWrapper}>
-            <div className={styles.frameGroup}>
-              <div className={styles.userProfile03Container}>
-                <img
-                  className={styles.userProfile03Icon}
-                  alt=""
-                  src="calendar-06.svg"
-                />
-              </div>
-              <div className={styles.div3}>{userInfo.birthday}</div>
-            </div>
-          </div>
+          )}
         </div>
         <div className={styles.inner} />
         <div className={styles.div4}>마이페이지</div>
@@ -181,16 +236,8 @@ const MyPage: React.FC = () => {
           src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_APP_KAKAOMAP_KEY}&libraries=services"
         ></script>
         <div className={styles.mapWrapper}>
-          <HospitalMap />
+          <HospitalMap lat={location.lat} lng={location.lng} />
         </div>
-        {/* <div className={styles.child2} />
-        <div className={styles.child3} />
-        <div className={styles.child4} />
-        <div className={styles.child5} />
-        <div className={styles.child6} />
-        <div className={styles.child7} />
-        <div className={styles.child8} /> */}
-
         <div className={styles.div37}>검사 소견</div>
         <div className={styles.navbar}>
           <div className={styles.bitamin} onClick={onBItAMinTextClick}>
