@@ -52,9 +52,6 @@ public class MemberService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @Autowired
-    private S3Service s3Service;
-
     @Transactional
     public Long register(MemberRequestDTO memberDTO, MultipartFile image) throws IOException {
         String dongCode = findDongCode(memberDTO.getSidoName(), memberDTO.getGugunName(), memberDTO.getDongName());
