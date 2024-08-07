@@ -31,6 +31,17 @@ public class MissionController {
         // Service 호출
         MissionResponse missionResponse = missionService.changeMission(missionId);
         return missionResponse;
+    }
 
+    // 완료한 미션 조회 기능
+    @GetMapping("/completed")
+    public MissionResponse getMissionCompleted(@RequestHeader(value = "Authorization", required = false) String tokenHeader
+                                               ,@RequestParam("date") String date){
+        // ID 추출
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+
+        // Service 호출
+        MissionResponse missionResponse = missionService.completedMission(memberId, date);
+        return missionResponse;
     }
 }
