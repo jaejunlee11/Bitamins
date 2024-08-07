@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import useConsultationStore from 'store/useConsultationStore'
-import { fetchRandomParticipants } from 'api/consultationAPI'
+import { fetchRandomParticipants, joinRoom } from 'api/consultationAPI'
 
 const ConsultationList: React.FC = () => {
   const { consultations, fetchAndSetConsultations } = useConsultationStore(
@@ -11,6 +11,10 @@ const ConsultationList: React.FC = () => {
   )
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [password, setPassword] = useState<string>('')
+  const [selectedConsultationId, setSelectedConsultationId] = useState<
+    number | null
+  >(null)
 
   const loadConsultations = async () => {
     try {
@@ -34,6 +38,28 @@ const ConsultationList: React.FC = () => {
     } catch (error) {
       alert('Failed to fetch random participants')
       console.error('Error fetching random participants:', error)
+    }
+  }
+
+  const handleJoinRoom = async (
+    consultationId: number,
+    sessionId: string,
+    isPrivated: boolean
+  ) => {
+    try {
+      const joinData = {
+        id: consultationId,
+        isPrivated,
+        password: isPrivated ? password : null,
+        startTime: new Date().toISOString(),
+        sessionId,
+      }
+      const response = await joinRoom(joinData)
+      console.log('Join Room Response:', response)
+      alert('Joined room successfully!')
+    } catch (error) {
+      alert('Failed to join room')
+      console.error('Error joining room:', error)
     }
   }
 
@@ -67,6 +93,39 @@ const ConsultationList: React.FC = () => {
             <p>
               <strong>Session ID:</strong> {consultation.sessionId}
             </p>
+            {consultation.isPrivated ? (
+              <div>
+                <input
+                  type="password"
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  onClick={() =>
+                    handleJoinRoom(
+                      consultation.id,
+                      consultation.sessionId,
+                      consultation.isPrivated
+                    )
+                  }
+                >
+                  Join Room
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() =>
+                  handleJoinRoom(
+                    consultation.id,
+                    consultation.sessionId,
+                    consultation.isPrivated
+                  )
+                }
+              >
+                Join Room
+              </button>
+            )}
             <br />
           </li>
         ))}

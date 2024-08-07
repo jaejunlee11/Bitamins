@@ -40,7 +40,6 @@ interface JoinData {
 }
 
 export const joinRoom = async (joinData: JoinData) => {
-  console.log('Join Data:', joinData) // joinData 확인
   const response = await axiosInstance.post(
     '/consultations/participants',
     joinData
