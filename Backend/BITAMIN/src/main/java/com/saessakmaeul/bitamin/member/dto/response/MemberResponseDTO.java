@@ -24,7 +24,5 @@ public class MemberResponseDTO {
     private String lat;
     private String lng;
     private LocalDate birthday;
-    private String profileKey;
     private String profileUrl;
-    private MultipartFile profileImage;
 }
