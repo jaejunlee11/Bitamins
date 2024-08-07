@@ -7,6 +7,7 @@ import com.saessakmaeul.bitamin.member.repository.DongCodeRepository;
 import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
+import com.saessakmaeul.bitamin.service.S3Service;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import com.saessakmaeul.bitamin.util.file.controller.FileController;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -39,8 +41,8 @@ public class MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final HealthReportRepository healthReportRepository;
-    private final FileController fileController;
     private final DongCodeRepository dongCodeRepository;
+    private final S3Service s3Service;
 
 
     @Autowired
@@ -50,7 +52,7 @@ public class MemberService {
     private JwtUtil jwtUtil;
 
     @Transactional
-    public Long register(MemberRequestDTO memberDTO) throws IOException {
+    public Long register(MemberRequestDTO memberDTO, MultipartFile image) throws IOException {
         String dongCode = findDongCode(memberDTO.getSidoName(), memberDTO.getGugunName(), memberDTO.getDongName());
         Member member = Member.builder()
                 .email(memberDTO.getEmail())
@@ -62,22 +64,17 @@ public class MemberService {
                 .role(Role.ROLE_MEMBER)
                 .build();
 
-        if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().isEmpty()) {
-            // 파일 업로드 후 파일 이름을 받아옴
-            ResponseEntity<String> uploadResponse = fileController.upload(memberDTO.getProfileImage());
-            if (uploadResponse.getStatusCode() == HttpStatus.OK) {
-                String fileName = uploadResponse.getBody();
-                member.setProfileKey(fileName);
-                member.setProfileUrl("/file/" + fileName);
-            } else {
-                throw new IOException("파일 업로드 실패: " + uploadResponse.getBody());
-            }
+        if (image != null && !image.isEmpty()) {
+            String fileUrl = s3Service.uploadFile(image);
+            member.setProfileUrl(fileUrl);
         }
 
         member = memberRepository.save(member);
 
         return member.getId();
     }
+
+
 
 
     // sidoName, gugunName, dongName으로 dongCode 찾는 메서드
@@ -174,7 +171,7 @@ public class MemberService {
 
 
     @Transactional
-    public int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO) throws IOException {
+    public int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO, MultipartFile image) throws IOException {
         Optional<Member> optionalMember = memberRepository.findById(userId);
         if (optionalMember.isPresent()) {
             Member member = optionalMember.get();
@@ -187,15 +184,9 @@ public class MemberService {
                 member.setDongCode(dongCode);
             }
 
-            if (memberUpdateRequestDTO.getProfileImage() != null && !memberUpdateRequestDTO.getProfileImage().isEmpty()) {
-                ResponseEntity<String> uploadResponse = fileController.upload(memberUpdateRequestDTO.getProfileImage());
-                if (uploadResponse.getStatusCode() == HttpStatus.OK) {
-                    String fileName = uploadResponse.getBody();
-                    member.setProfileKey(fileName);
-                    member.setProfileUrl("/file/" + fileName);
-                } else {
-                    throw new IOException("파일 업로드 실패: " + uploadResponse.getBody());
-                }
+            if (image != null && !image.isEmpty()) {
+                String fileUrl = s3Service.uploadFile(image);
+                member.setProfileUrl(fileUrl);
             }
             memberRepository.save(member);
             return 1;
