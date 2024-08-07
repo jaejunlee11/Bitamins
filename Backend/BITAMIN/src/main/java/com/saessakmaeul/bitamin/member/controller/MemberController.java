@@ -259,4 +259,18 @@ import java.util.List;
     public List<String> getDongNamesBySidoNameAndGugunName(@PathVariable String sidoName, @PathVariable String gugunName) {
         return dongCodeRepository.findDongNamesBySidoNameAndGugunName(sidoName, gugunName);
     }
+
+    // 이메일 중복확인
+    @PostMapping("/register/check-email/{email}")
+    public int checkEmail(@PathVariable String email) {
+        return memberService.duplicateCheckEmail(email);
+    }
+
+    // 닉네임 중복확인
+    @PostMapping("/register/check-nickname/{nickname}")
+    public int checkNickname(@PathVariable String nickname) {
+        return memberService.duplicateCheckNickname(nickname);
+    }
+
+
 }
