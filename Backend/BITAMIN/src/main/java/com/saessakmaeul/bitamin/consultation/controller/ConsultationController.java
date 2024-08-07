@@ -93,6 +93,12 @@ public class ConsultationController {
                                         @RequestBody JoinRandomRequest joinRandomRequest) throws OpenViduJavaClientException, OpenViduHttpException{
         Map<String,Object> params = new HashMap<>();
 
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+        String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
+
+        joinRandomRequest.setMemberId(memberId);
+        joinRandomRequest.setMemberNickname(memberNickname);
+
         Map<String, Object> map = consultationService.findRandomSessionId(joinRandomRequest);
 
         if(map == null) return ResponseEntity.status(404).body("방 없음");
@@ -107,12 +113,6 @@ public class ConsultationController {
         if (session == null) return ResponseEntity.status(404).body("못 찾음");
 
         // DB에 저장
-        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
-        String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
-
-        joinRandomRequest.setMemberId(memberId);
-        joinRandomRequest.setMemberNickname(memberNickname);
-
         JoinRandomResponse joinRandomResponse = consultationService.joinRandom(joinRandomRequest);
 
         if(joinRandomResponse == null) return ResponseEntity.status(404).body("방에 참여되지 않았습니다.");

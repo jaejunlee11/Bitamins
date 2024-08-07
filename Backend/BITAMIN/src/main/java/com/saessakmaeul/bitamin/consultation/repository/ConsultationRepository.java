@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,20 +19,22 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
             "FROM consultation " +
             "WHERE current_participants <= ?1 " +
             "AND is_privated = 0 " +
+            "AND id NOT IN ?2 " +
             "ORDER BY RAND() " +
             "LIMIT 1 ",
             nativeQuery = true)
-    Optional<Consultation> findByCurrentParticipantsLessThanEqualOrderByRand(int currentParticipant);
+    Optional<Consultation> findByCurrentParticipantsLessThanEqualOrderByRand(int currentParticipant, List<Long> consultationIds);
 
     @Query(value = "SELECT * " +
             "FROM consultation "+
             "WHERE category = ?1 " +
             "AND current_participants <= ?2 " +
             "AND is_privated = 0 " +
+            "AND id NOT IN ?3 " +
             "ORDER BY RAND() " +
             "LIMIT 1 ",
             nativeQuery = true)
-    Optional<Consultation> findByCategoryAndCurrentParticipantsLessThanEqualOrderByRand(String category, int currentParticipant);
+    Optional<Consultation> findByCategoryAndCurrentParticipantsLessThanEqualOrderByRand(String category, int currentParticipant, List<Long> consultationIds);
 
     @Query(value = "SELECT id " +
             "FROM consultation " +
