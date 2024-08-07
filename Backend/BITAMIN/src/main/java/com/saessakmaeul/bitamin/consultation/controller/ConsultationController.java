@@ -85,6 +85,8 @@ public class ConsultationController {
 
         joinRoomResponse.setToken(connection.getToken());
 
+        joinRoomResponse.setSessionId(joinRoomRequest.getSessionId());
+
         return ResponseEntity.status(200).body(joinRoomResponse);
     }
 
@@ -123,6 +125,7 @@ public class ConsultationController {
 
         joinRandomResponse.setToken(connection.getToken());
 
+        joinRandomResponse.setSessionId(joinRandomRequest.getSessionId());
         return ResponseEntity.status(200).body(joinRandomResponse);
     }
 
