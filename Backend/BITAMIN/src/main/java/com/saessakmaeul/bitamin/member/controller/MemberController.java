@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -57,15 +58,16 @@ import java.util.List;
      * @param memberDTO 회원가입 요청 정보
      * @return 회원 ID */
     @PostMapping("/register")
-    public ResponseEntity<Long> register(@RequestBody MemberRequestDTO memberDTO) {
+    public ResponseEntity<Long> register(@RequestPart("memberDTO") MemberRequestDTO memberDTO, @RequestPart("image") MultipartFile image) {
         try {
-            Long memberId = memberService.register(memberDTO);
+            Long memberId = memberService.register(memberDTO, image);
             return ResponseEntity.ok(memberId);
         } catch (IOException e) {
             logger.error("회원가입 오류: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
 
     /** 회원 한명 조회 API
      * @param request HTTP 요청 객체
@@ -93,20 +95,23 @@ import java.util.List;
      * @param memberUpdateRequestDTO 회원 수정 요청 정보
      * @return 수정 결과 (1: 성공, 0: 실패) */
     @PutMapping("/update-member")
-    public ResponseEntity<Integer> updateMemberByToken(HttpServletRequest request, @RequestBody MemberUpdateRequestDTO memberUpdateRequestDTO) {
+    public ResponseEntity<Integer> updateMemberByToken(HttpServletRequest request,
+                                                       @RequestPart("memberUpdateRequestDTO") MemberUpdateRequestDTO memberUpdateRequestDTO,
+                                                       @RequestPart("image") MultipartFile image) {
         try {
             String token = getTokenFromRequest(request);
             if (token == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
             Long userId = jwtUtil.extractUserId(token);
-            int updateResult = memberService.updateMember(userId, memberUpdateRequestDTO);
+            int updateResult = memberService.updateMember(userId, memberUpdateRequestDTO, image);
             return updateResult == 1 ? ResponseEntity.ok(updateResult) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(updateResult);
         } catch (IOException e) {
             logger.error("회원 정보 수정 오류: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(0);
         }
     }
+
 
     /** 회원 id, 닉네임 조회 API (AccessToken 파싱해서 회원 id, 닉네임 조회)
      * @param request HTTP 요청 객체

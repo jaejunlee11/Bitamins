@@ -15,13 +15,33 @@ public class MissionController {
     private final JwtUtil jwtUtil;
 
     // 데일리 미션 조회
-    @GetMapping("")
+    @GetMapping
     public MissionResponse getMission(@RequestHeader(value = "Authorization", required = false) String tokenHeader){
         // ID 추출
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
         // Service 호출
         MissionResponse missionResponse = missionService.readMission(memberId);
+        return missionResponse;
+    }
+
+    // 미션 교체
+    @GetMapping("/substitute")
+    public MissionResponse getMissionSubstitute(@RequestParam("missionId") Long missionId){
+        // Service 호출
+        MissionResponse missionResponse = missionService.changeMission(missionId);
+        return missionResponse;
+    }
+
+    // 완료한 미션 조회 기능
+    @GetMapping("/completed")
+    public MissionResponse getMissionCompleted(@RequestHeader(value = "Authorization", required = false) String tokenHeader
+                                               ,@RequestParam("date") String date){
+        // ID 추출
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+
+        // Service 호출
+        MissionResponse missionResponse = missionService.completedMission(memberId, date);
         return missionResponse;
     }
 }
