@@ -16,7 +16,7 @@ const SignUpPage: React.FC = () => {
     sidoName: '',
     gugunName: '',
     dongName: '',
-    profileImage: null, // 파일은 null로 초기화
+    profileImage: 'null', // 파일은 null로 초기화
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -61,12 +61,22 @@ const SignUpPage: React.FC = () => {
     formData.append('name', signupForm.name)
     formData.append('nickname', signupForm.nickname)
     formData.append('password', signupForm.password)
-    formData.append('birthday', signupForm.birthday)
     formData.append('sidoName', signupForm.sidoName)
-    formData.append('gugunName', signupForm.gugunName)
-    formData.append('dongName', signupForm.dongName)
-    if (signupForm.profileImage) {
-      formData.append('profileImage', signupForm.profileImage)
+    // formData.append('birthday', signupForm.birthday)
+    // formData.append('gugunName', signupForm.gugunName)
+    // formData.append('dongName', signupForm.dongName)
+    // 필수 아닌 정보 입력
+    if (signupForm.birthday) {
+      formData.append('birthday', signupForm.birthday)
+    }
+    if (signupForm.sidoName) {
+      formData.append('sidoName', signupForm.sidoName)
+    }
+    if (signupForm.gugunName) {
+      formData.append('gugunName', signupForm.gugunName)
+    }
+    if (signupForm.dongName) {
+      formData.append('dongName', signupForm.dongName)
     }
     // FormData의 모든 값을 출력하여 확인합니다.
     for (let [key, value] of formData.entries()) {

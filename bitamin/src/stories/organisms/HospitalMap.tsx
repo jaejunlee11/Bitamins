@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
+import { fetchUserInfo } from '@/api/userAPI'
 
 declare global {
   interface Window {

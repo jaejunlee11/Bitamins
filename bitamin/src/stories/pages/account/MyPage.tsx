@@ -1,14 +1,38 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import PhotoUpload from 'stories/organisms/PhotoUpload'
 import styles from 'styles/account/MyPage.module.css'
 import HospitalMap from 'stories/organisms/HospitalMap'
 import Button from 'stories/atoms/Button'
-import { Navigate } from 'react-router-dom'
+// import { useNavigate } from 'react-router-dom'
+import { fetchUserInfo } from '@/api/userAPI'
 
 const MyPage: React.FC = () => {
+  const [userInfo, setUserInfo] = useState({
+    email: '',
+    name: '',
+    nickname: '',
+    birthday: '',
+    sidoName: '',
+    gugunName: '',
+    dongName: '',
+  })
+
   const [isPhotoUploadOpen, setIsPhotoUploadOpen] = useState(false)
   const [isFrameOpen, setFrameOpen] = useState(false)
   const [isFrame1Open, setFrame1Open] = useState(false)
+
+  useEffect(() => {
+    const getUserInfo = async () => {
+      try {
+        const data = await fetchUserInfo()
+        setUserInfo(data)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    getUserInfo()
+  }, [])
 
   const openPhotoUpload = useCallback(() => {
     setIsPhotoUploadOpen(true)
@@ -60,7 +84,7 @@ const MyPage: React.FC = () => {
                   src="user-profile-03.svg"
                 />
               </div>
-              <div className={styles.eMail}>e-mail</div>
+              <div className={styles.eMail}>{userInfo.email}</div>
             </div>
           </div>
           <div className={styles.frameWrapper}>
@@ -72,7 +96,7 @@ const MyPage: React.FC = () => {
                   src="user-profile-03.svg"
                 />
               </div>
-              <div className={styles.eMail}>이름</div>
+              <div className={styles.eMail}>{userInfo.name}</div>
             </div>
           </div>
           <div className={styles.frameWrapper}>
@@ -84,7 +108,21 @@ const MyPage: React.FC = () => {
                   src="user-profile-03.svg"
                 />
               </div>
-              <div className={styles.eMail}>닉네임</div>
+              <div className={styles.eMail}>{userInfo.nickname}</div>
+            </div>
+          </div>
+          <div className={styles.frameWrapper}>
+            <div className={styles.frameGroup}>
+              <div className={styles.userProfile03Container}>
+                <img
+                  className={styles.userProfile03Icon}
+                  alt=""
+                  src="user-profile-03.svg"
+                />
+              </div>
+              <div className={styles.eMail}>{userInfo.sidoName}</div>
+              <div className={styles.eMail}>{userInfo.gugunName}</div>
+              <div className={styles.eMail}>{userInfo.dongName}</div>
             </div>
           </div>
           <div className={styles.frameWrapper}>
@@ -96,7 +134,7 @@ const MyPage: React.FC = () => {
                   src="calendar-06.svg"
                 />
               </div>
-              <div className={styles.div3}>생년월일 8자리</div>
+              <div className={styles.div3}>{userInfo.birthday}</div>
             </div>
           </div>
         </div>
