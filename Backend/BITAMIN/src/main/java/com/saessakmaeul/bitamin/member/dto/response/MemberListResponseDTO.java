@@ -19,9 +19,7 @@ public class MemberListResponseDTO {
     private String nickname;
     private String dongCode;
     private LocalDate birthday;
-    private String profileKey;
     private String profileUrl;
     private Role role;
-    private MultipartFile profileImage;
 
 }
