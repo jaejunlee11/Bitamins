@@ -1,14 +1,19 @@
 package com.saessakmaeul.bitamin.mission.service;
 
+import com.saessakmaeul.bitamin.mission.dto.request.MemberMissionRequest;
+import com.saessakmaeul.bitamin.mission.dto.response.MemberMissionResponse;
 import com.saessakmaeul.bitamin.mission.dto.response.MissionResponse;
 import com.saessakmaeul.bitamin.mission.entity.MemberMission;
 import com.saessakmaeul.bitamin.mission.entity.Mission;
 import com.saessakmaeul.bitamin.mission.repository.MemberMissionRepository;
 import com.saessakmaeul.bitamin.mission.repository.MissionRepository;
+import com.saessakmaeul.bitamin.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -22,6 +27,7 @@ public class MissionService {
 
     private final MissionRepository missionRepository;
     private final MemberMissionRepository memberMissionRepository;
+    private final S3Service s3Service;
 
     // 데일리 미션 조회
     public MissionResponse readMission(Long memberId) {
@@ -110,6 +116,40 @@ public class MissionService {
                 .missionName(completedMission.getMissionName())
                 .missionDescription(completedMission.getMissionDescription())
                 .missionLevel(completedMission.getMissionLevel())
+                .build();
+    }
+
+    // 미션 등록 기능
+    @Transactional
+    public MemberMissionResponse createMemberMission(Long memberId, MemberMissionRequest memberMissionRequest) throws IOException {
+        // MemberMissionRequest에서 LocalDate로 변환
+        LocalDate completeDate = LocalDate.parse(memberMissionRequest.getCompleteDate(), DateTimeFormatter.ISO_DATE);
+
+        // S3에 이미지 업로드
+        MultipartFile missionImage = memberMissionRequest.getMissionImage();
+        String imageUrl = null;
+        if(missionImage!=null && !missionImage.isEmpty()){
+            imageUrl = s3Service.uploadFile(missionImage);
+        }
+
+        // MemberMission 엔티티 생성
+        MemberMission memberMission = new MemberMission();
+        memberMission.setCompleteDate(completeDate);
+        memberMission.setImageUrl(imageUrl);
+        memberMission.setMissionId(memberMissionRequest.getMissionId());
+        memberMission.setMissionReview(memberMissionRequest.getMissionReview());
+        memberMission.setUserId(memberId);
+
+        // 저장하기
+        MemberMission savedMemberMission = memberMissionRepository.save(memberMission);
+
+        return MemberMissionResponse.builder()
+                .id(savedMemberMission.getId())
+                .completeDate(savedMemberMission.getCompleteDate())
+                .imageUrl(savedMemberMission.getImageUrl())
+                .missionId(savedMemberMission.getMissionId())
+                .missionReview(savedMemberMission.getMissionReview())
+                .userId(savedMemberMission.getUserId())
                 .build();
     }
 }
