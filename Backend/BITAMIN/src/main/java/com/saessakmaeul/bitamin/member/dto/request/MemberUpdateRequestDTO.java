@@ -17,9 +17,6 @@ public class MemberUpdateRequestDTO {
     private String sidoName;
     private String gugunName;
     private String dongName;
-    private String dongCode;
     private LocalDate birthday;
-    private String profileKey;
     private String profileUrl;
-    private MultipartFile profileImage;
 }
