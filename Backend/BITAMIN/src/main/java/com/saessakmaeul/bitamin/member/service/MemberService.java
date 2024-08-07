@@ -7,6 +7,7 @@ import com.saessakmaeul.bitamin.member.repository.DongCodeRepository;
 import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
+import com.saessakmaeul.bitamin.service.S3Service;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import com.saessakmaeul.bitamin.util.file.controller.FileController;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,6 +51,9 @@ public class MemberService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private S3Service s3Service;
+
     @Transactional
     public Long register(MemberRequestDTO memberDTO) throws IOException {
         String dongCode = findDongCode(memberDTO.getSidoName(), memberDTO.getGugunName(), memberDTO.getDongName());
@@ -63,15 +68,11 @@ public class MemberService {
                 .build();
 
         if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().isEmpty()) {
-            // 파일 업로드 후 파일 이름을 받아옴
-            ResponseEntity<String> uploadResponse = fileController.upload(memberDTO.getProfileImage());
-            if (uploadResponse.getStatusCode() == HttpStatus.OK) {
-                String fileName = uploadResponse.getBody();
-                member.setProfileKey(fileName);
-                member.setProfileUrl("/file/" + fileName);
-            } else {
-                throw new IOException("파일 업로드 실패: " + uploadResponse.getBody());
-            }
+            String fileName = UUID.randomUUID() + "_" + memberDTO.getProfileImage().getOriginalFilename();
+            String profileUrl = s3Service.uploadFile(memberDTO.getProfileImage());
+
+            member.setProfileKey(fileName);
+            member.setProfileUrl(profileUrl);
         }
 
         member = memberRepository.save(member);
@@ -188,14 +189,11 @@ public class MemberService {
             }
 
             if (memberUpdateRequestDTO.getProfileImage() != null && !memberUpdateRequestDTO.getProfileImage().isEmpty()) {
-                ResponseEntity<String> uploadResponse = fileController.upload(memberUpdateRequestDTO.getProfileImage());
-                if (uploadResponse.getStatusCode() == HttpStatus.OK) {
-                    String fileName = uploadResponse.getBody();
-                    member.setProfileKey(fileName);
-                    member.setProfileUrl("/file/" + fileName);
-                } else {
-                    throw new IOException("파일 업로드 실패: " + uploadResponse.getBody());
-                }
+                String fileName = UUID.randomUUID() + "_" + memberUpdateRequestDTO.getProfileImage().getOriginalFilename();
+                String profileUrl = s3Service.uploadFile(memberUpdateRequestDTO.getProfileImage());
+
+                member.setProfileKey(fileName);
+                member.setProfileUrl(profileUrl);
             }
             memberRepository.save(member);
             return 1;
