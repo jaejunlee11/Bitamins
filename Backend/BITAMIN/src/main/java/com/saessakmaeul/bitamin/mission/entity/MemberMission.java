@@ -18,11 +18,8 @@ public class MemberMission {
     @Column(name = "complete_date", nullable = false)
     private LocalDate completeDate;
 
-    @Column(name = "mission_key")
-    private String missionKey;
-
-    @Column(name = "mission_url")
-    private String missionUrl;
+    @Column(name = "image_url")
+    private String imageUrl;
 
     @Column(name = "mission_review")
     private String missionReview;
