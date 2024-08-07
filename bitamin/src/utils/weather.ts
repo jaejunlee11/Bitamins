@@ -70,7 +70,7 @@ export const fetchWeatherData = async (
     nx: string,
     ny: string
 ): Promise<any> => {
-    const url = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${serviceKey}&numOfRows=288&pageNo=1&dataType=json&base_date=${base_date}&base_time=${base_time}&nx=${nx}&ny=${ny}`;
+    const url = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${serviceKey}&numOfRows=10&pageNo=1&dataType=json&base_date=${base_date}&base_time=${base_time}&nx=${nx}&ny=${ny}`;
     const response = await axios.get(url);
     return response.data.response.body.items.item;
 };
@@ -88,5 +88,12 @@ export const parseWeatherData = (
         // @ts-ignore
         informations[dateTimeKey][category] = fcstValue;
     });
-    return informations;
+
+    // 가장 최근 시간 데이터만 반환
+    const latestKey = Object.keys(informations).sort().pop();
+    if (latestKey) {
+        return { [latestKey]: informations[latestKey] };
+    }
+
+    return {};
 };
