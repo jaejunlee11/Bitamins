@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -41,8 +42,8 @@ public class MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final HealthReportRepository healthReportRepository;
-    private final FileController fileController;
     private final DongCodeRepository dongCodeRepository;
+    private final S3Service s3Service;
 
 
     @Autowired
@@ -55,7 +56,7 @@ public class MemberService {
     private S3Service s3Service;
 
     @Transactional
-    public Long register(MemberRequestDTO memberDTO) throws IOException {
+    public Long register(MemberRequestDTO memberDTO, MultipartFile image) throws IOException {
         String dongCode = findDongCode(memberDTO.getSidoName(), memberDTO.getGugunName(), memberDTO.getDongName());
         Member member = Member.builder()
                 .email(memberDTO.getEmail())
@@ -67,18 +68,17 @@ public class MemberService {
                 .role(Role.ROLE_MEMBER)
                 .build();
 
-        if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().isEmpty()) {
-            String fileName = UUID.randomUUID() + "_" + memberDTO.getProfileImage().getOriginalFilename();
-            String profileUrl = s3Service.uploadFile(memberDTO.getProfileImage());
-
-            member.setProfileKey(fileName);
-            member.setProfileUrl(profileUrl);
+        if (image != null && !image.isEmpty()) {
+            String fileUrl = s3Service.uploadFile(image);
+            member.setProfileUrl(fileUrl);
         }
 
         member = memberRepository.save(member);
 
         return member.getId();
     }
+
+
 
 
     // sidoName, gugunName, dongName으로 dongCode 찾는 메서드
@@ -175,7 +175,7 @@ public class MemberService {
 
 
     @Transactional
-    public int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO) throws IOException {
+    public int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO, MultipartFile image) throws IOException {
         Optional<Member> optionalMember = memberRepository.findById(userId);
         if (optionalMember.isPresent()) {
             Member member = optionalMember.get();
@@ -188,12 +188,9 @@ public class MemberService {
                 member.setDongCode(dongCode);
             }
 
-            if (memberUpdateRequestDTO.getProfileImage() != null && !memberUpdateRequestDTO.getProfileImage().isEmpty()) {
-                String fileName = UUID.randomUUID() + "_" + memberUpdateRequestDTO.getProfileImage().getOriginalFilename();
-                String profileUrl = s3Service.uploadFile(memberUpdateRequestDTO.getProfileImage());
-
-                member.setProfileKey(fileName);
-                member.setProfileUrl(profileUrl);
+            if (image != null && !image.isEmpty()) {
+                String fileUrl = s3Service.uploadFile(image);
+                member.setProfileUrl(fileUrl);
             }
             memberRepository.save(member);
             return 1;
