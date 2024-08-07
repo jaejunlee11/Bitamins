@@ -37,7 +37,7 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
             "FROM consultation " +
             "WHERE current_participants = 0 " +
             "AND session_id is null " +
-            "AND start_time < NOW() - INTERVAL 15 DAY ",
+            "AND start_time <= NOW() - INTERVAL 15 DAY ",
             nativeQuery = true)
     List<Long> findIdOfOldConsultations();
 }
