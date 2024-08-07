@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -80,4 +82,34 @@ public class MissionService {
     }
 
 
+    public MissionResponse completedMission(Long memberId, String date) {
+        // 유저가 미션 수행한 날짜 형변환
+        LocalDate completeDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
+
+        // 유저가 해당 날짜에 한 미션 ID 조회
+        Optional<MemberMission> memberMissionOpt = memberMissionRepository.findByUserIdAndCompleteDate(memberId, completeDate);
+        Long completedMissionId = memberMissionOpt.map(MemberMission::getMissionId).orElse(null);
+
+        // 미션 ID가 null인 경우 null 반환
+        if (completedMissionId == null) {
+            return null;
+        }
+
+        // 미션 ID를 통해서 해당 미션 찾기
+        Optional<Mission> completedMissionOpt = missionRepository.findById(completedMissionId);
+        Mission completedMission = completedMissionOpt.orElseThrow(() -> new RuntimeException("해당 미션이 없습니다."));
+
+        // Mission이 없는 경우 null 반환
+        if (completedMission == null) {
+            return null;
+        }
+
+        // MissionResponse로 반환
+        return MissionResponse.builder()
+                .id(completedMission.getId())
+                .missionName(completedMission.getMissionName())
+                .missionDescription(completedMission.getMissionDescription())
+                .missionLevel(completedMission.getMissionLevel())
+                .build();
+    }
 }
