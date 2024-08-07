@@ -64,19 +64,19 @@ export const deg_to_dir = (deg: number): string => {
 };
 
 export const fetchWeatherData = async (
-    serviceKey: string,
-    base_date: string,
-    base_time: string,
-    nx: string,
-    ny: string
+  serviceKey: string,
+  base_date: string,
+  base_time: string,
+  nx: string,
+  ny: string
 ): Promise<any> => {
-    const url = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${serviceKey}&numOfRows=10&pageNo=1&dataType=json&base_date=${base_date}&base_time=${base_time}&nx=${nx}&ny=${ny}`;
+    const url = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?serviceKey=${serviceKey}&numOfRows=60&pageNo=1&dataType=json&base_date=${base_date}&base_time=${base_time}&nx=${nx}&ny=${ny}`;
     const response = await axios.get(url);
     return response.data.response.body.items.item;
 };
 
 export const parseWeatherData = (
-    data: any[]
+  data: any[]
 ): { [key: string]: WeatherInfo } => {
     const informations: { [key: string]: WeatherInfo } = {};
     data.forEach((item) => {
