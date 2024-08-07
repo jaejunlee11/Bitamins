@@ -1,6 +1,7 @@
 package com.saessakmaeul.bitamin.mission.controller;
 
 import com.saessakmaeul.bitamin.mission.dto.request.MemberMissionRequest;
+import com.saessakmaeul.bitamin.mission.dto.response.CompletedMemberMissionResponse;
 import com.saessakmaeul.bitamin.mission.dto.response.MemberMissionResponse;
 import com.saessakmaeul.bitamin.mission.dto.response.MissionResponse;
 import com.saessakmaeul.bitamin.mission.service.MissionService;
@@ -40,14 +41,14 @@ public class MissionController {
 
     // 완료한 미션 조회 기능
     @GetMapping("/completed")
-    public MissionResponse getMissionCompleted(@RequestHeader(value = "Authorization", required = false) String tokenHeader
-                                               ,@RequestParam("date") String date){
+    public CompletedMemberMissionResponse getMissionCompleted(@RequestHeader(value = "Authorization", required = false) String tokenHeader
+                                               , @RequestParam("date") String date){
         // ID 추출
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
         // Service 호출
-        MissionResponse missionResponse = missionService.completedMission(memberId, date);
-        return missionResponse;
+        CompletedMemberMissionResponse completedMemberMissionResponse = missionService.completedMission(memberId, date);
+        return completedMemberMissionResponse;
     }
 
     // 미션 리뷰 등록 기능
@@ -65,4 +66,7 @@ public class MissionController {
         MemberMissionResponse memberMissionResponse = missionService.createMemberMission(memberId, memberMissionRequest);
         return memberMissionResponse;
     }
+
+    // 미션 리뷰 조회 기능
+    // public MemberMissionResponse getMemberMission
 }
