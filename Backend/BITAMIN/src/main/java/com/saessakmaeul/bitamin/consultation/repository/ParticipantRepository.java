@@ -1,6 +1,8 @@
 package com.saessakmaeul.bitamin.consultation.repository;
 
+import com.saessakmaeul.bitamin.consultation.Entity.Consultation;
 import com.saessakmaeul.bitamin.consultation.Entity.Participant;
+import com.saessakmaeul.bitamin.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
 //    List<Participant> findByConsultationId(Long consultationId);
-    Optional<Participant> findByMemberIdAndConsultationId(Long memberId, Long consultationId);
-    List<Participant> findByMemberId(Long memberId);
-    List<Participant> findByConsultationIdInAndMemberIdNotIn(List<Long> consultationIdList, List<Long> memberIdList);
+    Optional<Participant> findByMemberIdAndConsultationId(Member memberId, Consultation consultationId);
+    List<Participant> findByMemberId(Member memberId);
+    List<Participant> findByConsultationIdInAndMemberIdNotIn(List<Consultation> consultationIdList, List<Member> memberIdList);
 }

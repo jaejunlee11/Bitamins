@@ -55,10 +55,6 @@ dependencies {
     implementation 'software.amazon.awssdk:core:2.20.40'
 
     implementation 'io.openvidu:openvidu-java-client:2.30.0'
-
-    implementation 'software.amazon.awssdk:s3:2.17.89'
-    implementation 'software.amazon.awssdk:auth:2.17.89'
-    implementation 'software.amazon.awssdk:core:2.20.40'
 }
 
 tasks.named('test') {

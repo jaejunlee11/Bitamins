@@ -98,10 +98,13 @@ public class ConsultationService {
     // 방 리스트에서 참가
     @Transactional
     public JoinRoomResponse joinRoom(JoinRoomRequest joinRoomRequest) {
+        Member m = Member.builder().id(joinRoomRequest.getMemberId()).build();
+        Consultation c = Consultation.builder().id(joinRoomRequest.getId()).build();
+
         Participant newParticipant = Participant.builder()
-                .memberId(joinRoomRequest.getMemberId())
+                .memberId(m)
                 .memberNickname(joinRoomRequest.getMemberNickname())
-                .consultationId(joinRoomRequest.getId())
+                .consultationId(c)
                 .consultationDate(joinRoomRequest.getConsultationDate())
                 .build();
 
@@ -133,7 +136,7 @@ public class ConsultationService {
             throw new RuntimeException("db 오류 rollback");
         }
 
-        Optional<Member> member = memberRepository.findById(newParticipant.getMemberId());
+        Optional<Member> member = memberRepository.findById(newParticipant.getMemberId().getId());
 
         if(member.isEmpty()) return null;
 
@@ -148,12 +151,21 @@ public class ConsultationService {
     }
 
     public Map<String, Object> findRandomSessionId(JoinRandomRequest joinRandomRequest) {
+        Member m = Member.builder().id(joinRandomRequest.getMemberId()).build();
+        List<Participant> p = participantRepository.findByMemberId(m);
+
+        List<Long> c = new ArrayList<>();
+
+        for(Participant p1 : p) {
+            c.add(p1.getConsultationId().getId());
+        }
+
         SearchCondition type = joinRandomRequest.getType();
         Optional<Consultation> consultation;
 
-        if(type == null || type == SearchCondition.전체 ) consultation = consultationRepository.findByCurrentParticipantsLessThanEqualOrderByRand(4);
+        if(type == null || type == SearchCondition.전체 ) consultation = consultationRepository.findByCurrentParticipantsLessThanEqualOrderByRand(4, c);
 
-        else if(type != SearchCondition.비밀방 && type != SearchCondition.요약) consultation = consultationRepository.findByCategoryAndCurrentParticipantsLessThanEqualOrderByRand(type.name(), 4);
+        else if(type != SearchCondition.비밀방 && type != SearchCondition.요약) consultation = consultationRepository.findByCategoryAndCurrentParticipantsLessThanEqualOrderByRand(type.name(), 4, c);
 
         else return null;
 
@@ -174,10 +186,12 @@ public class ConsultationService {
 
         if(consultation.isEmpty()) return null;
 
+        Member m = Member.builder().id(joinRandomRequest.getMemberId()).build();
+
         Participant newParticipant = Participant.builder()
-                .memberId(joinRandomRequest.getMemberId())
+                .memberId(m)
                 .memberNickname(joinRandomRequest.getMemberNickname())
-                .consultationId(joinRandomRequest.getId())
+                .consultationId(consultation.get())
                 .consultationDate(joinRandomRequest.getConsultationDate())
                 .build();
 
@@ -198,7 +212,7 @@ public class ConsultationService {
             throw new RuntimeException("db 오류 rollback");
         }
 
-        Optional<Member> member = memberRepository.findById(newParticipant.getMemberId());
+        Optional<Member> member = memberRepository.findById(newParticipant.getMemberId().getId());
 
         if(member.isEmpty()) return null;
 
@@ -215,7 +229,10 @@ public class ConsultationService {
     // 회의 시작 전 퇴장
     @Transactional
     public int exitRoomBeforeStart(ExitRoomBeforeStartRequest exitRoomBeforeStartRequest) {
-        Optional<Participant> participant = participantRepository.findByMemberIdAndConsultationId(exitRoomBeforeStartRequest.getMemberId(), exitRoomBeforeStartRequest.getConsultationId());
+        Member m = Member.builder().id(exitRoomBeforeStartRequest.getMemberId()).build();
+        Consultation c = Consultation.builder().id(exitRoomBeforeStartRequest.getConsultationId()).build();
+
+        Optional<Participant> participant = participantRepository.findByMemberIdAndConsultationId(m, c);
 
         if(participant.isEmpty()) return 0;
 
@@ -252,7 +269,10 @@ public class ConsultationService {
 
     // 회의 시작 후 퇴장
     public int exitRoomAfterStart(ExitRoomAfterStartRequest exitRoomAfterStartRequest) {
-        Optional<Participant> participant = participantRepository.findByMemberIdAndConsultationId(exitRoomAfterStartRequest.getMemberId(), exitRoomAfterStartRequest.getConsultationId());
+        Member m = Member.builder().id(exitRoomAfterStartRequest.getMemberId()).build();
+        Consultation c = Consultation.builder().id(exitRoomAfterStartRequest.getConsultationId()).build();
+
+        Optional<Participant> participant = participantRepository.findByMemberIdAndConsultationId(m, c);
 
         if(participant.isEmpty()) return 0;
 
@@ -292,7 +312,10 @@ public class ConsultationService {
 
     // 채팅 등록
     public int registChating(RegistChatingRequest registChatingRequest) {
-        Optional<Participant> participant = participantRepository.findByMemberIdAndConsultationId(registChatingRequest.getMemberId(), registChatingRequest.getConsultationId());
+        Member m = Member.builder().id(registChatingRequest.getMemberId()).build();
+        Consultation c = Consultation.builder().id(registChatingRequest.getConsultationId()).build();
+
+        Optional<Participant> participant = participantRepository.findByMemberIdAndConsultationId(m, c);
 
         if(participant.isEmpty()) return 0;
 
@@ -314,25 +337,28 @@ public class ConsultationService {
 
     // 쪽지 보낼 수 있는 명단 조회
     public List<RecentParticipantResponse> findRecentParticipants(Long memberId) {
-        List<Participant> participantList = participantRepository.findByMemberId(memberId);
+        Member m = Member.builder().id(memberId).build();
 
-        List<Long> consultationIdList = new ArrayList<>();
+        List<Participant> participantList = participantRepository.findByMemberId(m);
+
+        List<Consultation> consultationIdList = new ArrayList<>();
 
         for(Participant participant : participantList) {
-            consultationIdList.add(participant.getConsultationId());
+            Consultation c = Consultation.builder().id(participant.getConsultationId().getId()).build();
+            consultationIdList.add(c);
         }
 
-        List<Long> memberIdList = new ArrayList<>();
-        memberIdList.add(memberId);
+        List<Member> memberIdList = new ArrayList<>();
+        memberIdList.add(m);
 
         List<Participant> participants = participantRepository.findByConsultationIdInAndMemberIdNotIn(consultationIdList, memberIdList);
 
         return participants.stream()
                 .map(domain -> new RecentParticipantResponse(
                         domain.getId(),
-                        domain.getMemberId(),
+                        domain.getMemberId().getId(),
                         domain.getMemberNickname(),
-                        domain.getConsultationId(),
+                        domain.getConsultationId().getId(),
                         domain.getConsultationDate()
                 ))
                 .toList();

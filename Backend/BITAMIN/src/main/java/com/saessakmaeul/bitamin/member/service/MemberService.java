@@ -31,6 +31,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,6 +51,9 @@ public class MemberService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private S3Service s3Service;
 
     @Transactional
     public Long register(MemberRequestDTO memberDTO, MultipartFile image) throws IOException {

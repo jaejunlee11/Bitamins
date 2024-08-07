@@ -1,5 +1,6 @@
 package com.saessakmaeul.bitamin.consultation.Entity;
 
+import com.saessakmaeul.bitamin.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,14 +19,16 @@ public class Participant {
     @Column
     private Long id;
 
-    @Column(name = "member_id")
-    private Long memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", referencedColumnName = "id")
+    private Member memberId;
 
     @Column(name = "member_nickname")
     private String memberNickname;
 
-    @Column(name = "consultation_id")
-    private Long consultationId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "consultation_id", referencedColumnName = "id")
+    private Consultation consultationId;
 
     @Column(name = "consultation_date")
     private LocalDate consultationDate;
