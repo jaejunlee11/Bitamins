@@ -24,6 +24,7 @@ import ComponentPage from 'stories/pages/ComponentPage'
 import AuthPage from '@/stories/pages/account/AuthPage'
 import MissionForm from '../stories/pages/mission/MissionForm.tsx'
 import CompleteMission from '@/stories/pages/mission/CompleteMission.tsx'
+import CalendarCompleteMission from '@/stories/pages/mission/CalendarCompleteMission.tsx'
 
 const getCurrentDate = (): string => {
   const today = new Date();
@@ -61,7 +62,8 @@ const AppRouter: React.FC = () => {
       <Route path="/admin" element={<AdiminPage />} />
       <Route path="/mission" element={<MissionPage />} />
         <Route path="/missionform" element={<MissionForm />} />
-      <Route path="/complete" element={<CompleteMission />} />/
+      <Route path="/complete" element={<CompleteMission />} />
+      <Route path="/completecal" element={<CalendarCompleteMission />} />
         <Route path="/weather" element={<Weather />} />
     </Routes>
   )
