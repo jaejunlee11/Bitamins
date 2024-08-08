@@ -26,9 +26,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 public class ConsultationServiceTest {
@@ -169,24 +169,24 @@ public class ConsultationServiceTest {
 
         readingParticipant = Participant.builder()
                 .id(1L)
-                .consultationId(4L)
-                .memberId(1L)
+                .consultationId(reading)
+                .memberId(member1)
                 .memberNickname("user1")
                 .consultationDate(LocalDate.of(2024, 8, 1))
                 .build();
 
         conversationParticipant1 = Participant.builder()
                 .id(2L)
-                .consultationId(5L)
-                .memberId(1L)
+                .consultationId(conversation)
+                .memberId(member1)
                 .memberNickname("user1")
                 .consultationDate(LocalDate.of(2024, 8, 1))
                 .build();
 
         conversationParticipant2 = Participant.builder()
                 .id(3L)
-                .consultationId(5L)
-                .memberId(2L)
+                .consultationId(conversation)
+                .memberId(member2)
                 .memberNickname("user2")
                 .consultationDate(LocalDate.of(2024, 8, 1))
                 .build();
@@ -312,7 +312,7 @@ public class ConsultationServiceTest {
     public void registRoom() throws Exception {
         // Given
         RegistRoomRequest registRoomRequest = RegistRoomRequest.builder()
-                .category("미술")
+                .category(SearchCondition.미술)
                 .title("서로 얼굴 그려주기 해요~~")
                 .isPrivated(false)
                 .password(null)
@@ -366,9 +366,9 @@ public class ConsultationServiceTest {
                 .build();
 
         Participant participant = Participant.builder()
-                .consultationId(music.getId())
+                .consultationId(music)
                 .consultationDate(music.getStartTime().toLocalDate())
-                .memberId(member1.getId())
+                .memberId(member1)
                 .memberNickname(member1.getNickname())
                 .build();
 
@@ -424,6 +424,7 @@ public class ConsultationServiceTest {
         // Given
         JoinRandomRequest joinRandomRequest = JoinRandomRequest.builder()
                 .type(SearchCondition.영화)
+                .memberId(member1.getId())
                 .build();
 
         Consultation consultation = Consultation.builder()
@@ -432,8 +433,19 @@ public class ConsultationServiceTest {
                 .startTime(movie.getStartTime())
                 .build();
 
+        Member member = Member.builder().id(member1.getId()).build();
+
+        List<Participant> participants = new ArrayList<>();
+        List<Long> consultationIds = new ArrayList<>();
+
         // When
-        when(consultationRepository.findByCategoryAndCurrentParticipantsLessThanEqualOrderByRand(SearchCondition.영화.name(), 4))
+        when(participantRepository.findByMemberId(any(Member.class))).thenReturn(participants);
+
+        for(Participant p : participants) {
+            consultationIds.add(p.getConsultationId().getId());
+        }
+
+        when(consultationRepository.findByCategoryAndCurrentParticipantsLessThanEqualOrderByRand(SearchCondition.영화.name(), 4, consultationIds))
                 .thenReturn(Optional.of(consultation));
 
         Map<String, Object> expected = new HashMap<>();
@@ -461,9 +473,9 @@ public class ConsultationServiceTest {
                 .build();
 
         Participant participant = Participant.builder()
-                .consultationId(movie.getId())
+                .consultationId(movie)
                 .consultationDate(movie.getStartTime().toLocalDate())
-                .memberId(member1.getId())
+                .memberId(member1)
                 .memberNickname(member1.getNickname())
                 .build();
 
@@ -524,7 +536,7 @@ public class ConsultationServiceTest {
 
         Participant participant = Participant.builder()
                 .id(readingParticipant.getId())
-                .memberId(readingParticipant.getId())
+                .memberId(member1)
                 .memberNickname(readingParticipant.getMemberNickname())
                 .consultationId(readingParticipant.getConsultationId())
                 .consultationDate(readingParticipant.getConsultationDate())
@@ -542,9 +554,11 @@ public class ConsultationServiceTest {
                 .sessionId(reading.getSessionId())
                 .build();
 
+        Member member = Member.builder().id(member1.getId()).build();
+
         // When
-        when(participantRepository.findByMemberIdAndConsultationId(readingParticipant.getMemberId(), readingParticipant.getConsultationId())).thenReturn(Optional.of(participant));
-        when(consultationRepository.findById(readingParticipant.getConsultationId())).thenReturn(Optional.of(consultation));
+        when(participantRepository.findByMemberIdAndConsultationId(any(Member.class), any(Consultation.class))).thenReturn(Optional.of(participant));
+        when(consultationRepository.findById(participant.getConsultationId().getId())).thenReturn(Optional.of(consultation));
 
         // Then
         int actual = consultationService.exitRoomBeforeStart(exitRoomBeforeStartRequest);
@@ -567,7 +581,7 @@ public class ConsultationServiceTest {
 
         Participant participant = Participant.builder()
                 .id(conversationParticipant1.getId())
-                .memberId(conversationParticipant1.getId())
+                .memberId(member1)
                 .memberNickname(conversationParticipant1.getMemberNickname())
                 .consultationId(conversationParticipant1.getConsultationId())
                 .consultationDate(conversationParticipant1.getConsultationDate())
@@ -585,10 +599,12 @@ public class ConsultationServiceTest {
                 .sessionId(conversation.getSessionId())
                 .build();
 
-        // When
-        when(participantRepository.findByMemberIdAndConsultationId(conversationParticipant1.getMemberId(), conversationParticipant1.getConsultationId())).thenReturn(Optional.of(participant));
+        Member member = Member.builder().id(member1.getId()).build();
 
-        when(consultationRepository.findById(conversationParticipant1.getConsultationId())).thenReturn(Optional.of(consultation));
+        // When
+        when(participantRepository.findByMemberIdAndConsultationId(any(Member.class), any(Consultation.class))).thenReturn(Optional.of(participant));
+
+        when(consultationRepository.findById(conversationParticipant1.getConsultationId().getId())).thenReturn(Optional.of(consultation));
 
         consultation.setCurrentParticipants(conversation.getCurrentParticipants() - 1);
 
@@ -614,7 +630,7 @@ public class ConsultationServiceTest {
 
         Participant participant = Participant.builder()
                 .id(readingParticipant.getId())
-                .memberId(readingParticipant.getId())
+                .memberId(member1)
                 .memberNickname(readingParticipant.getMemberNickname())
                 .consultationId(readingParticipant.getConsultationId())
                 .consultationDate(readingParticipant.getConsultationDate())
@@ -632,10 +648,12 @@ public class ConsultationServiceTest {
                 .sessionId(reading.getSessionId())
                 .build();
 
-        // When
-        when(participantRepository.findByMemberIdAndConsultationId(readingParticipant.getMemberId(), readingParticipant.getConsultationId())).thenReturn(Optional.of(participant));
+        Member member = Member.builder().id(member1.getId()).build();
 
-        when(consultationRepository.findById(readingParticipant.getConsultationId())).thenReturn(Optional.of(consultation));
+        // When
+        when(participantRepository.findByMemberIdAndConsultationId(any(Member.class), any(Consultation.class))).thenReturn(Optional.of(participant));
+
+        when(consultationRepository.findById(readingParticipant.getConsultationId().getId())).thenReturn(Optional.of(consultation));
 
         consultation.setCurrentParticipants(reading.getCurrentParticipants() - 1);
         consultation.setSessionId(null);
@@ -660,7 +678,7 @@ public class ConsultationServiceTest {
 
         Participant participant = Participant.builder()
                 .id(conversationParticipant1.getId())
-                .memberId(conversationParticipant1.getId())
+                .memberId(member1)
                 .memberNickname(conversationParticipant1.getMemberNickname())
                 .consultationId(conversationParticipant1.getConsultationId())
                 .consultationDate(conversationParticipant1.getConsultationDate())
@@ -678,10 +696,12 @@ public class ConsultationServiceTest {
                 .sessionId(conversation.getSessionId())
                 .build();
 
-        // When
-        when(participantRepository.findByMemberIdAndConsultationId(conversationParticipant1.getMemberId(), conversationParticipant1.getConsultationId())).thenReturn(Optional.of(participant));
+        Member member = Member.builder().id(member1.getId()).build();
 
-        when(consultationRepository.findById(conversationParticipant1.getConsultationId())).thenReturn(Optional.of(consultation));
+        // When
+        when(participantRepository.findByMemberIdAndConsultationId(any(Member.class), any(Consultation.class))).thenReturn(Optional.of(participant));
+
+        when(consultationRepository.findById(conversationParticipant1.getConsultationId().getId())).thenReturn(Optional.of(consultation));
 
         consultation.setCurrentParticipants(conversation.getCurrentParticipants() - 1);
 
@@ -700,7 +720,7 @@ public class ConsultationServiceTest {
         // Given
         Participant p1 = Participant.builder()
                 .id(conversationParticipant1.getId())
-                .memberId(conversationParticipant1.getId())
+                .memberId(member1)
                 .memberNickname(conversationParticipant1.getMemberNickname())
                 .consultationId(conversationParticipant1.getConsultationId())
                 .consultationDate(conversationParticipant1.getConsultationDate())
@@ -708,40 +728,43 @@ public class ConsultationServiceTest {
 
         Participant p2 = Participant.builder()
                 .id(conversationParticipant2.getId())
-                .memberId(conversationParticipant2.getId())
+                .memberId(member2)
                 .memberNickname(conversationParticipant2.getMemberNickname())
                 .consultationId(conversationParticipant2.getConsultationId())
                 .consultationDate(conversationParticipant2.getConsultationDate())
                 .build();
 
-        List<Participant> participantList = Arrays.asList(p1, p2);
+        Member member = Member.builder().id(member1.getId()).build();
+
+        List<Participant> participantList = Arrays.asList(p1);
 
         List<Participant> participants = Arrays.asList(p2);
 
         // When
-        when(participantRepository.findByMemberId(p1.getMemberId())).thenReturn(participantList);
+        when(participantRepository.findByMemberId(any(Member.class))).thenReturn(participantList);
 
-        List<Long> consultationIdList = new ArrayList<>();
+        List<Consultation> consultationIdList = new ArrayList<>();
         for(Participant p : participantList) {
             consultationIdList.add(p.getConsultationId());
         }
 
-        List<Long> memberIdList = new ArrayList<>();
-        memberIdList.add(p1.getMemberId());
+        List<Member> memberIdList = new ArrayList<>();
+        memberIdList.add(member);
 
-        when(participantRepository.findByConsultationIdInAndMemberIdNotIn(consultationIdList, memberIdList)).thenReturn(participants);
+        when(participantRepository.findByConsultationIdInAndMemberIdNotIn(anyList(), anyList())).thenReturn(participants);
 
         List<RecentParticipantResponse> expected = participants.stream()
                 .map(domain -> new RecentParticipantResponse(
                         domain.getId(),
-                        domain.getMemberId(),
+                        domain.getMemberId().getId(),
                         domain.getMemberNickname(),
-                        domain.getConsultationId(),
+                        domain.getConsultationId().getId(),
                         domain.getConsultationDate()
                 ))
                 .toList();
+
         // Then
-        List<RecentParticipantResponse> actual = consultationService.findRecentParticipants(p1.getMemberId());
+        List<RecentParticipantResponse> actual = consultationService.findRecentParticipants(member.getId());
 
         assertEquals(expected, actual);
         System.out.println("최근 참여자 조회 성공");

@@ -50,6 +50,7 @@ public class ComplaintService {
                     .respondentNickname(getNickName(complaint.getRespondentId()))
                     .complainantNickname(getNickName(complaint.getComplainantId()))
                     .sendDate(complaint.getSendDate())
+                    .type(complaint.getType())
                     .build();
             result.add(response);
         }
