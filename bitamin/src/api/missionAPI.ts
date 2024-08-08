@@ -44,15 +44,14 @@ export const fetchMissionDatesByMonth = async (date: string) => {
   }
 }
 
-// 미션 등록
 export const submitMission = async (missionData: FormData) => {
   try {
     const response = await axiosInstance.post(
-      `${BASE_URL}/missions`,
+      '/missions',
       missionData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'multipart/form-data', // 이 설정은 없어도 됨
         },
       }
     );
@@ -62,6 +61,7 @@ export const submitMission = async (missionData: FormData) => {
     throw error;
   }
 };
+
 
 // 오늘의 미션 조회
 export const fetchTodayMission = async () => {
