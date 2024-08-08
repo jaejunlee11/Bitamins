@@ -12,9 +12,10 @@ interface Mission {
 interface MissionFormProps {
     selectedDate: string | null;
     missionData?: Mission | null;
+    onSubmitSuccess: () => void; // 추가된 콜백 함수
 }
 
-const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData }) => {
+const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData, onSubmitSuccess }) => {
     const [missionReview, setMissionReview] = useState('');
     const [missionImage, setMissionImage] = useState<File | null>(null);
     const [todayMission, setTodayMission] = useState<Mission | null>(null);
@@ -91,6 +92,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData }) 
         try {
             await submitMission(formData);
             console.log('미션이 성공적으로 등록되었습니다!');
+            onSubmitSuccess(); // 미션 등록 성공 시 콜백 호출
         } catch (error: any) {
             console.error('Error submitting mission:', error);
             if (error.response) {

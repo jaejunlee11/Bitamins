@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../../../styles/mission/quest2.module.css';
 import { fetchMissionsByDate } from '@/api/missionAPI';
+import MissionForm from './MissionForm';
 
 interface Mission {
     id: number;
@@ -12,34 +13,35 @@ interface Mission {
     missionReview: string;
 }
 
-// 현재 날짜를 가져오는 함수
-const getCurrentDate = (): string => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+interface CompleteMissionProps {
+    selectedDate: string;
 }
 
-const CompleteMission: React.FC = () => {
+const CompleteMission: React.FC<CompleteMissionProps> = ({ selectedDate }) => {
     const [mission, setMission] = useState<Mission | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const completeDate = getCurrentDate(); // 현재 날짜를 가져옴
+    const todayDate = new Date().toISOString().split('T')[0];
+
+    const getMission = async (date: string) => {
+        setLoading(true);
+        try {
+            const missionData = await fetchMissionsByDate(date);
+            setMission(missionData);
+        } catch (error) {
+            console.error('Error fetching mission:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const getMission = async () => {
-            try {
-                const missionData = await fetchMissionsByDate(completeDate);
-                setMission(missionData);
-            } catch (error) {
-                console.error('Error fetching mission:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        setMission(null); // 상태 초기화
+        getMission(selectedDate);
+    }, [selectedDate]);
 
-        getMission();
-    }, [completeDate]);
+    const handleSubmitSuccess = () => {
+        getMission(selectedDate);
+    };
 
     return (
       <div className={styles.missionFormContainer}>
@@ -62,7 +64,15 @@ const CompleteMission: React.FC = () => {
                           defaultValue={mission.missionReview}
                           required
                         />
-                    </div>=
+                    </div>
+                    <div>
+                        <label htmlFor="missionImage">미션 이미지:</label>
+                        <input
+                          id="missionImage"
+                          type="file"
+                          accept="image/*"
+                        />
+                    </div>
                     {mission.imageUrl && (
                       <div>
                           <img
@@ -75,7 +85,11 @@ const CompleteMission: React.FC = () => {
                 </div>
             </>
           ) : (
-            <p>해당 날짜에 완료된 미션이 없습니다.</p>
+            selectedDate === todayDate ? (
+              <MissionForm selectedDate={selectedDate} onSubmitSuccess={handleSubmitSuccess} /> // 오늘 날짜에 미션이 없으면 MissionForm을 표시합니다.
+            ) : (
+              <p>해당 날짜에 완료된 미션이 없습니다.</p>
+            )
           )}
       </div>
     );
