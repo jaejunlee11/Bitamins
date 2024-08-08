@@ -62,6 +62,9 @@ public class ConsultationController {
                                       @RequestBody JoinRoomRequest joinRoomRequest) throws OpenViduJavaClientException, OpenViduHttpException {
         Map<String,Object> params = new HashMap<>();
 
+        // 상담 시작 시간이 지났는지 아닌지 확인
+        if(joinRoomRequest.getStartTime().isBefore(LocalDateTime.now())) return ResponseEntity.status(404).body("입장 가능 시간이 아닙니다.");
+
         // 입장 가능한 세션인지 확인
         Session session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
 
@@ -108,6 +111,9 @@ public class ConsultationController {
         joinRandomRequest.setSessionId(map.get("sessionId").toString());
         joinRandomRequest.setId(Long.parseLong(map.get("id").toString()));
         joinRandomRequest.setConsultationDate(((LocalDateTime)map.get("consultationDate")).toLocalDate());
+
+        System.out.println(joinRandomRequest.getId());
+
 
         // 입장 가능한 세션인지 확인
         Session session = openVidu.getActiveSession(joinRandomRequest.getSessionId());
@@ -209,8 +215,29 @@ public class ConsultationController {
     public ResponseEntity<?> findRecentParticipants(@RequestHeader(value = "Authorization", required = false) String tokenHeader) {
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
-        List<RecentParticipantResponse> participants = consultationService.findRecentParticipants(memberId);
+        List<RecentParticipantResponse> participantList = consultationService.findRecentParticipants(memberId);
 
-        return ResponseEntity.status(200).body(participants);
+        return ResponseEntity.status(200).body(participantList);
     }
+
+    @GetMapping("/ongoing")
+    public ResponseEntity<?> findOngoingRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader) throws OpenViduJavaClientException, OpenViduHttpException {
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+
+        OngoingRoomResponse ongoingRoomResponse = consultationService.findOngoingRoom(memberId);
+
+        Session session = openVidu.getActiveSession(ongoingRoomResponse.getSessionId());
+
+        if (session == null) return ResponseEntity.status(404).body("유효하지 않은 세션입니다.");
+
+        Map<String,Object> params = new HashMap<>();
+
+        ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
+        Connection connection = session.createConnection(properties);
+
+        ongoingRoomResponse.setToken(connection.getToken());
+
+        return ResponseEntity.status(200).body(ongoingRoomResponse);
+    }
+
 }
