@@ -11,7 +11,7 @@ export const getPhrases = async () => {
   }
 }
 
-export const saveAudio = async (id: string, audioBlob: Blob) => {
+export const saveAudio = async (id: string, saveDate: string, audioBlob: Blob) => {
   const formData = new FormData()
   formData.append('id', id)
   formData.append('audio', audioBlob, 'recording.mp3')
