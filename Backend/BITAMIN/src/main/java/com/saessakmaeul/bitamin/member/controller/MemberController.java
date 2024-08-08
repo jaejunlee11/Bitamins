@@ -1,8 +1,12 @@
 package com.saessakmaeul.bitamin.member.controller;
 
 import com.saessakmaeul.bitamin.member.dto.request.*;
-import com.saessakmaeul.bitamin.member.dto.response.*;
+import com.saessakmaeul.bitamin.member.dto.response.HealthReportResponseDTO;
+import com.saessakmaeul.bitamin.member.dto.response.MemberBasicInfo;
+import com.saessakmaeul.bitamin.member.dto.response.MemberListResponseDTO;
+import com.saessakmaeul.bitamin.member.dto.response.MemberResponseDTO;
 import com.saessakmaeul.bitamin.member.repository.DongCodeRepository;
+import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
 import com.saessakmaeul.bitamin.member.service.MemberService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,30 +17,34 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/members")
-public class MemberController {
+@RequestMapping("/members") public class MemberController {
     private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
     private static final String BEARER_PREFIX = "Bearer ";
     private final MemberService memberService;
     private final DongCodeRepository dongCodeRepository;
     private final JwtUtil jwtUtil;
 
-    public MemberController(@Lazy MemberService memberService, DongCodeRepository dongCodeRepository, JwtUtil jwtUtil) {
+    public MemberController(@Lazy MemberService memberService, DongCodeRepository dongCodeRepository, HealthReportRepository healthReportRepository, JwtUtil jwtUtil) {
         this.memberService = memberService;
         this.dongCodeRepository = dongCodeRepository;
         this.jwtUtil = jwtUtil;
     }
 
+    /** 회원 목록 조회 API
+     * 테스트용
+     * @return 회원 목록 */
     @GetMapping("/list")
     public ResponseEntity<List<MemberListResponseDTO>> getMemberList() {
         try {
@@ -44,65 +52,68 @@ public class MemberController {
             return ResponseEntity.ok(members);
         } catch (Exception e) {
             logger.error("회원 목록 조회 오류: ", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
+    /** 회원가입 API
+     * @param memberDTO 회원가입 요청 정보
+     * @return 회원 ID */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestPart("memberDTO") MemberRequestDTO memberDTO, @RequestPart(value = "image", required = false) MultipartFile image) {
+    public ResponseEntity<Long> register(@RequestBody MemberRequestDTO memberDTO) {
         try {
-            Long memberId = memberService.register(memberDTO, image);
+            Long memberId = memberService.register(memberDTO);
             return ResponseEntity.ok(memberId);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 실패: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원가입 중 오류 발생: " + e.getMessage());
+            logger.error("회원가입 오류: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
-
+    /** 회원 한명 조회 API
+     * @param request HTTP 요청 객체
+     * @return 회원 정보 */
     @GetMapping("/get-member")
-    public ResponseEntity<?> getMemberByToken(HttpServletRequest request) {
+    public ResponseEntity<MemberResponseDTO> getMemberByToken(HttpServletRequest request) {
         try {
             String token = getTokenFromRequest(request);
             if (token == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
             Long userId = jwtUtil.extractUserId(token);
             MemberResponseDTO member = memberService.getMemberById(userId);
-            return member != null ? ResponseEntity.ok(member) : ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원을 찾을 수 없습니다.");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
+            return member != null ? ResponseEntity.ok(member) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 조회 중 오류 발생: " + e.getMessage());
+            logger.error("회원 조회 오류: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
 
+
+    /** 회원 정보 수정 API
+     * @param request                HTTP 요청 객체
+     * @param memberUpdateRequestDTO 회원 수정 요청 정보
+     * @return 수정 결과 (1: 성공, 0: 실패) */
     @PutMapping("/update-member")
-    public ResponseEntity<?> updateMemberByToken(HttpServletRequest request,
-                                                 @RequestPart("memberUpdateRequestDTO") MemberUpdateRequestDTO memberUpdateRequestDTO,
-                                                 @RequestPart(value = "image", required = false) MultipartFile image) {
+    public ResponseEntity<Integer> updateMemberByToken(HttpServletRequest request, @RequestBody MemberUpdateRequestDTO memberUpdateRequestDTO) {
         try {
             String token = getTokenFromRequest(request);
             if (token == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
             Long userId = jwtUtil.extractUserId(token);
-            int updateResult = memberService.updateMember(userId, memberUpdateRequestDTO, image);
-            return updateResult == 1 ? ResponseEntity.ok(updateResult) : ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원 정보를 찾을 수 없습니다.");
+            int updateResult = memberService.updateMember(userId, memberUpdateRequestDTO);
+            return updateResult == 1 ? ResponseEntity.ok(updateResult) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(updateResult);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 실패: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 정보 수정 중 오류 발생: " + e.getMessage());
+            logger.error("회원 정보 수정 오류: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(0);
         }
     }
 
-
+    /** 회원 id, 닉네임 조회 API (AccessToken 파싱해서 회원 id, 닉네임 조회)
+     * @param request HTTP 요청 객체
+     * @return 회원 기본 정보 (id, 닉네임) */
     @GetMapping("/info")
     public ResponseEntity<MemberBasicInfo> getUserInfo(HttpServletRequest request) {
         try {
@@ -119,98 +130,107 @@ public class MemberController {
         }
     }
 
+    /** 회원 비밀번호 수정 API
+     * @param request               HTTP 요청 객체
+     * @param changePasswordRequest 비밀번호 변경 요청 정보
+     * @return 변경 결과 메시지 */
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(HttpServletRequest request, @RequestBody ChangePasswordRequest changePasswordRequest) {
         try {
             String token = getTokenFromRequest(request);
             if (token == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
             Long userId = jwtUtil.extractUserId(token);
             boolean isPasswordChanged = memberService.changePassword(userId, changePasswordRequest);
             return isPasswordChanged ? ResponseEntity.ok("비밀번호 변경 완료") : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("현재 비밀번호가 일치하지 않습니다.");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없음: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("비밀번호 변경 중 오류 발생: " + e.getMessage());
+            logger.error("비밀번호 변경 오류: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("비밀번호 변경 중 오류 발생");
         }
     }
 
-
-
+    /**
+     * 회원 비밀번호 확인 API (회원 탈퇴 전 비밀번호 확인)
+     * @param checkPasswordRequest 비밀번호 확인 요청 정보
+     * @return 비밀번호 일치 여부 (1: 일치, 0: 불일치) */
     @PostMapping("/check-password")
-    public ResponseEntity<?> checkPassword(HttpServletRequest request, @RequestBody CheckPasswordRequest checkPasswordRequest) {
+    public ResponseEntity<Integer> checkPassword(@RequestBody CheckPasswordRequest checkPasswordRequest) {
         try {
-            String token = getTokenFromRequest(request);
-            if (token == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
-            }
-            Long userId = jwtUtil.extractUserId(token);
-            boolean isPasswordCorrect = memberService.checkPassword(userId, checkPasswordRequest.getPassword());
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String email = userDetails.getUsername();
+            boolean isPasswordCorrect = memberService.checkPassword(email, checkPasswordRequest.getPassword());
             return ResponseEntity.ok(isPasswordCorrect ? 1 : 0);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("비밀번호 확인 중 오류 발생: " + e.getMessage());
+            logger.error("비밀번호 확인 오류: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(0);
         }
     }
 
-
+    /**
+     * 회원 탈퇴 API (회원 탈퇴 및 관련 정보 삭제 & 로그아웃)
+     * @param request  HTTP 요청 객체
+     * @param response HTTP 응답 객체
+     * @return 탈퇴 결과 메시지 */
     @DeleteMapping("/withdraw")
     public ResponseEntity<String> deleteMember(HttpServletRequest request, HttpServletResponse response) {
         try {
             String token = getTokenFromRequest(request);
             if (token == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
             Long memberId = jwtUtil.extractUserId(token);
             memberService.deleteMember(memberId);
             logoutUser(request, response);
             return ResponseEntity.ok("회원 탈퇴 및 로그아웃 완료");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 탈퇴 중 오류 발생: " + e.getMessage());
+            logger.error("회원 탈퇴 오류: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 탈퇴 중 오류 발생");
         }
     }
 
+    /** 자가진단 결과 기록 API
+     * @param healthReportRequestDTO 자가진단 요청 정보
+     * @param request HTTP 요청 객체
+     * @return 자가진단 응답 정보 */
     @PostMapping("/self-assessment")
-    public ResponseEntity<?> createHealthReport(@RequestBody HealthReportRequestDTO healthReportRequestDTO, HttpServletRequest request) {
+    public ResponseEntity<HealthReportResponseDTO> createHealthReport(@RequestBody HealthReportRequestDTO healthReportRequestDTO, HttpServletRequest request) {
         try {
             String token = getTokenFromRequest(request);
             if (token == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
             Long userId = jwtUtil.extractUserId(token);
-            HealthReportResponseDTO dto = memberService.saveHealthReport(healthReportRequestDTO, userId);
-            return ResponseEntity.ok(dto);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
+            HealthReportResponseDTO healthReportResponseDTO = memberService.saveHealthReport(healthReportRequestDTO, userId);
+            return ResponseEntity.ok(healthReportResponseDTO);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("자가진단 결과 기록 중 오류 발생: " + e.getMessage());
+            logger.error("자가진단 결과 기록 오류: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-
+    /** 자가진단 결과 리스트 조회 API
+     * @param request HTTP 요청 객체
+     * @return 자가진단 결과 리스트 */
     @GetMapping("/self-assessment")
-    public ResponseEntity<?> getHealthReports(HttpServletRequest request) {
+    public ResponseEntity<List<HealthReportResponseDTO>> getHealthReports(HttpServletRequest request) {
         try {
             String token = getTokenFromRequest(request);
             if (token == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
             Long userId = jwtUtil.extractUserId(token);
             List<HealthReportResponseDTO> healthReports = memberService.getHealthReportsByUserId(userId);
             return ResponseEntity.ok(healthReports);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("자가진단 결과 조회 중 오류 발생: " + e.getMessage());
+            logger.error("자가진단 결과 조회 오류: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
+    /** JWT 토큰 추출 메서드 (헤더에서 JWT 토큰을 추출하는 메서드)
+     * @param request HTTP 요청 객체
+     * @return 추출된 JWT 토큰 */
     private String getTokenFromRequest(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
         return authorizationHeader != null && authorizationHeader.startsWith(BEARER_PREFIX) ? authorizationHeader.substring(BEARER_PREFIX.length()) : null;
@@ -223,59 +243,35 @@ public class MemberController {
         }
     }
 
-    @GetMapping("/sidoNames")
+
+
+    // sidoName 리스트
+    @GetMapping("/sidoName")
     public List<String> getSidoNames() {
         return dongCodeRepository.findDistinctSidoNames();
     }
 
-    @GetMapping("/gugunNames")
-    public ResponseEntity<?> getGugunNamesBySidoName(@RequestParam String sidoName) {
-        try {
-            List<String> gugunNames = dongCodeRepository.findGugunNamesBySidoName(sidoName);
-            if (gugunNames.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 시/도에 구군 정보를 찾을 수 없습니다.");
-            }
-            return ResponseEntity.ok(gugunNames);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("구군 정보 조회 중 오류 발생: " + e.getMessage());
-        }
+    // sidoName이 포함된 행의 gugunName 리스트
+    @GetMapping("/gugunName/{sidoName}")
+    public List<String> getGugunNamesBySidoName(@PathVariable String sidoName) {
+        return dongCodeRepository.findGugunNamesBySidoName(sidoName);
     }
 
-    @GetMapping("/dongNames")
-    public ResponseEntity<?> getDongNamesBySidoNameAndGugunName(@RequestParam String sidoName, @RequestParam String gugunName) {
-        try {
-            List<String> dongNames = dongCodeRepository.findDongNamesBySidoNameAndGugunName(sidoName, gugunName);
-            if (dongNames.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 시/도와 구군에 동 정보를 찾을 수 없습니다.");
-            }
-            return ResponseEntity.ok(dongNames);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("동 정보 조회 중 오류 발생: " + e.getMessage());
-        }
+    // sidoName, gugunName이 포함된 행의 dongName 리스트
+    @GetMapping("/dongName/{sidoName}/{gugunName}")
+    public List<String> getDongNamesBySidoNameAndGugunName(@PathVariable String sidoName, @PathVariable String gugunName) {
+        return dongCodeRepository.findDongNamesBySidoNameAndGugunName(sidoName, gugunName);
     }
 
-
-    @PostMapping("/register/check-email/{email}")
-    public ResponseEntity<?> checkEmail(@PathVariable String email) {
-        try {
-            int result = memberService.duplicateCheckEmail(email);
-            return ResponseEntity.ok(result);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이메일 중복 확인 중 오류 발생: " + e.getMessage());
+    // 자가검진 기록 일주일간 기록 여부 검색
+    @GetMapping("/self-assessment/check")
+    public ResponseEntity<?> getSelfAssessmentCheck(HttpServletRequest request) {
+        String token = getTokenFromRequest(request);
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-    }
-
-    @PostMapping("/register/check-nickname/{nickname}")
-    public ResponseEntity<?> checkNickname(@PathVariable String nickname) {
-        try {
-            int result = memberService.duplicateCheckNickname(nickname);
-            return ResponseEntity.ok(result);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("닉네임 중복 확인 중 오류 발생: " + e.getMessage());
-        }
+        Long userId = jwtUtil.extractUserId(token);
+        Map<String, Object> response = memberService.getHealthReportStatsForMember(userId);
+        return ResponseEntity.ok(response);
     }
 }
