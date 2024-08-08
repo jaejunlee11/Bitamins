@@ -240,4 +240,29 @@ public class ConsultationController {
         return ResponseEntity.status(200).body(ongoingRoomResponse);
     }
 
+    @PostMapping("/moderators1/{category}")
+    public ResponseEntity<?> testPrompt(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+                                          @PathVariable("category") SearchCondition category,
+                                          @RequestBody GptCompletionRequest gptCompletions) {
+        String nickname = jwtUtil.extractNickname(tokenHeader.substring(7));
+
+        GptResponseList gptResponses = new GptResponseList();
+
+        Map<String, GptResponse> map = new HashMap<>();
+
+        for(String str : gptCompletions.getGptCompletions().keySet()) {
+            GptCompletion gptCompletion = gptCompletions.getGptCompletions().get(str);
+
+            System.out.println("param :: " + gptCompletion.toString());
+
+            GptResponse gptResponse = GptService.promptTest(category, nickname, gptCompletion);
+
+            map.put(str, gptResponse);
+        }
+
+        gptResponses.setGptResponses(map);
+
+        return ResponseEntity.status(200).body(gptResponses);
+    }
+
 }
