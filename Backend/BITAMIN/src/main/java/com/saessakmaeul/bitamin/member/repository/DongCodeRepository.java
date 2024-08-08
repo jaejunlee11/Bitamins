@@ -18,12 +18,13 @@ public interface DongCodeRepository extends JpaRepository<DongCode, String> {
     @Query("SELECT d.dongCode FROM DongCode d WHERE d.sidoName = :sidoName AND (:gugunName IS NULL AND d.gugunName IS NULL OR d.gugunName = :gugunName) AND (:dongName IS NULL AND d.dongName IS NULL OR d.dongName = :dongName)")
     Optional<String> findDongCode(@Param("sidoName") String sidoName, @Param("gugunName") String gugunName, @Param("dongName") String dongName);
 
-    @Query("SELECT DISTINCT d.sidoName FROM DongCode d")
+    @Query("SELECT DISTINCT d.sidoName FROM DongCode d WHERE d.sidoName IS NOT NULL")
     List<String> findDistinctSidoNames();
 
-    @Query("SELECT DISTINCT d.gugunName FROM DongCode d WHERE d.sidoName = :sidoName")
+    @Query("SELECT DISTINCT d.gugunName FROM DongCode d WHERE d.sidoName = :sidoName AND d.gugunName IS NOT NULL")
     List<String> findGugunNamesBySidoName(@Param("sidoName") String sidoName);
 
-    @Query("SELECT DISTINCT d.dongName FROM DongCode d WHERE d.sidoName = :sidoName AND d.gugunName = :gugunName")
+    @Query("SELECT DISTINCT d.dongName FROM DongCode d WHERE d.sidoName = :sidoName AND d.gugunName = :gugunName AND d.dongName IS NOT NULL")
     List<String> findDongNamesBySidoNameAndGugunName(@Param("sidoName") String sidoName, @Param("gugunName") String gugunName);
+
 }
