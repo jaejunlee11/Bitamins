@@ -125,10 +125,10 @@ public class ConsultationService {
         Member m = Member.builder().id(joinRoomRequest.getMemberId()).build();
         Consultation c = Consultation.builder().id(joinRoomRequest.getId()).build();
 
-        // 당일 집단 상담 이용했는지 확인
-        Optional<Participant> isUsed = participantRepository.findByMemberIdAndConsultationDate(m, LocalDate.now());
-
-        if(isUsed.isPresent()) return null;
+//        // 당일 집단 상담 이용했는지 확인
+//        Optional<Participant> isUsed = participantRepository.findByMemberIdAndConsultationDate(m, LocalDate.now());
+//
+//        if(isUsed.isPresent()) return null;
 
         Participant newParticipant = Participant.builder()
                 .memberId(m)
@@ -182,10 +182,10 @@ public class ConsultationService {
     public Map<String, Object> findRandomSessionId(JoinRandomRequest joinRandomRequest) {
         Member m = Member.builder().id(joinRandomRequest.getMemberId()).build();
 
-        // 당일 집단 상담 이용했는지 확인
-        Optional<Participant> isUsed = participantRepository.findByMemberIdAndConsultationDate(m, LocalDate.now());
-
-        if(isUsed.isPresent()) return null;
+//        // 당일 집단 상담 이용했는지 확인
+//        Optional<Participant> isUsed = participantRepository.findByMemberIdAndConsultationDate(m, LocalDate.now());
+//
+//        if(isUsed.isPresent()) return null;
 
         List<Participant> p = participantRepository.findByMemberId(m);
 
