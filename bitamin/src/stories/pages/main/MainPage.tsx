@@ -10,13 +10,13 @@ import recordStop from 'assets/image/recordEnd.png'
 import recordAgain from 'assets/image/recordAgain.png'
 import recordPlay from 'assets/image/recordPlay.png'
 import ModalExample from 'stories/organisms/ModalExample'
-import { getPhrases, saveAudio } from '@/api/missionAPI'
+import { getPhrases, saveAudio } from '@/api/phraseAPI'
 
 const MainPage: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false)
     const [isEnded, setIsEnded] = useState(false)
     const [media, setMedia] = useState<MediaRecorder | null>(null)
-    const [audioUrl, setAudioUrl] = useState<Blob | null>(null)
+    const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
     const [consultOpacityClass, setConsultOpacityClass] = useState(styles.transparent)
     const [questOpacityClass, setQuestOpacityClass] = useState(styles.transparent)
     const [phraseContent, setPhraseContent] = useState('')
@@ -24,37 +24,39 @@ const MainPage: React.FC = () => {
 
     useEffect(() => {
         getPhrases()
-            .then(data => {
-                if (data && data.phraseContent && data.id) {
-                    setPhraseContent(data.phraseContent)
-                    setPhraseId(data.id)
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching the phrase:', error)
-            })
+          .then(data => {
+              if (data && data.phraseContent && data.id) {
+                  setPhraseContent(data.phraseContent)
+                  setPhraseId(data.id)
+              }
+          })
+          .catch(error => {
+              console.error('Error fetching the phrase:', error)
+          })
     }, [])
 
     const onRecAudio = () => {
         navigator.mediaDevices
-            .getUserMedia({ audio: true })
-            .then((stream) => {
-                const mediaRecorder = new MediaRecorder(stream)
+          .getUserMedia({ audio: true })
+          .then((stream) => {
+              const mediaRecorder = new MediaRecorder(stream);
 
-                mediaRecorder.addEventListener('dataavailable', (e) => {
-                    setAudioUrl(e.data)
-                    setIsRecording(false)
-                })
+              mediaRecorder.addEventListener('dataavailable', (e) => {
+                  const blob = e.data;
+                  setAudioBlob(blob);
+                  setIsRecording(false);
+              });
 
-                mediaRecorder.start()
-                setMedia(mediaRecorder)
-                setIsRecording(true)
-                setIsEnded(false)
-            })
-            .catch(() => {
-                alert('마이크 사용 권한을 허용해야 녹음을 진행할 수 있습니다.')
-            })
-    }
+              mediaRecorder.start();
+              setMedia(mediaRecorder);
+              setIsRecording(true);
+              setIsEnded(false);
+          })
+          .catch(() => {
+              alert('마이크 사용 권한을 허용해야 녹음을 진행할 수 있습니다.');
+          });
+    };
+
 
     const offRecAudio = () => {
         if (media) {
@@ -67,29 +69,38 @@ const MainPage: React.FC = () => {
     }
 
     const onPlayAudio = useCallback(() => {
-        if (audioUrl) {
-            const audio = new Audio(URL.createObjectURL(audioUrl))
+        if (audioBlob) {
+            const audio = new Audio(URL.createObjectURL(audioBlob))
             audio.play()
         }
-    }, [audioUrl])
+    }, [audioBlob])
 
     const onSaveAudio = () => {
-        if (phraseId && audioUrl) {
-            saveAudio(phraseId, audioUrl)
-                .then(response => {
-                    alert('녹음이 성공적으로 저장되었습니다.')
-                })
-                .catch(error => {
-                    console.error('Error saving the audio:', error)
-                    alert('녹음 저장에 실패했습니다.')
-                })
+        if (phraseId && audioBlob) {
+            const formData = new FormData();
+            formData.append('memberPhraseRequest', new Blob([JSON.stringify({
+                phraseId: phraseId,
+                saveDate: new Date().toISOString().split('T')[0]
+            })], { type: 'application/json' }));
+            formData.append('phraseRecord', audioBlob);
+
+            saveAudio(formData)
+              .then(response => {
+                  alert('녹음이 성공적으로 저장되었습니다.');
+              })
+              .catch(error => {
+                  console.error('Error saving the audio:', error);
+                  alert('녹음 저장에 실패했습니다.');
+              });
         } else {
-            alert('녹음 파일이 없거나 문구 ID를 찾을 수 없습니다.')
+            alert('녹음 파일이 없거나 문구 ID를 찾을 수 없습니다.');
         }
-    }
+    };
+
+
 
     const onResetAudio = () => {
-        setAudioUrl(null)
+        setAudioBlob(null)
         setIsRecording(false)
         setIsEnded(false)
     }
@@ -133,51 +144,51 @@ const MainPage: React.FC = () => {
     }
 
     return (
-        <>
-            <ModalExample />
-            <div className={styles.div}>
-                <div className={styles.navbar}>
-                    <div className={styles.bitamin}>BItAMin</div>
-                    <div className={styles.parent}>
-                        <div className={styles.div4} onClick={onRectangleClick}>
-                            <div className={styles.wrapper}>
-                                <div className={styles.b}>상담</div>
-                            </div>
-                            <div className={styles.child12} />
-                        </div>
-                        <div className={styles.div4} onClick={onRectangleClick}>
-                            <div className={styles.wrapper}>
-                                <div className={styles.b}>미션</div>
-                            </div>
-                            <div className={styles.child12} />
-                        </div>
-                        <div className={styles.div4} onClick={onRectangleClick}>
-                            <div className={styles.group}>
-                                <div className={styles.b}>건강</div>
-                                <div className={styles.upWrapper}>
-                                    <div className={styles.up}>UP !</div>
-                                </div>
-                            </div>
-                            <div className={styles.child12} />
-                        </div>
-                        <div className={styles.div4} onClick={onRectangleClick}>
-                            <div className={styles.wrapper}>
-                                <div className={styles.b}>관리자</div>
-                            </div>
-                            <div className={styles.child12} />
-                        </div>
-                    </div>
-                    <div className={styles.div12}>
-                        <div className={styles.frameParent}>
-                            <div className={styles.personcircleParent}>
-                                <img
-                                    className={styles.personcircleIcon}
-                                    alt=""
-                                    src="PersonCircle.svg"
-                                />
-                                <div className={styles.frameGroup}>
-                                    <div className={styles.frameDiv}>
-                                        <div className={styles.div13}>
+      <>
+          <ModalExample />
+          <div className={styles.div}>
+              <div className={styles.navbar}>
+                  <div className={styles.bitamin}>BItAMin</div>
+                  <div className={styles.parent}>
+                      <div className={styles.div4} onClick={onRectangleClick}>
+                          <div className={styles.wrapper}>
+                              <div className={styles.b}>상담</div>
+                          </div>
+                          <div className={styles.child12} />
+                      </div>
+                      <div className={styles.div4} onClick={onRectangleClick}>
+                          <div className={styles.wrapper}>
+                              <div className={styles.b}>미션</div>
+                          </div>
+                          <div className={styles.child12} />
+                      </div>
+                      <div className={styles.div4} onClick={onRectangleClick}>
+                          <div className={styles.group}>
+                              <div className={styles.b}>건강</div>
+                              <div className={styles.upWrapper}>
+                                  <div className={styles.up}>UP !</div>
+                              </div>
+                          </div>
+                          <div className={styles.child12} />
+                      </div>
+                      <div className={styles.div4} onClick={onRectangleClick}>
+                          <div className={styles.wrapper}>
+                              <div className={styles.b}>관리자</div>
+                          </div>
+                          <div className={styles.child12} />
+                      </div>
+                  </div>
+                  <div className={styles.div12}>
+                      <div className={styles.frameParent}>
+                          <div className={styles.personcircleParent}>
+                              <img
+                                className={styles.personcircleIcon}
+                                alt=""
+                                src="PersonCircle.svg"
+                              />
+                              <div className={styles.frameGroup}>
+                                  <div className={styles.frameDiv}>
+                                      <div className={styles.div13}>
                       <span className={styles.txt}>
                         <span>김싸피</span>
                         <span className={styles.span}>
@@ -185,88 +196,88 @@ const MainPage: React.FC = () => {
                           <span className={styles.span1}>님</span>
                         </span>
                       </span>
-                                        </div>
-                                    </div>
-                                    <div className={styles.vectorWrapper}>
-                                        <img
-                                            className={styles.vectorIcon}
-                                            alt=""
-                                            src="Vector.svg"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className={styles.wrapper1} onClick={onRectangleClick}>
-                                <img className={styles.icon} alt="" src="쪽지 버튼.svg" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className={styles.inner}>
-                    <div className={styles.div3}>
-                        <p className={styles.p}>{phraseContent}</p>
-                    </div>
-                </div>
-                <div className={styles.recordBtns}>
-                    <img
-                        className={styles.recordBtn}
-                        alt=""
-                        src={isRecording ? recordStop : isEnded ? recordPlay : recordStart}
-                        onClick={isEnded ? onPlayClick : onRecordClick}
-                    />
-                    {isEnded && (
-                        <>
-                            <img
-                                className={styles.recordBtn}
-                                alt=""
-                                src={recordAgain}
-                                onClick={onAgainClick}
-                            />
-                            <img
-                                className={styles.recordBtn}
-                                alt=""
-                                src={recordSave}
-                                onClick={onSaveAudio}
-                            />
-                        </>
-                    )}
-                </div>
-                <img
-                    className={styles.recordBackgroundImg}
+                                      </div>
+                                  </div>
+                                  <div className={styles.vectorWrapper}>
+                                      <img
+                                        className={styles.vectorIcon}
+                                        alt=""
+                                        src="Vector.svg"
+                                      />
+                                  </div>
+                              </div>
+                          </div>
+                          <div className={styles.wrapper1} onClick={onRectangleClick}>
+                              <img className={styles.icon} alt="" src="쪽지 버튼.svg" />
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div className={styles.inner}>
+                  <div className={styles.div3}>
+                      <p className={styles.p}>{phraseContent}</p>
+                  </div>
+              </div>
+              <div className={styles.recordBtns}>
+                  <img
+                    className={styles.recordBtn}
                     alt=""
-                    src={recordBackGroundImg}
-                />
-                <div className={styles.consultBox} onClick={onRectangleClick} />
-                <div className={styles.questBox} onClick={onRectangleClick} />
-                <div
-                    className={styles.tryConsultBtn}
-                    onMouseEnter={handleMouseEnterConsult}
-                    onMouseLeave={handleMouseLeaveConsult}
-                >
-                    <b className={styles.b}>상담하기</b>
-                </div>
-                <div
-                    className={styles.tryQuestBtn}
-                    onMouseEnter={handleMouseEnterQuest}
-                    onMouseLeave={handleMouseLeaveQuest}
-                >
-                    <b className={styles.b}>미션하기</b>
-                </div>
-                <img className={styles.mainImg} alt="" src={mainImg} />
-                <div className={styles.consultBorder} />
-                <img
-                    className={`${styles.mainConsultImg} ${consultOpacityClass}`}
-                    src={mainConsultImg}
-                    alt="Main Consult"
-                />
-                <div className={styles.questBorder} />
-                <img
-                    className={`${styles.mainQuestImg} ${questOpacityClass}`}
-                    alt="Main Quest"
-                    src={mainQuestImg}
-                />
-            </div>
-        </>
+                    src={isRecording ? recordStop : isEnded ? recordPlay : recordStart}
+                    onClick={isEnded ? onPlayClick : onRecordClick}
+                  />
+                  {isEnded && (
+                    <>
+                        <img
+                          className={styles.recordBtn}
+                          alt=""
+                          src={recordAgain}
+                          onClick={onAgainClick}
+                        />
+                        <img
+                          className={styles.recordBtn}
+                          alt=""
+                          src={recordSave}
+                          onClick={onSaveAudio}
+                        />
+                    </>
+                  )}
+              </div>
+              <img
+                className={styles.recordBackgroundImg}
+                alt=""
+                src={recordBackGroundImg}
+              />
+              <div className={styles.consultBox} onClick={onRectangleClick} />
+              <div className={styles.questBox} onClick={onRectangleClick} />
+              <div
+                className={styles.tryConsultBtn}
+                onMouseEnter={handleMouseEnterConsult}
+                onMouseLeave={handleMouseLeaveConsult}
+              >
+                  <b className={styles.b}>상담하기</b>
+              </div>
+              <div
+                className={styles.tryQuestBtn}
+                onMouseEnter={handleMouseEnterQuest}
+                onMouseLeave={handleMouseLeaveQuest}
+              >
+                  <b className={styles.b}>미션하기</b>
+              </div>
+              <img className={styles.mainImg} alt="" src={mainImg} />
+              <div className={styles.consultBorder} />
+              <img
+                className={`${styles.mainConsultImg} ${consultOpacityClass}`}
+                src={mainConsultImg}
+                alt="Main Consult"
+              />
+              <div className={styles.questBorder} />
+              <img
+                className={`${styles.mainQuestImg} ${questOpacityClass}`}
+                alt="Main Quest"
+                src={mainQuestImg}
+              />
+          </div>
+      </>
     )
 }
 
