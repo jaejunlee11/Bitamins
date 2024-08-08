@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import styles from 'styles/main/MainPage.module.css'
 import mainConsultImg from 'assets/image/mainConsultImg.png'
 import mainQuestImg from 'assets/image/mainQuestImg.png'
@@ -10,6 +10,7 @@ import recordStop from 'assets/image/recordEnd.png'
 import recordAgain from 'assets/image/recordAgain.png'
 import recordPlay from 'assets/image/recordPlay.png'
 import ModalExample from 'stories/organisms/ModalExample'
+import { fetchAllPhrases } from '@/api/missionAPI'
 
 const MainPage: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false)
@@ -22,6 +23,20 @@ const MainPage: React.FC = () => {
     styles.transparent
   )
   const [questOpacityClass, setQuestOpacityClass] = useState(styles.transparent)
+  const [phrase, setPhrase] = useState<{ id: number, phraseContent: string } | null>(null)
+
+  useEffect(() => {
+    const loadPhrase = async () => {
+      try {
+        const data = await fetchAllPhrases()
+        setPhrase(data[0]) // 첫 번째 문구만 사용
+      } catch (error) {
+        console.error('Error fetching phrases:', error)
+      }
+    }
+
+    loadPhrase()
+  }, [])
 
   const onRecAudio = () => {
     navigator.mediaDevices
@@ -197,8 +212,14 @@ const MainPage: React.FC = () => {
         </div>
         <div className={styles.inner}>
           <div className={styles.div3}>
-            <p className={styles.p}>오늘 하루도 최선을 다한 당신,</p>
-            <p className={styles.p}>멋져요!</p>
+            {phrase ? (
+              <p className={styles.p}>{phrase.phraseContent}</p>
+            ) : (
+              <>
+                <p className={styles.p}>오늘 하루도 최선을 다한 당신,</p>
+                <p className={styles.p}>멋져요!</p>
+              </>
+            )}
           </div>
         </div>
         <div className={styles.recordBtns}>

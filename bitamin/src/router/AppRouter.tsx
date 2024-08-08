@@ -22,6 +22,7 @@ import ExLogin from 'stories/pages/account/ExLogin'
 import MyPage from 'stories/pages/account/MyPage'
 import ComponentPage from 'stories/pages/ComponentPage'
 import AuthPage from '@/stories/pages/account/AuthPage'
+import MissionForm from '../stories/pages/mission/MissionForm.tsx'
 
 const AppRouter: React.FC = () => {
   return (
@@ -49,6 +50,7 @@ const AppRouter: React.FC = () => {
       <Route path="/reply" element={<ReplyPage />} />
       <Route path="/admin" element={<AdiminPage />} />
       <Route path="/mission" element={<MissionPage />} />
+        <Route path="/missionform" element={<MissionForm />} />
         <Route path="/weather" element={<Weather />} />
     </Routes>
   )
