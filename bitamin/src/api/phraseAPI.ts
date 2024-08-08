@@ -28,3 +28,17 @@ export const saveAudio = async (formData: FormData) => {
     throw error;
   }
 };
+
+export const getMemberPhraseByDate = async (date: string) => {
+  try {
+    const response = await axiosInstance.get('/missions/phrases/recorded', {
+      params: {
+        date: date,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching saved member phrase:', error);
+    throw error;
+  }
+};
