@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import styles from '../../../styles/mission/quest2.module.css';
 import { fetchMissionsByDate } from '@/api/missionAPI';
 
@@ -13,10 +12,19 @@ interface Mission {
     missionReview: string;
 }
 
-// @ts-ignore
-const CompleteMission: React.FC<{ completeDate: string }> = ({ completeDate }) => {
+// 현재 날짜를 가져오는 함수
+const getCurrentDate = (): string => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+const CompleteMission: React.FC = () => {
     const [mission, setMission] = useState<Mission | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const completeDate = getCurrentDate(); // 현재 날짜를 가져옴
 
     useEffect(() => {
         const getMission = async () => {
@@ -54,16 +62,16 @@ const CompleteMission: React.FC<{ completeDate: string }> = ({ completeDate }) =
                           defaultValue={mission.missionReview}
                           required
                         />
-                    </div>
-                    <div>
-                        <label htmlFor="missionImage">미션 이미지:</label>
-                        <input
-                          id="missionImage"
-                          type="file"
-                          accept="image/*"
-                        />
-                    </div>
-                    <button type="submit">미션 등록</button>
+                    </div>=
+                    {mission.imageUrl && (
+                      <div>
+                          <img
+                            src={mission.imageUrl}
+                            alt="Mission"
+                            style={{ width: '300px', height: 'auto', marginTop: '10px' }}
+                          />
+                      </div>
+                    )}
                 </div>
             </>
           ) : (

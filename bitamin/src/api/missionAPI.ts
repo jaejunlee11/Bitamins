@@ -2,19 +2,18 @@ import axiosInstance from './axiosInstance'
 
 const BASE_URL = 'https://i11b105.p.ssafy.io/api'
 
-// 선택한 날짜의 미션 기록 가져오기
 export const fetchMissionsByDate = async (completeDate: string) => {
   try {
-    const response = await axiosInstance.get(
-      `${BASE_URL}/missions/completed`,
-      { params: { date: completeDate } }
-    );
+    const response = await axiosInstance.get('/missions/completed', {
+      params: { date: completeDate }
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching missions:', error);
     throw error;
   }
-}
+};
+
 
 // 선택한 날짜의 녹음 기록 가져오기
 export const fetchRecordedPhrasesByDate = async (saveDate: string) => {
