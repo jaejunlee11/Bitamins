@@ -220,13 +220,24 @@ public class ConsultationController {
         return ResponseEntity.status(200).body(participantList);
     }
 
-//    @GetMapping("/ongoing")
-//    public ResponseEntity<?> findOngoingRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader) {
-//        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
-//
-//        List<OngoingRoomResponse> ongoningRoomList = consultationService.findOngoingRoom(memberId);
-//
-//        return ResponseEntity.status(200).body(ongoningRoomList);
-//    }
+    @GetMapping("/ongoing")
+    public ResponseEntity<?> findOngoingRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader) throws OpenViduJavaClientException, OpenViduHttpException {
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+
+        OngoingRoomResponse ongoingRoomResponse = consultationService.findOngoingRoom(memberId);
+
+        Session session = openVidu.getActiveSession(ongoingRoomResponse.getSessionId());
+
+        if (session == null) return ResponseEntity.status(404).body("유효하지 않은 세션입니다.");
+
+        Map<String,Object> params = new HashMap<>();
+
+        ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
+        Connection connection = session.createConnection(properties);
+
+        ongoingRoomResponse.setToken(connection.getToken());
+
+        return ResponseEntity.status(200).body(ongoingRoomResponse);
+    }
 
 }

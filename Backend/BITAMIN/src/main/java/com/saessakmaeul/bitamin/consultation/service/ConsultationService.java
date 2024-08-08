@@ -399,6 +399,36 @@ public class ConsultationService {
                 .toList();
     }
 
+    // 진행중 상담 재입장 기능
+    public OngoingRoomResponse findOngoingRoom(Long memberId) {
+        Member m = Member.builder().id(memberId).build();
+
+        Optional<Participant> p = participantRepository.findByMemberIdAndConsultationDate(m, LocalDate.now());
+
+        if(p.isEmpty()) return null;
+
+        Optional<Consultation> c = consultationRepository.findById(p.get().getConsultationId().getId());
+
+        if(c.isEmpty()) return null;
+
+        Optional<Consultation> consultation = consultationRepository.findByIdAndCurrentTimeBetween(c.get().getId(), c.get().getStartTime(), c.get().getEndTime());
+
+        if(consultation.isEmpty()) return null;
+
+        Optional<Member> member = memberRepository.findById(memberId);
+
+        return OngoingRoomResponse.builder()
+                .consultationId(consultation.get().getId())
+                .sessionId(consultation.get().getSessionId())
+                .id(p.get().getId())
+                .memberId(p.get().getMemberId().getId())
+                .memberNickname(p.get().getMemberNickname())
+                .profileKey(member.get().getProfileKey())
+                .profileUrl(member.get().getProfileUrl())
+                .build();
+
+    }
+
     // 만약 나중에 Broadcast 필요한 상황이 오면 구현
 //    public BroadcastInformationResponse broadcastInformation(Long id) {
 //        Optional<Consultation> consultation = consultationRepository.findById(id);
