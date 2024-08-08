@@ -12,21 +12,9 @@ export const fetchMissionsByDate = async (completeDate: string) => {
     console.error('Error fetching missions:', error);
     // @ts-ignore
     if (error.response) {
+      // @ts-ignore
       console.error('Response data:', error.response.data);
     }
-    throw error;
-  }
-};
-
-// 선택한 날짜의 녹음 기록 가져오기
-export const fetchRecordedPhrasesByDate = async (saveDate: string) => {
-  try {
-    const response = await axiosInstance.get(
-      `${BASE_URL}/missions/phrases/recorded/${saveDate}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching recorded phrases:', error);
     throw error;
   }
 };
@@ -96,6 +84,17 @@ export const fetchAllPhrases = async () => {
     return response.data;
   } catch (error) {
     console.error('Error fetching all phrases:', error);
+    throw error;
+  }
+};
+
+// 경험치
+export const getExperience = async () => {
+  try {
+    const response = await axiosInstance.get('/missions/plant');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching experience:', error);
     throw error;
   }
 };
