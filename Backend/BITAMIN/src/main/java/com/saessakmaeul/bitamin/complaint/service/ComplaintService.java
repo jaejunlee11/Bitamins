@@ -10,6 +10,9 @@ import com.saessakmaeul.bitamin.complaint.repository.UserStopRepository;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.entity.Role;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
+import com.saessakmaeul.bitamin.message.dto.requestDto.MessageRegistRequest;
+import com.saessakmaeul.bitamin.message.entity.Message;
+import com.saessakmaeul.bitamin.message.service.MessageService;
 import jakarta.persistence.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +35,9 @@ public class ComplaintService {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private MessageService messageService;
 
     public List<ComplaintSimpleResponse> getComplaintList(long userId) throws Exception{
         checkAdmin(userId);
@@ -122,6 +128,27 @@ public class ComplaintService {
             userStop.setId(complaint.getRespondentId());
             userStop.setStopDate(LocalDateTime.now().plusDays(stopDate));
             userStopRepository.save(userStop);
+        } finally {
+            // 보낼 메시지 생성 (신고자)
+            MessageRegistRequest messageToComplaint = MessageRegistRequest.builder()
+                    .title("신고 처리 완료")
+                    .content(getNickName(complaint.getRespondentId())+"의 재제를  완료하였습니다.")
+                    .category("신고")
+                    .counselingDate(LocalDateTime.now())
+                    .receiverId(complaint.getComplainantId())
+                    .build();
+
+            // 보낼 메시지 생성 (피신고자)
+            MessageRegistRequest messageToRespondent = MessageRegistRequest.builder()
+                    .title("재제 알림")
+                    .content(getNickName(complaint.getRespondentId())+"님의 계정이 "+ stopDate +"일간 정지 당하셨습니다.")
+                    .category("신고")
+                    .counselingDate(LocalDateTime.now())
+                    .receiverId(complaint.getRespondentId())
+                    .build();
+            // 메시지 전송
+            messageService.registMessage(messageToComplaint,userId);
+            messageService.registMessage(messageToRespondent,userId);
         }
     }
 
