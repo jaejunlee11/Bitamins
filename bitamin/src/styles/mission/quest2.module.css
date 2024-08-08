@@ -489,3 +489,14 @@
     font-size: 1.2em;
     line-height: 1;
 }
+
+.disabledDay {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: default;
+}
+
+.disabledDay:hover {
+    background-color: transparent;
+}
+

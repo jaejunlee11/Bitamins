@@ -5,8 +5,7 @@ import ko from 'date-fns/locale/ko';
 import styles from '../../../styles/mission/quest2.module.css';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../../styles/mission/custom-datepicker.css';
-import { fetchMissionsByDate, fetchRecordedPhrasesByDate, fetchMissionDatesByMonth } from '@/api/missionAPI';
-import MissionForm from './MissionForm'; // 새 컴포넌트 import
+import { fetchMissionDatesByMonth, fetchMissionsByDate } from '@/api/missionAPI';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
@@ -15,59 +14,49 @@ setDefaultLocale('ko');
 
 interface CalendarProps {
     onDateChange: (date: Date | null) => void;
-    onMissionDataChange: (data: any) => void;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ onDateChange, onMissionDataChange }) => {
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [missionData, setMissionData] = useState<any>(null);
-    const [recordedPhrasesData, setRecordedPhrasesData] = useState<any>(null);
-    const [missionDates, setMissionDates] = useState<Date[]>([]);
+const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
+    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+    const [missionDate, setMissionDate] = useState<Date | null>(null);
     const [todayMissionExists, setTodayMissionExists] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
 
-    const fetchMissionDates = async (date: Date) => {
-        const formattedDate = format(date, 'yyyy-MM');
+    const fetchMissionDate = async (date: Date) => {
+        const formattedDate = format(date, 'yyyy-MM-dd'); // 일까지 포함한 형식으로 변경
         try {
-            const data = await fetchMissionDatesByMonth(formattedDate);
-            const dates = data.map((dateString: string) => new Date(dateString));
-            setMissionDates(dates);
+            setLoading(true);
+            const data = await fetchMissionsByDate(formattedDate);
+            const missionDate = new Date(data.completeDate);
+            setMissionDate(missionDate);
             const today = new Date().toISOString().split('T')[0];
-            setTodayMissionExists(dates.some((missionDate: { toISOString: () => string; }) => missionDate.toISOString().split('T')[0] === today));
+            setTodayMissionExists(missionDate.toISOString().split('T')[0] === today);
         } catch (error) {
-            console.error('Error fetching mission dates:', error);
+            console.error('Error fetching mission date:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         const today = new Date();
-        fetchMissionDates(today);
+        setSelectedDate(today);
+        fetchMissionDate(today);
+        onDateChange(today); // 페이지 로드 시 오늘 날짜를 선택된 상태로 설정
     }, []);
 
-    const handleDateChange = async (date: Date | null) => {
-        setSelectedDate(date);
-        onDateChange(date);
-
+    const handleDateChange = (date: Date | null) => {
         if (date) {
-            const formattedDate = format(date, 'yyyy-MM-dd');
-            console.log(formattedDate);
-
-            try {
-                const missionData = await fetchMissionsByDate(formattedDate);
-                setMissionData(missionData);
-                onMissionDataChange(missionData);
-                console.log(missionData);
-
-                const recordedPhrasesData = await fetchRecordedPhrasesByDate(formattedDate);
-                setRecordedPhrasesData(recordedPhrasesData);
-                console.log(recordedPhrasesData);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
+            // 선택된 날짜를 UTC 시간으로 설정하여 하루 전날짜가 되는 문제를 해결
+            const correctedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            setSelectedDate(correctedDate);
+            setMissionDate(null); // 상태 초기화
+            onDateChange(correctedDate);
         }
     };
 
     const handleMonthChange = (date: Date) => {
-        fetchMissionDates(date);
+        fetchMissionDate(date);
     };
 
     const renderCustomHeader = ({
@@ -89,9 +78,12 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange, onMissionDataChange }
     const getDayClassName = (date: Date) => {
         const isSelected = selectedDate && date.getTime() === selectedDate.getTime();
         const isOutsideCurrentMonth = date.getMonth() !== (selectedDate ? selectedDate.getMonth() : new Date().getMonth());
-        const hasMission = missionDates.some(missionDate => missionDate.toDateString() === date.toDateString());
+        const hasMission = missionDate && missionDate.toDateString() === date.toDateString();
+        const isFutureDate = date > new Date();
 
-        if (isSelected) {
+        if (isFutureDate) {
+            return styles.disabledDay;
+        } else if (isSelected) {
             return styles.selectedDay;
         } else if (isOutsideCurrentMonth) {
             return 'react-datepicker__day--outside-month';
@@ -111,6 +103,11 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange, onMissionDataChange }
         return '';
     };
 
+    const filterDate = (date: Date) => {
+        const today = new Date();
+        return date <= today;
+    };
+
     return (
       <div className={styles.calendarContainer} style={{ zIndex: 1000 }}>
           <DatePicker
@@ -121,9 +118,11 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange, onMissionDataChange }
             renderCustomHeader={renderCustomHeader}
             calendarClassName={styles.customCalendar}
             dayClassName={getDayClassName}
+            filterDate={filterDate}
             formatWeekDay={(day) => day.substr(0, 1)}
             weekDayClassName={getWeekDayClassName}
           />
+          {loading && <p>로딩 중...</p>}
       </div>
     );
 };
