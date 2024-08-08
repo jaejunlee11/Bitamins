@@ -20,6 +20,7 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
             "WHERE current_participants <= ?1 " +
             "AND is_privated = 0 " +
             "AND id NOT IN ?2 " +
+            "AND start_time > now() " +
             "ORDER BY RAND() " +
             "LIMIT 1 ",
             nativeQuery = true)
@@ -31,6 +32,7 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
             "AND current_participants <= ?2 " +
             "AND is_privated = 0 " +
             "AND id NOT IN ?3 " +
+            "AND start_time > now() " +
             "ORDER BY RAND() " +
             "LIMIT 1 ",
             nativeQuery = true)

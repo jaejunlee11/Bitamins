@@ -62,6 +62,9 @@ public class ConsultationController {
                                       @RequestBody JoinRoomRequest joinRoomRequest) throws OpenViduJavaClientException, OpenViduHttpException {
         Map<String,Object> params = new HashMap<>();
 
+        // 상담 시작 시간이 지났는지 아닌지 확인
+        if(joinRoomRequest.getStartTime().isBefore(LocalDateTime.now())) return ResponseEntity.status(404).body("입장 가능 시간이 아닙니다.");
+
         // 입장 가능한 세션인지 확인
         Session session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
 
@@ -108,6 +111,9 @@ public class ConsultationController {
         joinRandomRequest.setSessionId(map.get("sessionId").toString());
         joinRandomRequest.setId(Long.parseLong(map.get("id").toString()));
         joinRandomRequest.setConsultationDate(((LocalDateTime)map.get("consultationDate")).toLocalDate());
+
+        System.out.println(joinRandomRequest.getId());
+
 
         // 입장 가능한 세션인지 확인
         Session session = openVidu.getActiveSession(joinRandomRequest.getSessionId());
