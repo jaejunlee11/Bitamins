@@ -24,7 +24,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData }) 
             if (!missionData) {
                 try {
                     const data = await fetchTodayMission();
-                    console.log('Fetched mission data:', data);
                     setTodayMission(data);
                 } catch (error) {
                     console.error('Error fetching today\'s mission:', error);
@@ -67,15 +66,20 @@ const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData }) 
 
         if (!todayMission) return;
 
-        const formData = new FormData();
         const completeDate = getCurrentDate();
-        formData.append('completeDate', completeDate);
-        formData.append('missionReview', missionReview);
-        formData.append('missionId', todayMission.id.toString());
+        const memberMissionRequest = {
+            completeDate,
+            missionReview,
+            missionId: todayMission.id,
+        };
+
+        const formData = new FormData();
+        formData.append('memberMissionRequest', new Blob([JSON.stringify(memberMissionRequest)], { type: 'application/json' }));
         if (missionImage) {
             formData.append('missionImage', missionImage);
         }
 
+        // 전송할 데이터 콘솔에 출력
         console.log('Submitting form data:', {
             completeDate,
             missionReview,
@@ -86,12 +90,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData }) 
         try {
             await submitMission(formData);
             console.log('미션이 성공적으로 등록되었습니다!');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error submitting mission:', error);
-            // @ts-ignore
             if (error.response) {
-                // @ts-ignore
-                console.error('Response data:', error.response.data);
+                console.error('Response data:', error.response.data); // 서버 응답 출력
             }
         }
     };

@@ -1,13 +1,13 @@
-import { useState } from 'react'
-import axiosInstance, { setAccessToken } from 'api/axiosInstance' // 경로 수정
-import useAuthStore from 'store/useAuthStore' // 경로 수정
-import { useCookies } from 'react-cookie'
-import { fetchMessages } from 'api/messageAPI'
+import { useState } from 'react';
+import axiosInstance, { setAccessToken } from 'api/axiosInstance';
+import useAuthStore from 'store/useAuthStore';
+import { useCookies } from 'react-cookie';
+import { fetchMessages } from 'api/messageAPI';
 
 const AuthPage: React.FC = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [, setCookie] = useCookies(['refreshToken']) // `cookies` 대신 `_`를 사용
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [, setCookie] = useCookies(['refreshToken']);
 
   const {
     accessToken,
@@ -15,42 +15,42 @@ const AuthPage: React.FC = () => {
     setAccessToken: setAuthAccessToken,
     setRefreshToken: setAuthRefreshToken,
     clearAuth,
-  } = useAuthStore()
+  } = useAuthStore();
 
   const handleLogin = async () => {
     try {
       const response = await axiosInstance.post('/auth/login', {
         email,
         password,
-      })
+      });
 
-      const { accessToken, refreshToken } = response.data
-      setAccessToken(accessToken) // axiosInstance에 accessToken 설정
-      setAuthAccessToken(accessToken) // zustand 상태 관리에 accessToken 설정
-      setAuthRefreshToken(refreshToken) // zustand 상태 관리에 refreshToken 설정
+      const { accessToken, refreshToken } = response.data;
+      localStorage.setItem('accessToken', accessToken); // 로컬 스토리지에 accessToken 저장
+      setAuthAccessToken(accessToken); // zustand 상태 관리에 accessToken 설정
+      setAuthRefreshToken(refreshToken); // zustand 상태 관리에 refreshToken 설정
       setCookie('refreshToken', refreshToken, {
         path: '/',
         secure: true,
-        sameSite: 'strict', // 또는 'lax' 또는 'none'으로 설정
-      })
+        sameSite: 'strict',
+      });
 
-      alert('Login successful!')
+      alert('Login successful!');
     } catch (error: any) {
       const errorMessage =
-        error.response?.data?.message || error.message || 'Login failed'
-      alert(`Login failed: ${errorMessage}`)
-      console.error('Login error:', error)
+        error.response?.data?.message || error.message || 'Login failed';
+      alert(`Login failed: ${errorMessage}`);
+      console.error('Login error:', error);
     }
-  }
+  };
 
   const handleFetchMessages = async () => {
     try {
-      const messages = await fetchMessages()
-      console.log('Messages:', messages)
+      const messages = await fetchMessages();
+      console.log('Messages:', messages);
     } catch (error) {
-      console.error('Failed to fetch messages:', error)
+      console.error('Failed to fetch messages:', error);
     }
-  }
+  };
 
   return (
     <div>
@@ -85,7 +85,7 @@ const AuthPage: React.FC = () => {
         <p>Current Refresh Token: {refreshToken}</p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AuthPage
+export default AuthPage;
