@@ -18,6 +18,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,6 +34,9 @@ public class AuthController {
 
     @Value("${KAKAO_API_KEY}")
     private String apiKey;
+
+    @Value("${GOOGLE_API_KEY}")
+    private String googleApiKey;
 
     @Autowired
     public AuthController(MemberService memberService, JwtUtil jwtUtil) {
@@ -147,6 +151,64 @@ public class AuthController {
             LoginRequest loginRequest = memberService.kakaoLogin(code);
 //            URI redirectUri = new URI("http://localhost:5173/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
             URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setLocation(redirectUri);
+            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        } catch (Exception e) {
+            if(e.getMessage().contains("K:등록된 유저가 없습니다.")){
+                StringTokenizer st = new StringTokenizer(e.getMessage(),"/");
+                st.nextToken();
+                // 리다이렉트
+                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
+                // String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken()" + token; //테스트
+                URI redirectUriWithParams = new URI(redirectUrl);
+                HttpHeaders httpHeaders = new HttpHeaders();
+                httpHeaders.setLocation(redirectUriWithParams);
+                return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+            }
+            return ResponseEntity.status(500).body("로그인 실패");
+        }
+    }
+
+    // 소셜 로그인 과정
+    /*
+        1. google 소셜 로그인 요청(버튼 클릭)
+        2. google 로그인 창으로 이동
+        3. 로그인시 엑세스 토큰 획득
+        4. 엑세스 토큰으로 DB에 확인
+            4.1. 정보가 있는 경우 로그인
+            4.2. 정보가 없는 경우 회원가입 창으로 이동(email,이름,비밀번호 넘겨주기)
+     */
+    @GetMapping("/google/login")
+    public ResponseEntity<?> googleLogin() throws URISyntaxException {
+//        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/google"; //배
+        String redirectUri = "http://localhost:8080/api/auth/google"; // 테스트용
+        String scope = "email profile openid";
+
+        // 공백때문에 uri처리 추가
+        String googleAuthUri = UriComponentsBuilder.fromHttpUrl("https://accounts.google.com/o/oauth2/v2/auth")
+                .queryParam("client_id", googleApiKey)
+                .queryParam("redirect_uri", redirectUri)
+                .queryParam("response_type", "code")
+                .queryParam("scope", scope)
+                .build()
+                .encode()
+                .toUriString();
+
+        // 리다이렉트
+        HttpHeaders httpHeaders = new HttpHeaders();
+        URI redirectUriWithParams = new URI(googleAuthUri);
+        httpHeaders.setLocation(redirectUriWithParams);
+        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+    }
+
+    @GetMapping("/google")
+    public ResponseEntity<?> google(@RequestParam("code") String code) throws Exception {
+        try{
+            // 로그인
+            LoginRequest loginRequest = memberService.googleLogin(code);
+            URI redirectUri = new URI("http://localhost:5173/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+//            URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setLocation(redirectUri);
             return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);

@@ -60,6 +60,12 @@ public class MemberService {
     @Value("${KAKAO_API_KEY}")
     private String apiKey;
 
+    @Value("${GOOGLE_API_KEY}")
+    private String googleApiKey;
+
+    @Value("${GOOGLE_PASSWORD}")
+    private String googlePassword;
+
     @Transactional
     public Long register(MemberRequestDTO memberDTO, MultipartFile image) throws IOException {
         try {
@@ -180,6 +186,71 @@ public class MemberService {
         String accessToken = getKakaotoken(code);
         // 로그인 진행
         return getLoginRequest(accessToken);
+    }
+
+
+    // 구글 엑세스 토큰 획득
+    private String getgoogletoken(String code) throws JsonProcessingException {
+        //        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/google"; // 배포
+        String redirectUri = "http://localhost:8080/api/auth/google"; // 테스트
+        String tokenUrl = "https://oauth2.googleapis.com/token";
+
+        // 요청으로 엑세스 토큰 꺼내기
+        HttpHeaders tokenHeaders = new HttpHeaders();
+        tokenHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> tokenBody = new LinkedMultiValueMap<>();
+        tokenBody.add("grantType", "authorization_code");
+        tokenBody.add("clientId", googleApiKey);
+        tokenBody.add("clientSecret",googlePassword);
+        tokenBody.add("redirectUri", redirectUri);
+        tokenBody.add("code", code);
+
+        HttpEntity<MultiValueMap<String, String>> tokenRequestEntity = new HttpEntity<>(tokenBody, tokenHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> tokenResponse = restTemplate.exchange(tokenUrl, HttpMethod.POST, tokenRequestEntity, String.class);
+
+        // 엑세스 토큰 꺼내기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode tokenJsonNode = objectMapper.readTree(tokenResponse.getBody());
+        return tokenJsonNode.get("id_token").asText();
+    }
+
+    private LoginRequest getGoogleLoginRequest(String accessToken) throws Exception {
+        String userInfoUrl = "https://oauth2.googleapis.com/tokeninfo";
+
+        // 엑세스 토큰으로 검색
+        HttpHeaders userInfoHeaders = new HttpHeaders();
+        userInfoHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> userInfoBody = new LinkedMultiValueMap<>();
+        userInfoBody.add("id_token", accessToken);
+
+        HttpEntity<MultiValueMap<String, String>> userInfoRequestEntity = new HttpEntity<>(userInfoBody, userInfoHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> userInfoResponse = restTemplate.exchange(userInfoUrl, HttpMethod.POST, userInfoRequestEntity, String.class);
+
+        // 결과값 꺼내오기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode userInfoJsonNode = objectMapper.readTree(userInfoResponse.getBody());
+        String id = userInfoJsonNode.get("sub").asText();
+        String email = userInfoJsonNode.get("email").asText();
+
+        // 저장된 유저가 없다면 Exception 발생
+        memberRepository.findByEmail(email).orElseThrow(()->new Exception("K:등록된 유저가 없습니다./"+email+"/"+id));
+
+        // 저장된 유저가 있다면 로그인을 위해 request body 생성
+        return new LoginRequest(email,id);
+    }
+
+    //구글 로그인
+    public LoginRequest googleLogin(String code) throws Exception {
+        // 엑세스 토큰 획득
+        String accessToken = getgoogletoken(code);
+        // 로그인 진행
+        return getGoogleLoginRequest(accessToken);
     }
 
     // 카카오톡 엑세스 토큰 획득
