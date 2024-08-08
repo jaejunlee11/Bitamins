@@ -124,6 +124,10 @@ public class ConsultationService {
         Member m = Member.builder().id(joinRoomRequest.getMemberId()).build();
         Consultation c = Consultation.builder().id(joinRoomRequest.getId()).build();
 
+        Optional<Participant> p = participantRepository.findByMemberIdAndConsultationId(m, c);
+
+        if(p.isPresent()) return null;
+
         Participant newParticipant = Participant.builder()
                 .memberId(m)
                 .memberNickname(joinRoomRequest.getMemberNickname())

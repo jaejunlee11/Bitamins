@@ -65,7 +65,7 @@ public class ConsultationController {
         // 입장 가능한 세션인지 확인
         Session session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
 
-        if (session == null) return ResponseEntity.status(404).body("못 찾음");
+        if (session == null) return ResponseEntity.status(404).body("유효하지 않은 세션입니다.");
 
         // DB에 저장
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
@@ -103,7 +103,7 @@ public class ConsultationController {
 
         Map<String, Object> map = consultationService.findRandomSessionId(joinRandomRequest);
 
-        if(map == null) return ResponseEntity.status(404).body("방 없음");
+        if(map == null) return ResponseEntity.status(404).body("입장 가능한 방이 없습니다.");
 
         joinRandomRequest.setSessionId(map.get("sessionId").toString());
         joinRandomRequest.setId(Long.parseLong(map.get("id").toString()));
@@ -112,7 +112,7 @@ public class ConsultationController {
         // 입장 가능한 세션인지 확인
         Session session = openVidu.getActiveSession(joinRandomRequest.getSessionId());
 
-        if (session == null) return ResponseEntity.status(404).body("못 찾음");
+        if (session == null) return ResponseEntity.status(404).body("유효하지 않은 세션입니다.");
 
         // DB에 저장
         JoinRandomResponse joinRandomResponse = consultationService.joinRandom(joinRandomRequest);
@@ -138,7 +138,7 @@ public class ConsultationController {
 
         int result = consultationService.exitRoomBeforeStart(exitRoomBeforeStartRequest);
 
-        if(result == 0) return ResponseEntity.status(404).body("퇴장하지 못 했습니다.");
+        if(result == 0) return ResponseEntity.status(404).body("퇴장하지 못했습니다.");
 
         return ResponseEntity.status(200).body("정상적으로 퇴장 처리 되었습니다.");
     }
