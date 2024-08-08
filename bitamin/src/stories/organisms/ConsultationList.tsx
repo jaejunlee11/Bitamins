@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { joinRoom } from 'api/consultationAPI'
 import useConsultationStore from 'store/useConsultationStore'
 
 const ConsultationList: React.FC = () => {
+  const navigate = useNavigate()
   const {
     consultations,
     fetchAndSetConsultations,
-    joinRoomAndSetState,
     joinRandomParticipantsAndSetState,
+    setJoinResponseData,
+    setParticipant,
+    setJoinData,
   } = useConsultationStore((state) => ({
     consultations: state.consultations,
     fetchAndSetConsultations: state.fetchAndSetConsultations,
-    joinRoomAndSetState: state.joinRoomAndSetState,
     joinRandomParticipantsAndSetState: state.joinRandomParticipantsAndSetState,
+    setJoinResponseData: state.setJoinResponseData,
+    setParticipant: state.setParticipant,
+    setJoinData: state.setJoinData,
   }))
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -20,9 +27,11 @@ const ConsultationList: React.FC = () => {
   const loadConsultations = async () => {
     try {
       await fetchAndSetConsultations(0, 100, '전체')
+      console.log('Fetched Consultations:', consultations)
     } catch (err) {
       setError('Failed to fetch consultations')
     } finally {
+      console.log('Fetched Consultations:', consultations)
       setLoading(false)
     }
   }
@@ -30,28 +39,6 @@ const ConsultationList: React.FC = () => {
   useEffect(() => {
     loadConsultations()
   }, [fetchAndSetConsultations])
-
-  const handleJoinRoom = async (
-    consultationId: number,
-    sessionId: string,
-    isPrivated: boolean
-  ) => {
-    try {
-      const joinData = {
-        id: consultationId,
-        isPrivated,
-        password: isPrivated ? passwords[consultationId] : null,
-        startTime: new Date().toISOString(),
-        sessionId,
-        token: '', // token will be set by the API response
-      }
-      await joinRoomAndSetState(joinData)
-      alert('Joined room successfully!')
-    } catch (error) {
-      alert('Failed to join room')
-      console.error('Error joining room:', error)
-    }
-  }
 
   const handlePasswordChange = (consultationId: number, value: string) => {
     setPasswords((prevPasswords) => ({
@@ -62,12 +49,37 @@ const ConsultationList: React.FC = () => {
 
   const handleJoinRandomParticipants = async (type: string) => {
     try {
-      console.log('입장')
       await joinRandomParticipantsAndSetState(type)
       alert(`Fetched random participants for ${type}`)
     } catch (error) {
       alert('Failed to fetch random participants')
       console.error('Error fetching random participants:', error)
+    }
+  }
+
+  const handleJoinRoom = async (consultation) => {
+    try {
+      const joinData = {
+        id: consultation.id,
+        isPrivated: consultation.isPrivated,
+        password: consultation.isPrivated ? passwords[consultation.id] : null,
+        startTime: consultation.startTime,
+        sessionId: consultation.sessionId,
+      }
+
+      const joinResponse = await joinRoom(joinData)
+
+      setJoinData(joinData)
+      setParticipant(joinResponse)
+      setJoinResponseData({
+        token: joinResponse.token,
+        sessionId: joinResponse.sessionId,
+      })
+
+      navigate('/consult')
+    } catch (error) {
+      console.error('Error joining room:', error)
+      alert('Failed to join the room')
     }
   }
 
@@ -87,12 +99,10 @@ const ConsultationList: React.FC = () => {
               <strong>Title:</strong> {consultation.title}
             </p>
             <p>
-              <strong>Start Time:</strong>{' '}
-              {new Date(consultation.startTime).toLocaleString()}
+              <strong>Start Time:</strong> {consultation.startTime}
             </p>
             <p>
-              <strong>End Time:</strong>{' '}
-              {new Date(consultation.endTime).toLocaleString()}
+              <strong>End Time:</strong> {consultation.endTime}
             </p>
             <p>
               <strong>Current Participants:</strong>{' '}
@@ -111,28 +121,12 @@ const ConsultationList: React.FC = () => {
                     handlePasswordChange(consultation.id, e.target.value)
                   }
                 />
-                <button
-                  onClick={() =>
-                    handleJoinRoom(
-                      consultation.id,
-                      consultation.sessionId,
-                      consultation.isPrivated
-                    )
-                  }
-                >
+                <button onClick={() => handleJoinRoom(consultation)}>
                   Join Room
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() =>
-                  handleJoinRoom(
-                    consultation.id,
-                    consultation.sessionId,
-                    consultation.isPrivated
-                  )
-                }
-              >
+              <button onClick={() => handleJoinRoom(consultation)}>
                 Join Room
               </button>
             )}
@@ -140,6 +134,7 @@ const ConsultationList: React.FC = () => {
           </li>
         ))}
       </ul>
+      <button onClick={() => {}}></button>
       <div>
         <h2>Fetch Random Participants</h2>
         <button onClick={() => handleJoinRandomParticipants('전체')}>

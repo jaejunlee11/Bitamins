@@ -5,7 +5,13 @@ import {
   joinRandomParticipants,
   fetchConsultations,
 } from 'api/consultationAPI'
-import { OpenVidu, Publisher, Session, StreamManager } from 'openvidu-browser'
+import {
+  OpenVidu,
+  Publisher,
+  Session,
+  StreamManager,
+  Device,
+} from 'openvidu-browser'
 
 interface Consultation {
   id: number
@@ -43,7 +49,11 @@ interface JoinData {
   password: string | null
   startTime: string
   sessionId: string
+}
+
+interface JoinResponseData {
   token: string
+  sessionId: string
 }
 
 interface ConsultationState {
@@ -51,6 +61,7 @@ interface ConsultationState {
   participant: Participant | null
   roomData: RoomData | null
   joinData: JoinData | null
+  joinResponseData: JoinResponseData | null // JoinResponse 데이터 추가
   totalPages: number
   page: number
   size: number
@@ -58,6 +69,10 @@ interface ConsultationState {
   mySessionId: string
   myUserName: string
   subscribers: StreamManager[]
+  session?: Session
+  publisher?: Publisher
+  mainStreamManager?: StreamManager
+  currentVideoDevice?: Device
   fetchAndSetConsultations: (
     page: number,
     size: number,
@@ -68,6 +83,7 @@ interface ConsultationState {
   setParticipant: (participant: Participant) => void
   setRoomData: (roomData: RoomData) => void
   setJoinData: (joinData: JoinData) => void
+  setJoinResponseData: (joinResponseData: JoinResponseData) => void // JoinResponse 데이터 설정 함수 추가
   initializeOpenViduSession: (session: Session) => void
   addSubscriber: (subscriber: StreamManager) => void
   removeSubscriber: (subscriber: StreamManager) => void
@@ -80,6 +96,7 @@ const useConsultationStore = create<ConsultationState>()(
       participant: null,
       roomData: null,
       joinData: null,
+      joinResponseData: null, // 초기 값 설정
       totalPages: 0,
       page: 0,
       size: 10,
@@ -114,7 +131,13 @@ const useConsultationStore = create<ConsultationState>()(
       joinRoomAndSetState: async (joinData: JoinData) => {
         try {
           const response = await joinRoom(joinData)
-          set({ joinData: response })
+          set({ joinData: { ...joinData, token: response.token } })
+          set({
+            joinResponseData: {
+              token: response.token,
+              sessionId: response.sessionId,
+            },
+          }) // JoinResponse 데이터를 스토어에 저장
           const OV = new OpenVidu()
           const session = OV.initSession()
           get().initializeOpenViduSession(session)
@@ -126,7 +149,9 @@ const useConsultationStore = create<ConsultationState>()(
       joinRandomParticipantsAndSetState: async (type: string) => {
         try {
           const response = await joinRandomParticipants(type)
-          set({ joinData: response })
+          const { sessionid, token } = response
+          set({ joinData: { ...get().joinData, sessionId: sessionid, token } })
+          set({ joinResponseData: { token, sessionId: sessionid } }) // JoinResponse 데이터를 스토어에 저장
           const OV = new OpenVidu()
           const session = OV.initSession()
           get().initializeOpenViduSession(session)
@@ -136,7 +161,7 @@ const useConsultationStore = create<ConsultationState>()(
         }
       },
       initializeOpenViduSession: (session: Session) => {
-        set({ session }) // 저장소에 session 저장
+        set({ session })
         session.on('streamCreated', (event) => {
           const subscriber = session.subscribe(event.stream, undefined)
           get().addSubscriber(subscriber)
@@ -152,7 +177,7 @@ const useConsultationStore = create<ConsultationState>()(
 
         const { joinData, myUserName } = get()
         session
-          .connect(joinData.token, { clientData: myUserName })
+          .connect(joinData!.token, { clientData: myUserName })
           .then(async () => {
             const publisher = await session.initPublisherAsync(undefined, {
               audioSource: undefined,
@@ -199,6 +224,8 @@ const useConsultationStore = create<ConsultationState>()(
       setParticipant: (participant: Participant) => set({ participant }),
       setRoomData: (roomData: RoomData) => set({ roomData }),
       setJoinData: (joinData: JoinData) => set({ joinData }),
+      setJoinResponseData: (joinResponseData: JoinResponseData) =>
+        set({ joinResponseData }), // JoinResponse 데이터 설정 함수 추가
     }),
     {
       name: 'consultation-storage',
@@ -208,6 +235,7 @@ const useConsultationStore = create<ConsultationState>()(
         participant: state.participant,
         roomData: state.roomData,
         joinData: state.joinData,
+        joinResponseData: state.joinResponseData,
         totalPages: state.totalPages,
         page: state.page,
         size: state.size,

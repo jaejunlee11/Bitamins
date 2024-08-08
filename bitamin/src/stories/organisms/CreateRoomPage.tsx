@@ -12,6 +12,9 @@ const CreateRoomPage: React.FC = () => {
   const setParticipant = useConsultationStore((state) => state.setParticipant)
   const setRoomData = useConsultationStore((state) => state.setRoomData)
   const setJoinData = useConsultationStore((state) => state.setJoinData)
+  const setJoinResponseData = useConsultationStore(
+    (state) => state.setJoinResponseData
+  )
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,8 +22,8 @@ const CreateRoomPage: React.FC = () => {
     try {
       const startDateTime = new Date(startTime)
       const endDateTime = new Date(
-        startDateTime.getTime() + 24 * 14 * 60 * 60 * 1000
-      ) // 2시간 후
+        startDateTime.getTime() + 2 * 60 * 60 * 1000 // 2시간 후
+      )
 
       const roomData = {
         category,
@@ -32,26 +35,29 @@ const CreateRoomPage: React.FC = () => {
       }
 
       const response = await createRoom(roomData)
-      console.log('Create Room Response:', response) // 응답 데이터 확인
+      console.log('Create Room Response:', response)
       setRoomData(roomData)
 
       const joinData = {
-        id: response.id, // 수정된 부분
+        id: response.id,
         isPrivated: response.isPrivated,
         password: response.password,
         startTime: response.startTime,
         sessionId: response.sessionId,
-        token: response.token,
       }
 
-      console.log('Join Data:', joinData) // joinData 확인
+      console.log('Join Data:', joinData)
 
-      const joinResponse = await joinRoom(joinData) // 자동으로 참여 요청
-      console.log('Join Room Response:', joinResponse) // 응답 데이터 확인
+      const joinResponse = await joinRoom(joinData)
+      console.log('Join Room Response:', joinResponse)
       setJoinData(joinData)
-      setParticipant(joinResponse.data) // zustand 스토어에 저장
+      setParticipant(joinResponse.data)
+      setJoinResponseData({
+        token: joinResponse.token,
+        sessionId: joinResponse.sessionId,
+      }) // JoinResponse 데이터를 스토어에 저장
       alert('Room created and joined successfully!')
-      navigate('/consultationlist')
+      navigate('/consultation')
     } catch (error) {
       alert('Failed to create or join room')
       console.error('Error creating or joining room:', error)
