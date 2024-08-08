@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -124,9 +125,10 @@ public class ConsultationService {
         Member m = Member.builder().id(joinRoomRequest.getMemberId()).build();
         Consultation c = Consultation.builder().id(joinRoomRequest.getId()).build();
 
-        Optional<Participant> p = participantRepository.findByMemberIdAndConsultationId(m, c);
+        // 당일 집단 상담 이용했는지 확인
+        Optional<Participant> isUsed = participantRepository.findByMemberIdAndConsultationDate(m, LocalDate.now());
 
-        if(p.isPresent()) return null;
+        if(isUsed.isPresent()) return null;
 
         Participant newParticipant = Participant.builder()
                 .memberId(m)
@@ -179,6 +181,12 @@ public class ConsultationService {
 
     public Map<String, Object> findRandomSessionId(JoinRandomRequest joinRandomRequest) {
         Member m = Member.builder().id(joinRandomRequest.getMemberId()).build();
+
+        // 당일 집단 상담 이용했는지 확인
+        Optional<Participant> isUsed = participantRepository.findByMemberIdAndConsultationDate(m, LocalDate.now());
+
+        if(isUsed.isPresent()) return null;
+
         List<Participant> p = participantRepository.findByMemberId(m);
 
         List<Long> c = new ArrayList<>();

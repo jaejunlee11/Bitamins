@@ -215,8 +215,18 @@ public class ConsultationController {
     public ResponseEntity<?> findRecentParticipants(@RequestHeader(value = "Authorization", required = false) String tokenHeader) {
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
-        List<RecentParticipantResponse> participants = consultationService.findRecentParticipants(memberId);
+        List<RecentParticipantResponse> participantList = consultationService.findRecentParticipants(memberId);
 
-        return ResponseEntity.status(200).body(participants);
+        return ResponseEntity.status(200).body(participantList);
     }
+
+//    @GetMapping("/ongoing")
+//    public ResponseEntity<?> findOngoingRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader) {
+//        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+//
+//        List<OngoingRoomResponse> ongoningRoomList = consultationService.findOngoingRoom(memberId);
+//
+//        return ResponseEntity.status(200).body(ongoningRoomList);
+//    }
+
 }
