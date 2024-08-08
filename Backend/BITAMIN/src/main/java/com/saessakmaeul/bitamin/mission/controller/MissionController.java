@@ -1,8 +1,10 @@
 package com.saessakmaeul.bitamin.mission.controller;
 
 import com.saessakmaeul.bitamin.mission.dto.request.MemberMissionRequest;
+import com.saessakmaeul.bitamin.mission.dto.request.MemberPhraseRequest;
 import com.saessakmaeul.bitamin.mission.dto.response.*;
 import com.saessakmaeul.bitamin.mission.service.ExperienceService;
+import com.saessakmaeul.bitamin.mission.service.MemberPhraseService;
 import com.saessakmaeul.bitamin.mission.service.MissionService;
 import com.saessakmaeul.bitamin.mission.service.PhraseService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
@@ -20,6 +22,7 @@ public class MissionController {
     private final MissionService missionService;
     private final ExperienceService experienceService;
     private final PhraseService phraseService;
+    private final MemberPhraseService memberPhraseService;
     private final JwtUtil jwtUtil;
 
     // 데일리 미션 조회
@@ -86,6 +89,22 @@ public class MissionController {
         // Service 호출
         PhraseResponse phraseResponse = phraseService.readPhrase();
         return phraseResponse;
+    }
+
+    // 오늘의 녹음 등록 기능
+    @PostMapping("/phrases")
+    public MemberPhraseResponse postPhrase(@RequestHeader(value = "Authorization", required = false) String tokenHeader
+                                    , @RequestPart("memberPhraseRequest") MemberPhraseRequest memberPhraseRequest
+                                    , @RequestPart("phraseRecord") MultipartFile phraseRecord) throws IOException {
+        // ID 추출
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+
+        // MemberPhraseRequest에 phraseRecord 설정
+        memberPhraseRequest.setPhraseRecord(phraseRecord);
+
+        // Service 호출
+        MemberPhraseResponse memberPhraseResponse = memberPhraseService.createMemberPhrase(memberId, memberPhraseRequest);
+        return memberPhraseResponse;
     }
 
 }
