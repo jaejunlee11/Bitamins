@@ -50,7 +50,7 @@ import java.util.List;
             return ResponseEntity.ok(members);
         } catch (Exception e) {
             logger.error("회원 목록 조회 오류: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
@@ -58,7 +58,7 @@ import java.util.List;
      * @param memberDTO 회원가입 요청 정보
      * @return 회원 ID */
     @PostMapping("/register")
-    public ResponseEntity<Long> register(@RequestPart("memberDTO") MemberRequestDTO memberDTO, @RequestPart("image") MultipartFile image) {
+    public ResponseEntity<Long> register(@RequestPart("memberDTO") MemberRequestDTO memberDTO, @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
             Long memberId = memberService.register(memberDTO, image);
             return ResponseEntity.ok(memberId);
@@ -97,7 +97,7 @@ import java.util.List;
     @PutMapping("/update-member")
     public ResponseEntity<Integer> updateMemberByToken(HttpServletRequest request,
                                                        @RequestPart("memberUpdateRequestDTO") MemberUpdateRequestDTO memberUpdateRequestDTO,
-                                                       @RequestPart("image") MultipartFile image) {
+                                                       @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
             String token = getTokenFromRequest(request);
             if (token == null) {
