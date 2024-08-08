@@ -23,6 +23,16 @@ import MyPage from 'stories/pages/account/MyPage'
 import ComponentPage from 'stories/pages/ComponentPage'
 import AuthPage from '@/stories/pages/account/AuthPage'
 import MissionForm from '../stories/pages/mission/MissionForm.tsx'
+import CompleteMission from '@/stories/pages/mission/CompleteMission.tsx'
+
+const getCurrentDate = (): string => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 
 const AppRouter: React.FC = () => {
   return (
@@ -51,6 +61,7 @@ const AppRouter: React.FC = () => {
       <Route path="/admin" element={<AdiminPage />} />
       <Route path="/mission" element={<MissionPage />} />
         <Route path="/missionform" element={<MissionForm />} />
+      <Route path="/complete" element={<CompleteMission />} />/
         <Route path="/weather" element={<Weather />} />
     </Routes>
   )
