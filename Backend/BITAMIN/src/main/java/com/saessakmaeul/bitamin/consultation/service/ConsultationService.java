@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -124,9 +125,10 @@ public class ConsultationService {
         Member m = Member.builder().id(joinRoomRequest.getMemberId()).build();
         Consultation c = Consultation.builder().id(joinRoomRequest.getId()).build();
 
-        Optional<Participant> p = participantRepository.findByMemberIdAndConsultationId(m, c);
-
-        if(p.isPresent()) return null;
+//        // 당일 집단 상담 이용했는지 확인
+//        Optional<Participant> isUsed = participantRepository.findByMemberIdAndConsultationDate(m, LocalDate.now());
+//
+//        if(isUsed.isPresent()) return null;
 
         Participant newParticipant = Participant.builder()
                 .memberId(m)
@@ -179,6 +181,12 @@ public class ConsultationService {
 
     public Map<String, Object> findRandomSessionId(JoinRandomRequest joinRandomRequest) {
         Member m = Member.builder().id(joinRandomRequest.getMemberId()).build();
+
+//        // 당일 집단 상담 이용했는지 확인
+//        Optional<Participant> isUsed = participantRepository.findByMemberIdAndConsultationDate(m, LocalDate.now());
+//
+//        if(isUsed.isPresent()) return null;
+
         List<Participant> p = participantRepository.findByMemberId(m);
 
         List<Long> c = new ArrayList<>();
@@ -389,6 +397,36 @@ public class ConsultationService {
                         domain.getConsultationDate()
                 ))
                 .toList();
+    }
+
+    // 진행중 상담 재입장 기능
+    public OngoingRoomResponse findOngoingRoom(Long memberId) {
+        Member m = Member.builder().id(memberId).build();
+
+        Optional<Participant> p = participantRepository.findByMemberIdAndConsultationDate(m, LocalDate.now());
+
+        if(p.isEmpty()) return null;
+
+        Optional<Consultation> c = consultationRepository.findById(p.get().getConsultationId().getId());
+
+        if(c.isEmpty()) return null;
+
+        Optional<Consultation> consultation = consultationRepository.findByIdAndCurrentTimeBetween(c.get().getId(), c.get().getStartTime(), c.get().getEndTime());
+
+        if(consultation.isEmpty()) return null;
+
+        Optional<Member> member = memberRepository.findById(memberId);
+
+        return OngoingRoomResponse.builder()
+                .consultationId(consultation.get().getId())
+                .sessionId(consultation.get().getSessionId())
+                .id(p.get().getId())
+                .memberId(p.get().getMemberId().getId())
+                .memberNickname(p.get().getMemberNickname())
+                .profileKey(member.get().getProfileKey())
+                .profileUrl(member.get().getProfileUrl())
+                .build();
+
     }
 
     // 만약 나중에 Broadcast 필요한 상황이 오면 구현
