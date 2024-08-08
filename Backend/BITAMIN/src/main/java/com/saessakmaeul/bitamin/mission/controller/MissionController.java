@@ -2,8 +2,10 @@ package com.saessakmaeul.bitamin.mission.controller;
 
 import com.saessakmaeul.bitamin.mission.dto.request.MemberMissionRequest;
 import com.saessakmaeul.bitamin.mission.dto.response.CompletedMemberMissionResponse;
+import com.saessakmaeul.bitamin.mission.dto.response.MemberExperienceResponse;
 import com.saessakmaeul.bitamin.mission.dto.response.MemberMissionResponse;
 import com.saessakmaeul.bitamin.mission.dto.response.MissionResponse;
+import com.saessakmaeul.bitamin.mission.service.ExperienceService;
 import com.saessakmaeul.bitamin.mission.service.MissionService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import java.io.IOException;
 public class MissionController {
 
     private final MissionService missionService;
+    private final ExperienceService experienceService;
     private final JwtUtil jwtUtil;
 
     // 데일리 미션 조회
@@ -67,6 +70,15 @@ public class MissionController {
         return memberMissionResponse;
     }
 
-    // 미션 리뷰 조회 기능
-    // public MemberMissionResponse getMemberMission
+    // 반려 식물 경험치 조회 기능
+    @GetMapping("/plant")
+    public MemberExperienceResponse getExperience(@RequestHeader(value = "Authorization", required = false) String tokenHeader){
+        // ID 추출
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+
+        // Service 호출
+        MemberExperienceResponse memberExperienceResponse = experienceService.readExperience(memberId);
+        return memberExperienceResponse;
+    }
+
 }
