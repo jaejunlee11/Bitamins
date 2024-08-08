@@ -13,7 +13,12 @@ import MissionForm from './MissionForm'; // 새 컴포넌트 import
 registerLocale('ko', ko);
 setDefaultLocale('ko');
 
-const Calendar: React.FC = () => {
+interface CalendarProps {
+    onDateChange: (date: Date | null) => void;
+    onMissionDataChange: (data: any) => void;
+}
+
+const Calendar: React.FC<CalendarProps> = ({ onDateChange, onMissionDataChange }) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [missionData, setMissionData] = useState<any>(null);
     const [recordedPhrasesData, setRecordedPhrasesData] = useState<any>(null);
@@ -21,7 +26,7 @@ const Calendar: React.FC = () => {
     const [todayMissionExists, setTodayMissionExists] = useState<boolean>(true);
 
     const fetchMissionDates = async (date: Date) => {
-        const formattedDate = format(date, 'yyyyMM');
+        const formattedDate = format(date, 'yyyy-MM');
         try {
             const data = await fetchMissionDatesByMonth(formattedDate);
             const dates = data.map((dateString: string) => new Date(dateString));
@@ -39,14 +44,17 @@ const Calendar: React.FC = () => {
     }, []);
 
     const handleDateChange = async (date: Date | null) => {
+        setSelectedDate(date);
+        onDateChange(date);
+
         if (date) {
-            setSelectedDate(date);
-            const formattedDate = format(date, 'yyyyMMdd');
+            const formattedDate = format(date, 'yyyy-MM-dd');
             console.log(formattedDate);
 
             try {
                 const missionData = await fetchMissionsByDate(formattedDate);
                 setMissionData(missionData);
+                onMissionDataChange(missionData);
                 console.log(missionData);
 
                 const recordedPhrasesData = await fetchRecordedPhrasesByDate(formattedDate);
@@ -71,11 +79,11 @@ const Calendar: React.FC = () => {
         decreaseMonth: () => void;
         increaseMonth: () => void;
     }) => (
-        <div className={styles.header}>
-            <button onClick={() => { decreaseMonth(); handleMonthChange(date); }}>{"<"}</button>
-            <span>{format(date, 'yyyy.MM')}</span>
-            <button onClick={() => { increaseMonth(); handleMonthChange(date); }}>{">"}</button>
-        </div>
+      <div className={styles.header}>
+          <button onClick={() => { decreaseMonth(); handleMonthChange(date); }}>{"<"}</button>
+          <span>{format(date, 'yyyy.MM')}</span>
+          <button onClick={() => { increaseMonth(); handleMonthChange(date); }}>{">"}</button>
+      </div>
     );
 
     const getDayClassName = (date: Date) => {
@@ -104,47 +112,19 @@ const Calendar: React.FC = () => {
     };
 
     return (
-        <div className={styles.calendarContainer} style={{ zIndex: 1000 }}>
-            <DatePicker
-                selected={selectedDate}
-                onChange={handleDateChange}
-                inline
-                locale="ko"
-                renderCustomHeader={renderCustomHeader}
-                calendarClassName={styles.customCalendar}
-                dayClassName={getDayClassName}
-                formatWeekDay={(day) => day.substr(0, 1)}
-                weekDayClassName={getWeekDayClassName}
-            />
-            {!todayMissionExists && (
-                <MissionForm onSubmit={() => fetchMissionDates(new Date())} />
-            )}
-            {missionData && (
-                <div className={styles.missionDataContainer}>
-                    <h3>미션 데이터</h3>
-                    {/* 미션테이블에서 아이디로 mission_name도 받아와서 출력해야함 */}
-                    <p>미션 ID: {missionData.id}</p>
-                    <p>사용자 ID: {missionData.userId}</p>
-                    <p>미션 ID: {missionData.missionId}</p>
-                    <p>완료 날짜: {missionData.completeDate}</p>
-                    <p>미션 키: {missionData.missionKey}</p>
-                    <p>미션 URL: <a href={missionData.missionUrl} target="_blank" rel="noopener noreferrer">{missionData.missionUrl}</a></p>
-                    <p>미션 리뷰: {missionData.missionReview}</p>
-                    <img src={missionData.missionUrl} alt="Mission" />
-                </div>
-            )}
-            {recordedPhrasesData && (
-                <div className={styles.recordedPhrasesDataContainer}>
-                    <h3>녹음된 구문 데이터</h3>
-                    <p>기록 키: {recordedPhrasesData.recordKey}</p>
-                    <p>기록 URL: <a href={recordedPhrasesData.recordUrl} target="_blank" rel="noopener noreferrer">{recordedPhrasesData.recordUrl}</a></p>
-                    <audio controls>
-                        <source src={recordedPhrasesData.recordUrl} type="audio/mpeg" />
-                        {/* 만약 안되면 브라우저에서 지원x 표시 */}
-                    </audio>
-                </div>
-            )}
-        </div>
+      <div className={styles.calendarContainer} style={{ zIndex: 1000 }}>
+          <DatePicker
+            selected={selectedDate}
+            onChange={handleDateChange}
+            inline
+            locale="ko"
+            renderCustomHeader={renderCustomHeader}
+            calendarClassName={styles.customCalendar}
+            dayClassName={getDayClassName}
+            formatWeekDay={(day) => day.substr(0, 1)}
+            weekDayClassName={getWeekDayClassName}
+          />
+      </div>
     );
 };
 
