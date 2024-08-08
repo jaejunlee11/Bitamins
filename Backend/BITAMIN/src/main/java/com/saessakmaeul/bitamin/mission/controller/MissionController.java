@@ -107,4 +107,16 @@ public class MissionController {
         return memberPhraseResponse;
     }
 
+    // 오늘의 문구 녹음 조회 기능
+    @GetMapping("/phrases/recorded")
+    public SavedMemberPhraseResponse getSavedMemberPhrase(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+                                                          @RequestParam("date") String date){
+        // ID 추출
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+
+        // Service 호출
+        SavedMemberPhraseResponse savedMemberPhrasesResponse = memberPhraseService.readSavedMemberPhrase(memberId, date);
+        return savedMemberPhrasesResponse;
+    }
+
 }
