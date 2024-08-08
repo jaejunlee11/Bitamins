@@ -1,12 +1,10 @@
 package com.saessakmaeul.bitamin.mission.controller;
 
 import com.saessakmaeul.bitamin.mission.dto.request.MemberMissionRequest;
-import com.saessakmaeul.bitamin.mission.dto.response.CompletedMemberMissionResponse;
-import com.saessakmaeul.bitamin.mission.dto.response.MemberExperienceResponse;
-import com.saessakmaeul.bitamin.mission.dto.response.MemberMissionResponse;
-import com.saessakmaeul.bitamin.mission.dto.response.MissionResponse;
+import com.saessakmaeul.bitamin.mission.dto.response.*;
 import com.saessakmaeul.bitamin.mission.service.ExperienceService;
 import com.saessakmaeul.bitamin.mission.service.MissionService;
+import com.saessakmaeul.bitamin.mission.service.PhraseService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +19,7 @@ public class MissionController {
 
     private final MissionService missionService;
     private final ExperienceService experienceService;
+    private final PhraseService phraseService;
     private final JwtUtil jwtUtil;
 
     // 데일리 미션 조회
@@ -79,6 +78,14 @@ public class MissionController {
         // Service 호출
         MemberExperienceResponse memberExperienceResponse = experienceService.readExperience(memberId);
         return memberExperienceResponse;
+    }
+
+    // 오늘의 문구 조회 기능
+    @GetMapping("/phrases")
+    public PhraseResponse getPhrase(){
+        // Service 호출
+        PhraseResponse phraseResponse = phraseService.readPhrase();
+        return phraseResponse;
     }
 
 }
