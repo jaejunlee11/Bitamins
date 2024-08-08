@@ -57,7 +57,7 @@ public class MissionController {
     @PostMapping
     public MemberMissionResponse postMission(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                              @RequestPart("memberMissionRequest") MemberMissionRequest memberMissionRequest,
-                                             @RequestPart("mssionImage") MultipartFile missionImage) throws IOException {
+                                             @RequestPart("missionImage") MultipartFile missionImage) throws IOException {
         // ID 추출
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
