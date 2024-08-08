@@ -22,9 +22,10 @@ import ExLogin from 'stories/pages/account/ExLogin'
 import MyPage from 'stories/pages/account/MyPage'
 import ComponentPage from 'stories/pages/ComponentPage'
 import AuthPage from '@/stories/pages/account/AuthPage'
-import MissionForm from '../stories/pages/mission/MissionForm.tsx'
+import MissionForm from '@/stories/pages/mission/MissionForm.tsx'
 import CompleteMission from '@/stories/pages/mission/CompleteMission.tsx'
 import CalendarCompleteMission from '@/stories/pages/mission/CalendarCompleteMission.tsx'
+import MyPlant from '@/stories/pages/mission/MyPlant.tsx'
 
 const getCurrentDate = (): string => {
   const today = new Date();
@@ -65,6 +66,7 @@ const AppRouter: React.FC = () => {
       <Route path="/complete" element={<CompleteMission />} />
       <Route path="/completecal" element={<CalendarCompleteMission />} />
         <Route path="/weather" element={<Weather />} />
+      <Route path="/plant" element={<MyPlant />} />
     </Routes>
   )
 }
