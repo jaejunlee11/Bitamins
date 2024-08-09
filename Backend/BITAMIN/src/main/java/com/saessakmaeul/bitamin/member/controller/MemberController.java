@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -302,4 +303,17 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("닉네임 중복 확인 중 오류 발생: " + e.getMessage());
         }
     }
+
+    // 자가검진 기록 일주일간 기록 여부 검색
+    @GetMapping("/self-assessment/check")
+    public ResponseEntity<?> getSelfAssessmentCheck(HttpServletRequest request) {
+        String token = getTokenFromRequest(request);
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Long userId = jwtUtil.extractUserId(token);
+        Map<String, Object> response = memberService.getHealthReportStatsForMember(userId);
+        return ResponseEntity.ok(response);
+    }
+
 }
