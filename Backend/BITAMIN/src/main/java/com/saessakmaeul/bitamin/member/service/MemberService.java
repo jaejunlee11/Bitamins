@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saessakmaeul.bitamin.exception.ApplicationException;
 import com.saessakmaeul.bitamin.member.dto.request.*;
-import com.saessakmaeul.bitamin.member.dto.request.HealthReportRequestDTO;
+import com.saessakmaeul.bitamin.member.dto.request.HealthReportRequest;
 import com.saessakmaeul.bitamin.member.dto.response.*;
 import com.saessakmaeul.bitamin.member.entity.*;
 import com.saessakmaeul.bitamin.member.repository.DongCodeRepository;
@@ -40,9 +40,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,8 +72,34 @@ public class MemberService {
     private String naverApiPassword;
 
     @Transactional
-    public Long register(MemberRequestDTO memberDTO, MultipartFile image) throws IOException {
+    public Long register(MemberRequest memberDTO, MultipartFile image) throws IOException {
         try {
+            // 필수 값 체크
+            if (memberDTO.getEmail() == null || memberDTO.getEmail().isEmpty()) {
+                throw new IllegalArgumentException("이메일은 필수 입력 항목입니다.");
+            }
+            if (memberRepository.countByEmail(memberDTO.getEmail()) > 0) {
+                throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            }
+            if (memberDTO.getPassword() == null || memberDTO.getPassword().isEmpty()) {
+                throw new IllegalArgumentException("비밀번호는 필수 입력 항목입니다.");
+            }
+            if (memberDTO.getName() == null || memberDTO.getName().isEmpty()) {
+                throw new IllegalArgumentException("이름은 필수 입력 항목입니다.");
+            }
+            if (memberDTO.getNickname() == null || memberDTO.getNickname().isEmpty()) {
+                throw new IllegalArgumentException("닉네임은 필수 입력 항목입니다.");
+            }
+            if (memberRepository.countByNickname(memberDTO.getNickname()) > 0) {
+                throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+            }
+            if (memberDTO.getSidoName() == null || memberDTO.getSidoName().isEmpty()) {
+                throw new IllegalArgumentException("시,도 정보는 필수 입력 항목입니다.");
+            }
+            if (memberDTO.getBirthday() == null) {
+                throw new IllegalArgumentException("생일은 필수 입력 항목입니다.");
+            }
+
             String dongCode = findDongCode(memberDTO.getSidoName(), memberDTO.getGugunName(), memberDTO.getDongName());
             Member member = Member.builder()
                     .email(memberDTO.getEmail())
@@ -93,16 +117,17 @@ public class MemberService {
             }
 
             member = memberRepository.save(member);
-
             return member.getId();
         } catch (IOException e) {
             throw new IOException(e);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("잘못된 입력 값 : " + e, e);
+            throw new IllegalArgumentException("잘못된 입력 값 : " + e.getMessage(), e);
         } catch (Exception e) {
-            throw new RuntimeException("입력 정보 부족 : " + e, e);
+            throw new RuntimeException("입력 정보 부족 : " + e.getMessage(), e);
         }
     }
+
+
 
 
     public String findDongCode(String sidoName, String gugunName, String dongName) {
@@ -110,9 +135,9 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 주소에 대한 동 코드를 찾을 수 없습니다."));
     }
 
-    public List<MemberListResponseDTO> getMemberList() {
+    public List<MemberListResponse> getMemberList() {
         return memberRepository.findAll().stream()
-                .map(member -> MemberListResponseDTO.builder()
+                .map(member -> MemberListResponse.builder()
                         .id(member.getId())
                         .name(member.getName())
                         .email(member.getEmail())
@@ -129,6 +154,14 @@ public class MemberService {
     @Transactional
     public boolean changePassword(Long userId, ChangePasswordRequest changePasswordRequest) {
         try {
+            // 필수 값 체크
+            if (changePasswordRequest.getCurrentPassword() == null || changePasswordRequest.getCurrentPassword().isEmpty()) {
+                throw new IllegalArgumentException("현재 비밀번호는 필수 입력 항목입니다.");
+            }
+            if (changePasswordRequest.getNewPassword() == null || changePasswordRequest.getNewPassword().isEmpty()) {
+                throw new IllegalArgumentException("새 비밀번호는 필수 입력 항목입니다.");
+            }
+
             Optional<Member> optionalMember = memberRepository.findById(userId);
             if (optionalMember.isPresent()) {
                 Member member = optionalMember.get();
@@ -150,9 +183,15 @@ public class MemberService {
     }
 
 
+
     @Transactional
     public boolean checkPassword(Long userId, String password) {
         try {
+            // 필수 값 체크
+            if (password == null || password.isEmpty()) {
+                throw new IllegalArgumentException("비밀번호는 필수 입력 항목입니다.");
+            }
+
             Optional<Member> optionalMember = memberRepository.findById(userId);
             if (optionalMember.isPresent()) {
                 Member member = optionalMember.get();
@@ -170,6 +209,7 @@ public class MemberService {
             throw new RuntimeException(e);
         }
     }
+
 
 
     @Transactional
@@ -384,15 +424,15 @@ public class MemberService {
     }
 
 
-    public MemberResponseDTO getMemberById(Long userId) {
+    public MemberResponse getMemberById(Long userId) {
         try {
             Optional<Member> optionalMember = memberRepository.findById(userId);
             if (optionalMember.isPresent()) {
                 Member member = optionalMember.get();
-                Optional<DongCodeResponseDTO> dongInformationOptional = dongCodeRepository.findNamesByDongCode(member.getDongCode());
+                Optional<DongCodeResponse> dongInformationOptional = dongCodeRepository.findNamesByDongCode(member.getDongCode());
                 if (dongInformationOptional.isPresent()) {
-                    DongCodeResponseDTO dongInformation = dongInformationOptional.get();
-                    return MemberResponseDTO.builder()
+                    DongCodeResponse dongInformation = dongInformationOptional.get();
+                    return MemberResponse.builder()
                             .email(member.getEmail())
                             .password(member.getPassword())
                             .name(member.getName())
@@ -422,8 +462,19 @@ public class MemberService {
 
 
     @Transactional
-    public int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO, MultipartFile image) throws IOException {
+    public int updateMember(Long userId, MemberUpdateRequest memberUpdateRequestDTO, MultipartFile image) throws IOException {
         try {
+            // 필수 값 체크
+            if (memberUpdateRequestDTO.getName() == null || memberUpdateRequestDTO.getName().isEmpty()) {
+                throw new IllegalArgumentException("이름은 필수 입력 항목입니다.");
+            }
+            if (memberUpdateRequestDTO.getNickname() == null || memberUpdateRequestDTO.getNickname().isEmpty()) {
+                throw new IllegalArgumentException("닉네임은 필수 입력 항목입니다.");
+            }
+            if (memberUpdateRequestDTO.getBirthday() == null) {
+                throw new IllegalArgumentException("생일은 필수 입력 항목입니다.");
+            }
+
             Optional<Member> optionalMember = memberRepository.findById(userId);
             if (optionalMember.isPresent()) {
                 Member member = optionalMember.get();
@@ -442,6 +493,7 @@ public class MemberService {
                 } else {
                     member.setProfileUrl(null);
                 }
+
                 memberRepository.save(member);
                 return 1;
             } else {
@@ -457,9 +509,17 @@ public class MemberService {
     }
 
 
+
     @Transactional
     public AuthResponse login(LoginRequest loginRequest) {
         try {
+            if (loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty()) {
+                throw new IllegalArgumentException("이메일은 필수 입력 항목입니다.");
+            }
+            if (loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
+                throw new IllegalArgumentException("비밀번호는 필수 입력 항목입니다.");
+            }
+
             Member user = memberRepository.findByEmail(loginRequest.getEmail())
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
@@ -546,7 +606,7 @@ public class MemberService {
     }
 
     @Transactional
-    public HealthReportResponseDTO saveHealthReport(HealthReportRequestDTO healthReportRequestDTO, Long userId) {
+    public HealthReportResponse saveHealthReport(HealthReportRequest healthReportRequestDTO, Long userId) {
         try {
             HealthReport healthReport = new HealthReport();
             healthReport.setCheckupScore(healthReportRequestDTO.getCheckupScore());
@@ -558,7 +618,7 @@ public class MemberService {
 
             HealthReport savedHealthReport = healthReportRepository.save(healthReport);
 
-            HealthReportResponseDTO healthReportResponseDTO = new HealthReportResponseDTO();
+            HealthReportResponse healthReportResponseDTO = new HealthReportResponse();
             healthReportResponseDTO.setId(savedHealthReport.getId());
             healthReportResponseDTO.setCheckupScore(savedHealthReport.getCheckupScore());
             healthReportResponseDTO.setCheckupDate(savedHealthReport.getCheckupDate());
@@ -574,14 +634,14 @@ public class MemberService {
 
 
 
-    public List<HealthReportResponseDTO> getHealthReportsByUserId(Long userId) {
+    public List<HealthReportResponse> getHealthReportsByUserId(Long userId) {
         try {
             List<HealthReport> healthReports = healthReportRepository.findByMemberId(userId);
             if (healthReports.isEmpty()) {
                 throw new IllegalArgumentException("등록된 결과가 없습니다.");
             }
             return healthReports.stream().map(healthReport -> {
-                HealthReportResponseDTO dto = new HealthReportResponseDTO();
+                HealthReportResponse dto = new HealthReportResponse();
                 dto.setId(healthReport.getId());
                 dto.setCheckupScore(healthReport.getCheckupScore());
                 dto.setCheckupDate(healthReport.getCheckupDate());
@@ -618,4 +678,22 @@ public class MemberService {
             throw new RuntimeException(e);
         }
     }
+
+    public Map<String, Object> getHealthReportStatsForMember(Long userId) {
+        LocalDate nowDate = LocalDate.now();
+        LocalDate beforeDate = nowDate.minusDays(7);
+
+        List<Object[]> result = healthReportRepository.findCountAndLatestCheckupDate(userId, beforeDate, nowDate);
+        Object[] data = result.get(0);
+
+        Long count = (Long) data[0];
+        LocalDate latestCheckupDate = (LocalDate) data[1];
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("result", count > 0 ? 1 : 0);
+        response.put("latestCheckupDate", latestCheckupDate);
+
+        return response;
+    }
+
 }
