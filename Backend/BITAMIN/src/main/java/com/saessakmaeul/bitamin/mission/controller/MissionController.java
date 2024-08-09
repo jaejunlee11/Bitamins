@@ -23,6 +23,7 @@ public class MissionController {
     private final MemberPhraseService memberPhraseService;
     private final JwtUtil jwtUtil;
     private final MonthActivityService monthActivityService;
+    private final MemberMissionService memberMissionService;
 
     // 데일리 미션 조회
     @GetMapping
@@ -51,7 +52,7 @@ public class MissionController {
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
         // Service 호출
-        CompletedMemberMissionResponse completedMemberMissionResponse = missionService.completedMission(memberId, date);
+        CompletedMemberMissionResponse completedMemberMissionResponse = memberMissionService.completedMission(memberId, date);
         return completedMemberMissionResponse;
     }
 
@@ -67,7 +68,7 @@ public class MissionController {
         memberMissionRequest.setMissionImage(missionImage);
 
         // Service 호출
-        MemberMissionResponse memberMissionResponse = missionService.createMemberMission(memberId, memberMissionRequest);
+        MemberMissionResponse memberMissionResponse = memberMissionService.createMemberMission(memberId, memberMissionRequest);
         return memberMissionResponse;
     }
 
