@@ -57,7 +57,7 @@ const CreateRoomPage: React.FC = () => {
         sessionId: joinResponse.sessionId,
       }) // JoinResponse 데이터를 스토어에 저장
       alert('Room created and joined successfully!')
-      navigate('/consultation')
+      navigate('/consult')
     } catch (error) {
       alert('Failed to create or join room')
       console.error('Error creating or joining room:', error)

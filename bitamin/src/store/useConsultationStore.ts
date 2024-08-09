@@ -4,6 +4,7 @@ import {
   joinRoom,
   joinRandomParticipants,
   fetchConsultations,
+  sendChatGPTMessage as apiSendChatGPTMessage, // 업데이트된 부분
 } from 'api/consultationAPI'
 import {
   OpenVidu,
@@ -56,12 +57,23 @@ interface JoinResponseData {
   sessionId: string
 }
 
+interface GPTMessage {
+  role: string
+  content: string
+  category: string
+}
+
+interface Message {
+  user: string
+  content: string
+}
+
 interface ConsultationState {
   consultations: Consultation[]
   participant: Participant | null
   roomData: RoomData | null
   joinData: JoinData | null
-  joinResponseData: JoinResponseData | null // JoinResponse 데이터 추가
+  joinResponseData: JoinResponseData | null
   totalPages: number
   page: number
   size: number
@@ -71,8 +83,10 @@ interface ConsultationState {
   subscribers: StreamManager[]
   session?: Session
   publisher?: Publisher
+  screenPublisher?: Publisher
   mainStreamManager?: StreamManager
   currentVideoDevice?: Device
+  messages: Message[]
   fetchAndSetConsultations: (
     page: number,
     size: number,
@@ -83,10 +97,16 @@ interface ConsultationState {
   setParticipant: (participant: Participant) => void
   setRoomData: (roomData: RoomData) => void
   setJoinData: (joinData: JoinData) => void
-  setJoinResponseData: (joinResponseData: JoinResponseData) => void // JoinResponse 데이터 설정 함수 추가
+  setJoinResponseData: (joinResponseData: JoinResponseData) => void
   initializeOpenViduSession: (session: Session) => void
   addSubscriber: (subscriber: StreamManager) => void
   removeSubscriber: (subscriber: StreamManager) => void
+  addMessage: (message: Message) => void
+  sendChatGPTMessage: (
+    user: string,
+    content: string,
+    category: string
+  ) => Promise<void>
 }
 
 const useConsultationStore = create<ConsultationState>()(
@@ -96,7 +116,7 @@ const useConsultationStore = create<ConsultationState>()(
       participant: null,
       roomData: null,
       joinData: null,
-      joinResponseData: null, // 초기 값 설정
+      joinResponseData: null,
       totalPages: 0,
       page: 0,
       size: 10,
@@ -104,6 +124,7 @@ const useConsultationStore = create<ConsultationState>()(
       mySessionId: 'SessionA',
       myUserName: 'Participant' + Math.floor(Math.random() * 100),
       subscribers: [],
+      messages: [],
       fetchAndSetConsultations: async (
         page: number,
         size: number,
@@ -137,7 +158,7 @@ const useConsultationStore = create<ConsultationState>()(
               token: response.token,
               sessionId: response.sessionId,
             },
-          }) // JoinResponse 데이터를 스토어에 저장
+          })
           const OV = new OpenVidu()
           const session = OV.initSession()
           get().initializeOpenViduSession(session)
@@ -151,7 +172,7 @@ const useConsultationStore = create<ConsultationState>()(
           const response = await joinRandomParticipants(type)
           const { sessionid, token } = response
           set({ joinData: { ...get().joinData, sessionId: sessionid, token } })
-          set({ joinResponseData: { token, sessionId: sessionid } }) // JoinResponse 데이터를 스토어에 저장
+          set({ joinResponseData: { token, sessionId: sessionid } })
           const OV = new OpenVidu()
           const session = OV.initSession()
           get().initializeOpenViduSession(session)
@@ -225,7 +246,29 @@ const useConsultationStore = create<ConsultationState>()(
       setRoomData: (roomData: RoomData) => set({ roomData }),
       setJoinData: (joinData: JoinData) => set({ joinData }),
       setJoinResponseData: (joinResponseData: JoinResponseData) =>
-        set({ joinResponseData }), // JoinResponse 데이터 설정 함수 추가
+        set({ joinResponseData }),
+      addMessage: (message: Message) =>
+        set((state) => ({ messages: [...state.messages, message] })),
+      sendChatGPTMessage: async (
+        user: string,
+        content: string,
+        category: string
+      ) => {
+        try {
+          const response = await apiSendChatGPTMessage(user, content, category)
+          const message = response.gptResponses[user]
+          set((state) => ({
+            messages: [
+              ...state.messages,
+              { role: 'user', content, category },
+              { role: 'assistant', content: message.content, category },
+            ],
+          }))
+        } catch (error) {
+          console.error('Failed to send message to ChatGPT:', error)
+          throw error
+        }
+      },
     }),
     {
       name: 'consultation-storage',
@@ -243,6 +286,7 @@ const useConsultationStore = create<ConsultationState>()(
         mySessionId: state.mySessionId,
         myUserName: state.myUserName,
         subscribers: state.subscribers,
+        messages: state.messages,
       }),
     }
   )

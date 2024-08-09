@@ -1,30 +1,30 @@
-import React, { Component } from 'react'
+import React from 'react'
 import OpenViduVideoComponent from './OvVideo'
 import { StreamManager } from 'openvidu-browser'
 
-interface Props {
+interface UserVideoComponentProps {
   streamManager: StreamManager
 }
 
-export default class UserVideoComponent extends Component<Props> {
-  getNicknameTag(): string {
-    // Gets the nickName of the user
-    return JSON.parse(this.props.streamManager.stream.connection.data)
-      .clientData
+const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
+  streamManager,
+}) => {
+  const getNicknameTag = (): string => {
+    return JSON.parse(streamManager.stream.connection.data).clientData
   }
 
-  render() {
-    return (
-      <div>
-        {this.props.streamManager !== undefined ? (
-          <div className="streamcomponent">
-            <OpenViduVideoComponent streamManager={this.props.streamManager} />
-            <div>
-              <p>{this.getNicknameTag()}</p>
-            </div>
+  return (
+    <div>
+      {streamManager !== undefined ? (
+        <div className="streamcomponent">
+          <OpenViduVideoComponent streamManager={streamManager} />
+          <div>
+            <p>{getNicknameTag()}</p>
           </div>
-        ) : null}
-      </div>
-    )
-  }
+        </div>
+      ) : null}
+    </div>
+  )
 }
+
+export default UserVideoComponent

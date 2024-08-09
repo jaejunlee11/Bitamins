@@ -8,28 +8,56 @@ import {
 } from 'openvidu-browser'
 import UserVideoComponent from './UserVideoComponent'
 import useConsultationStore from 'store/useConsultationStore'
+import Chat from './Chat'
+import ParticipantsList from './ParticipantsList'
+import { synthesizeText, SynthesizeOptions } from './textToSpeeach'
 
 const Consult: React.FC = () => {
+  const [text, setText] = useState<string>('')
+  const [audioSrc, setAudioSrc] = useState<string>('')
+  const handleTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(event.target.value)
+  }
+  const handleSynthesize = async () => {
+    const options: SynthesizeOptions = { text }
+    try {
+      const audioContent = await synthesizeText(options)
+      setAudioSrc(`data:audio/mp3;base64,${audioContent}`)
+    } catch (error) {
+      console.error('Error synthesizing text:', error)
+    }
+  }
   const [session, setSession] = useState<Session | undefined>(undefined)
   const [mainStreamManager, setMainStreamManager] = useState<
     StreamManager | undefined
   >(undefined)
   const [publisher, setPublisher] = useState<Publisher | undefined>(undefined)
+  const [screenPublisher, setScreenPublisher] = useState<Publisher | undefined>(
+    undefined
+  )
   const [subscribers, setSubscribers] = useState<StreamManager[]>([])
   const currentVideoDevice = useRef<Device | undefined>(undefined)
 
+  const [gptmessage, setGptMessage] = useState<string>('')
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setGptMessage(event.target.value) // 입력된 값을 상태에 반영
+  }
   const {
     joinData,
     joinResponseData,
     myUserName,
     setMyUserName,
     initializeOpenViduSession,
+    sendChatGPTMessage,
+    messages, // Access the messages from the store
   } = useConsultationStore((state) => ({
     joinData: state.joinData,
     joinResponseData: state.joinResponseData,
     myUserName: state.myUserName,
     setMyUserName: state.setMyUserName,
     initializeOpenViduSession: state.initializeOpenViduSession,
+    sendChatGPTMessage: state.sendChatGPTMessage,
+    messages: state.messages, // Retrieve messages from the store
   }))
 
   useEffect(() => {
@@ -38,17 +66,26 @@ const Consult: React.FC = () => {
     }
   }, [joinResponseData])
 
+  useEffect(() => {
+    // When messages change, the component will re-render automatically
+  }, [messages])
+
   const joinSession = (sessionId: string, token: string) => {
+    console.log('Joining session with sessionId:', sessionId)
+    console.log('Using token:', token)
+
     const OV = new OpenVidu()
     const newSession = OV.initSession()
     setSession(newSession)
 
     newSession.on('streamCreated', (event) => {
+      console.log('Stream created:', event.stream.streamId)
       const subscriber = newSession.subscribe(event.stream, undefined)
       setSubscribers((prevSubscribers) => [...prevSubscribers, subscriber])
     })
 
     newSession.on('streamDestroyed', (event) => {
+      console.log('Stream destroyed:', event.stream.streamId)
       deleteSubscriber(event.stream.streamManager)
     })
 
@@ -59,6 +96,7 @@ const Consult: React.FC = () => {
     newSession
       .connect(token, { clientData: myUserName })
       .then(async () => {
+        console.log('Connected to the session')
         try {
           const newPublisher = await OV.initPublisherAsync(undefined, {
             audioSource: undefined,
@@ -131,6 +169,7 @@ const Consult: React.FC = () => {
     setSubscribers([])
     setMainStreamManager(undefined)
     setPublisher(undefined)
+    setScreenPublisher(undefined)
   }
 
   const switchCamera = async () => {
@@ -168,11 +207,53 @@ const Consult: React.FC = () => {
     }
   }
 
+  const startScreenShare = async () => {
+    if (session) {
+      try {
+        console.log('Starting screen share')
+        const newScreenPublisher = await session.openvidu.initPublisherAsync(
+          undefined,
+          {
+            videoSource: 'screen',
+            publishAudio: true,
+            publishVideo: true,
+            mirror: false,
+          }
+        )
+        session.publish(newScreenPublisher)
+        setScreenPublisher(newScreenPublisher)
+        setMainStreamManager(newScreenPublisher)
+      } catch (error) {
+        console.error('Error starting screen share: ', error)
+      }
+    }
+  }
+
+  const stopScreenShare = () => {
+    if (session && screenPublisher) {
+      session.unpublish(screenPublisher)
+      setScreenPublisher(undefined)
+      if (publisher) {
+        setMainStreamManager(publisher)
+      }
+    }
+  }
+
   const join = () => {
     if (joinResponseData) {
       joinSession(joinResponseData.sessionId, joinResponseData.token)
     } else {
       console.error('joinResponseData is null')
+    }
+  }
+
+  const chatgpt = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    console.log(1)
+    event.preventDefault() // 폼 제출을 막음
+    try {
+      await sendChatGPTMessage(myUserName, gptmessage, '음악')
+    } catch (error) {
+      console.error('Failed to send message:', error)
     }
   }
 
@@ -235,6 +316,22 @@ const Consult: React.FC = () => {
               onClick={switchCamera}
               value="Switch Camera"
             />
+            <input
+              className="btn btn-large btn-primary"
+              type="button"
+              id="buttonStartScreenShare"
+              onClick={startScreenShare}
+              value="Start Screen Share"
+            />
+            {screenPublisher && (
+              <input
+                className="btn btn-large btn-warning"
+                type="button"
+                id="buttonStopScreenShare"
+                onClick={stopScreenShare}
+                value="Stop Screen Share"
+              />
+            )}
           </div>
 
           {mainStreamManager !== undefined && (
@@ -259,6 +356,49 @@ const Consult: React.FC = () => {
               >
                 <span>{sub.id}</span>
                 <UserVideoComponent streamManager={sub} />
+              </div>
+            ))}
+          </div>
+          <ParticipantsList />
+
+          {/* Button to send message to ChatGPT */}
+
+          <form>
+            <p>
+              <label>채팅 입력: </label>
+            </p>
+            <input
+              type="text"
+              value={gptmessage}
+              onChange={handleInputChange}
+            />
+            <button onClick={chatgpt} className="btn btn-large btn-info">
+              GPT Button
+            </button>
+          </form>
+
+          <div>
+            <p>여기서 stt 구현</p>
+            <textarea
+              value={text}
+              onChange={handleTextChange}
+              rows={10}
+              cols={50}
+            />
+            <button type="button" onClick={handleSynthesize}>
+              Synthesize
+            </button>
+            {audioSrc && <audio controls src={audioSrc} />}
+          </div>
+          <br />
+          <br />
+          <br />
+          <br />
+          {/* Display messages */}
+          <div className="messages">
+            {messages.map((msg, index) => (
+              <div key={index} className={`message ${msg.role}`}>
+                <strong>{msg.role}:</strong> {msg.content}
               </div>
             ))}
           </div>

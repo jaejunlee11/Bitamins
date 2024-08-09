@@ -27,7 +27,7 @@ interface RoomData {
 
 export const createRoom = async (roomData: RoomData) => {
   const response = await axiosInstance.post('/consultations', roomData)
-  console.log('Create Room Response:', response.data) // 응답 데이터 확인
+  console.log('Create Room Response:', response.data)
   return response.data
 }
 
@@ -44,7 +44,7 @@ export const joinRoom = async (joinData: JoinData) => {
     '/consultations/participants',
     joinData
   )
-  console.log('Join Room Response:', response.data) // 응답 데이터 확인
+  console.log('Join Room Response:', response.data)
   return response.data
 }
 
@@ -62,9 +62,44 @@ export const joinRandomParticipants = async (type: string) => {
   }
 }
 
+interface GPTMessage {
+  role: string
+  content: string
+  category: string
+}
+
+export const sendChatGPTMessage = async (
+  user: string,
+  content: string,
+  category: string
+) => {
+  try {
+    const response = await axiosInstance.post(
+      `/consultations/moderators1/${category}`,
+      {
+        gptCompletions: {
+          [user]: {
+            messages: [
+              {
+                role: 'user',
+                content: content,
+              },
+            ],
+          },
+        },
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error sending message to ChatGPT:', error)
+    throw error
+  }
+}
+
 export default {
   fetchConsultations,
   createRoom,
   joinRoom,
   joinRandomParticipants,
+  sendChatGPTMessage,
 }
