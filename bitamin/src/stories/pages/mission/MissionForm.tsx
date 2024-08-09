@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from '/src/styles/mission/quest2.module.css';
 import { submitMission, fetchTodayMission, substituteMission } from '@/api/missionAPI';
+import useMissionStore from '@/store/missionStore';
 
 interface Mission {
     id: number;
@@ -12,30 +13,31 @@ interface Mission {
 interface MissionFormProps {
     selectedDate: string | null;
     missionData?: Mission | null;
-    onSubmitSuccess: () => void; // 추가된 콜백 함수
+    onSubmitSuccess: () => void;
 }
 
 const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData, onSubmitSuccess }) => {
     const [missionReview, setMissionReview] = useState('');
     const [missionImage, setMissionImage] = useState<File | null>(null);
-    const [todayMission, setTodayMission] = useState<Mission | null>(null);
+
+    const { mission, setMission, substitutionCount, increaseSubstitutionCount } = useMissionStore();
 
     useEffect(() => {
         const fetchMission = async () => {
-            if (!missionData) {
+            if (!mission && !missionData) {
                 try {
                     const data = await fetchTodayMission();
-                    setTodayMission(data);
+                    setMission(data);
                 } catch (error) {
                     console.error('Error fetching today\'s mission:', error);
                 }
-            } else {
-                setTodayMission(missionData);
+            } else if (missionData) {
+                setMission(missionData);
             }
         };
 
         fetchMission();
-    }, [missionData]);
+    }, [mission, missionData, setMission]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -44,11 +46,12 @@ const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData, on
     };
 
     const handleMissionSubstitute = async () => {
-        if (!todayMission) return;
+        if (!mission || substitutionCount >= 5) return;
 
         try {
-            const newMission = await substituteMission(todayMission.id);
-            setTodayMission(newMission);
+            const newMission = await substituteMission(mission.id);
+            setMission(newMission);
+            increaseSubstitutionCount();
         } catch (error) {
             console.error('Error substituting mission:', error);
         }
@@ -62,17 +65,16 @@ const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData, on
         return `${year}-${month}-${day}`;
     };
 
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!todayMission) return;
+        if (!mission) return;
 
         const completeDate = getCurrentDate();
         const memberMissionRequest = {
             completeDate,
             missionReview,
-            missionId: todayMission.id,
+            missionId: mission.id,
         };
 
         const formData = new FormData();
@@ -81,62 +83,66 @@ const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData, on
             formData.append('missionImage', missionImage);
         }
 
-        // 전송할 데이터 콘솔에 출력
         console.log('Submitting form data:', {
             completeDate,
             missionReview,
-            missionId: todayMission.id,
+            missionId: mission.id,
             missionImage,
         });
 
         try {
             await submitMission(formData);
             console.log('미션이 성공적으로 등록되었습니다!');
-            onSubmitSuccess(); // 미션 등록 성공 시 콜백 호출
+            onSubmitSuccess();
         } catch (error: any) {
             console.error('Error submitting mission:', error);
             if (error.response) {
-                console.error('Response data:', error.response.data); // 서버 응답 출력
+                console.error('Response data:', error.response.data);
             }
         }
     };
 
     return (
-      <div className={styles.missionFormContainer}>
-          {todayMission ? (
-            <div className={styles.todayMission}>
-                <h3>미션</h3>
-                <p>미션 이름: {todayMission.missionName}</p>
-                <p>미션 설명: {todayMission.missionDescription}</p>
-                <p>미션 레벨: {todayMission.missionLevel}</p>
-                <button onClick={handleMissionSubstitute}>미션 교체</button>
-            </div>
-          ) : (
-            <p>미션을 불러오는 중...</p>
-          )}
-          <form onSubmit={handleSubmit} className={styles.missionForm}>
-              <div>
-                  <label htmlFor="missionReview">미션 리뷰:</label>
-                  <input
-                    id="missionReview"
-                    type="text"
-                    value={missionReview}
-                    onChange={(e) => setMissionReview(e.target.value)}
-                    required
-                  />
-              </div>
-              <div>
-                  <label htmlFor="missionImage">미션 이미지:</label>
-                  <input
-                    id="missionImage"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                  />
-              </div>
-              <button type="submit">미션 등록</button>
-          </form>
-      </div>
+        <div className={styles.missionFormContainer}>
+            {mission ? (
+                <div className={styles.todayMission}>
+                    <h3>미션</h3>
+                    <p>미션 이름: {mission.missionName}</p>
+                    <p>미션 설명: {mission.missionDescription}</p>
+                    <p>미션 레벨: {mission.missionLevel}</p>
+                    <button
+                        onClick={handleMissionSubstitute}
+                        disabled={substitutionCount >= 5}
+                    >
+                        미션 교체 ({substitutionCount}/5)
+                    </button>
+                </div>
+            ) : (
+                <p>미션을 불러오는 중...</p>
+            )}
+            <form onSubmit={handleSubmit} className={styles.missionForm}>
+                <div>
+                    <label htmlFor="missionReview">미션 리뷰:</label>
+                    <input
+                        id="missionReview"
+                        type="text"
+                        value={missionReview}
+                        onChange={(e) => setMissionReview(e.target.value)}
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="missionImage">미션 이미지:</label>
+                    <input
+                        id="missionImage"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                    />
+                </div>
+                <button type="submit">미션 등록</button>
+            </form>
+        </div>
     );
 };
 
