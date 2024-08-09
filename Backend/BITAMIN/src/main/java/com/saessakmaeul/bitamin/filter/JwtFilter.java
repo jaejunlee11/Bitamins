@@ -32,27 +32,63 @@ public class JwtFilter extends OncePerRequestFilter {
 
         final String authorizationHeader = request.getHeader("Authorization");
 
-        String username = null;
+        String userEmail = null;
         String jwt = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7);
-            username = jwtUtil.extractUsername(jwt);
+        String method = request.getMethod();
+        String requestURI = request.getRequestURI();
+
+        logger.debug(requestURI + " " + method);
+
+        if(requestURI.startsWith("/api/auth/login") ||
+                requestURI.startsWith("/api/auth/kakao") ||
+                requestURI.startsWith("/api/auth/google") ||
+                requestURI.startsWith("/api/auth/naver") ||
+                requestURI.startsWith("/api/members/register") ||
+                requestURI.startsWith("/api/members/sidoNames") ||
+                requestURI.startsWith("/api/members/gugunNames") ||
+                requestURI.startsWith("/api/members/dongNames")) {
+            chain.doFilter(request, response);
+            return;
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-            UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
-
-            if (jwtUtil.extractUsername(jwt).equals(userDetails.getUsername()) && !jwtUtil.isTokenExpired(jwt)) {
-
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
-                usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            }
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("The token is missing or invalid");
+            return;
         }
+
+        jwt = authorizationHeader.substring(7);
+        userEmail = jwtUtil.extractEmail(jwt);
+
+        System.out.println(userEmail);
+
+
+        if (userEmail == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("No email: Unable to authenticate.");
+            return;
+        }
+
+        if(SecurityContextHolder.getContext().getAuthentication() != null) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(userEmail);
+
+        if (!jwtUtil.extractEmail(jwt).equals(userDetails.getUsername()) || jwtUtil.isTokenExpired(jwt)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("The email is not valid, or the token has expired.");
+            return;
+        }
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
+
+        usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+
         chain.doFilter(request, response);
     }
 
