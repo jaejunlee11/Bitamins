@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -73,7 +74,7 @@ public class ComplaintRepositoryTests {
                 .name("Sender Name")
                 .nickname("sender")
                 .dongCode("1111010200")
-                .birthday(new Date(1990 - 1900, Calendar.JANUARY, 1))  // Setting a sample birthday
+                .birthday(LocalDate.of(1990 - 1900, Calendar.JANUARY, 1))  // Setting a sample birthday
                 .role(Role.ROLE_ADMIN)
                 .build();
         admin = memberRepository.save(admin);
@@ -84,7 +85,7 @@ public class ComplaintRepositoryTests {
                 .name("respondent Name")
                 .nickname("respondent")
                 .dongCode("1111010200")
-                .birthday(new Date(1990 - 1900, Calendar.JANUARY, 1))  // Setting a sample birthday
+                .birthday(LocalDate.of(1990 - 1900, Calendar.JANUARY, 1))  // Setting a sample birthday
                 .role(Role.ROLE_MEMBER)
                 .build();
         respondent = memberRepository.save(respondent);
@@ -95,7 +96,7 @@ public class ComplaintRepositoryTests {
                 .name("complaint Name")
                 .nickname("complaint")
                 .dongCode("1111010200")
-                .birthday(new Date(1990 - 1900, Calendar.JANUARY, 1))  // Setting a sample birthday
+                .birthday(LocalDate.of(1990 - 1900, Calendar.JANUARY, 1))  // Setting a sample birthday
                 .role(Role.ROLE_MEMBER)
                 .build();
         complaint = memberRepository.save(complaint);

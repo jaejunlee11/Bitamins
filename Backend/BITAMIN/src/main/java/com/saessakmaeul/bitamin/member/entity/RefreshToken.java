@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "refresh_token")
@@ -20,7 +20,7 @@ public class RefreshToken {
     private String token;
 
     @Column(name = "expire_date")
-    private Date expireDate;
+    private LocalDateTime expireDate;
 
     @OneToOne
     @MapsId

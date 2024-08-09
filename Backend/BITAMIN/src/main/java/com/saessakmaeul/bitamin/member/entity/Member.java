@@ -3,6 +3,7 @@ package com.saessakmaeul.bitamin.member.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Set;
 
@@ -15,26 +16,32 @@ import java.util.Set;
 @Table(name = "member")
 public class Member {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @Column(nullable = false)
     private String email;
+
     @Column(nullable = false)
     private String password;
+
     @Column(nullable = false)
     private String name;
 
     @Column(unique = true, nullable = false)
     private String nickname;
+
     @Column(nullable = false)
-    private String dongCode;
+    private String dongCode; // String 타입 유지
+
     @Column(nullable = false)
-    private Date birthday;
+    private LocalDate birthday;
 
     @Column(length = 255)
     private String profileKey;
+
     @Column(length = 255)
     private String profileUrl;
 
