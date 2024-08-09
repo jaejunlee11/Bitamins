@@ -1,9 +1,23 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import * as tmPose from '@teachablemachine/pose'
-import * as tf from '@tensorflow/tfjs'
+import axiosInstance from '@/api/axiosInstance'
+import { healthInfo } from '@/api/healthAPI'
 import styles from 'styles/healthup/HealthUpPage.module.css'
 
+// healthInfo 함수 불러오기
+const fetchHealthInfo = async (id: number) => {
+  try {
+    const response = await axiosInstance.get(`exercises/${id}`)
+    return response.data
+  } catch (error: any) {
+    console.error('Error fetching health info:', error.response)
+    throw new Error('Failed to fetch health info')
+  }
+}
+
 const HealthUP: React.FC = () => {
+  const [exerciseInfo, setExerciseInfo] =
+    useState<ExcersizeDetailResponse | null>(null)
   const onGroupContainerClick = useCallback(() => {
     // Add your code here
   }, [])
@@ -12,6 +26,20 @@ const HealthUP: React.FC = () => {
   const labelContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // 운동 ID를 사용해 정보 불러오기
+    const exerciseId = 2 // 예시로 1번 운동 ID 사용
+    const loadExerciseInfo = async () => {
+      try {
+        const data = await fetchHealthInfo(exerciseId)
+        console.log('Fetched Exercise Info:', data) // 데이터를 확인하는 로그
+        setExerciseInfo(data)
+      } catch (error) {
+        console.error('Error loading exercise info:', error)
+      }
+    }
+    loadExerciseInfo()
+
+    // Teachable Machine 관련 초기화 코드
     const URL = 'my_model/' // 상대 경로로 수정
     let model: tmPose.CustomPoseNet
     let webcam: tmPose.Webcam
@@ -176,6 +204,17 @@ const HealthUP: React.FC = () => {
           목과 어깨가 길어지는 것을 느끼며 이완해주세요
         </p>
         <p className={styles.p}>내쉬는 호흡에 길게 몸을 늘려주세요</p>
+        {/* 운동 정보 표시 */}
+        {exerciseInfo ? (
+          <div className={styles.exerciseInfo}>
+            <h2>{exerciseInfo.title}</h2>
+            <p>{exerciseInfo.description}</p>
+            <p>Level: {exerciseInfo.level}</p>
+            {/* 필요한 다른 정보도 여기에 추가할 수 있습니다. */}
+          </div>
+        ) : (
+          <p>운동 정보를 불러오는 중입니다...</p> // 데이터가 로드되기 전에 표시할 텍스트
+        )}
       </div>
       <div className={styles.upChild2} />
       <div className={styles.upChild3} />

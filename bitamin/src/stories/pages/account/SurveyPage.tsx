@@ -1,7 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '@/api/axiosInstance'
-import useAuthStore from '@/store/useAuthStore' // 경로를 실제 경로로 변경해주세요
 import styles from 'styles/account/SurveyPage.module.css'
 
 const questions = [
@@ -28,25 +27,56 @@ const questions = [
 ]
 
 const SurveyPage: React.FC = () => {
-  const [scores, setScores] = useState<number[]>(Array(20).fill(0))
-  // const { username: userId } = useAuthStore()
+  const [scores, setScores] = useState<number[]>(Array(20).fill(-1))
+  const [canTakeSurvey, setCanTakeSurvey] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(true)
   const navigate = useNavigate()
 
-  const handleScoreChange = (index: number, score: number) => {
+  useEffect(() => {
+    const checkSurveyEligibility = async () => {
+      try {
+        const response = await axiosInstance.get(
+          '/members/self-assessment/check'
+        )
+        const { result } = response.data
+
+        if (result === 0) {
+          setCanTakeSurvey(true) // 기록이 없으므로 설문조사 가능
+        } else {
+          setCanTakeSurvey(false) // 기록이 있으므로 설문조사 불가능
+        }
+      } catch (error) {
+        console.error('Error checking survey eligibility:', error)
+        setCanTakeSurvey(false) // 오류 발생 시 기본적으로 접근 불가 처리
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkSurveyEligibility()
+  }, [])
+
+  const handleScoreChange = useCallback((index: number, score: number) => {
+    console.log(`Question ${index + 1} selected score: ${score}`)
+
     setScores((prevScores) => {
       const newScores = [...prevScores]
       newScores[index] = score
       return newScores
     })
-  }
+  }, [])
 
   const handleSubmit = useCallback(async () => {
+    if (scores.includes(-1)) {
+      alert('모든 질문에 답변해 주세요.')
+      return
+    }
+
     const totalScore = scores.reduce((acc, score) => acc + score, 0)
+
     const data = {
-      // id: 'ai id',
       checkupScore: totalScore,
       // checkupDate: new Date().toISOString().split('T')[0],
-      // memberId: userId, // useAuthStore에서 가져온 userId 사용
     }
 
     console.log('합산 점수:', totalScore)
@@ -65,13 +95,18 @@ const SurveyPage: React.FC = () => {
     }
   }, [scores])
 
-  const onBItAMinTextClick = useCallback(() => {
-    navigate('/12')
-  }, [navigate])
+  if (loading) {
+    return <div>로딩 중...</div> // 로딩 상태 표시
+  }
 
-  const onContainerClick = useCallback(() => {
-    // Add your code here
-  }, [])
+  if (!canTakeSurvey) {
+    return (
+      <div>
+        이미 지난 일주일 동안 설문조사를 완료하셨습니다. 나중에 다시
+        시도해주세요.
+      </div>
+    )
+  }
 
   return (
     <>
@@ -105,25 +140,25 @@ const SurveyPage: React.FC = () => {
                       </div>
                       <div className={styles.group}>
                         <button
-                          className={styles.div5}
+                          className={`${styles.div5} ${scores[index] === 0 ? styles.selected : ''}`}
                           onClick={() => handleScoreChange(index, 0)}
                         >
                           극히 드물게 (0점)
                         </button>
                         <button
-                          className={styles.div7}
+                          className={`${styles.div7} ${scores[index] === 1 ? styles.selected : ''}`}
                           onClick={() => handleScoreChange(index, 1)}
                         >
                           가끔 (1점)
                         </button>
                         <button
-                          className={styles.div9}
+                          className={`${styles.div9} ${scores[index] === 2 ? styles.selected : ''}`}
                           onClick={() => handleScoreChange(index, 2)}
                         >
                           자주 (2점)
                         </button>
                         <button
-                          className={styles.div5}
+                          className={`${styles.div5} ${scores[index] === 3 ? styles.selected : ''}`}
                           onClick={() => handleScoreChange(index, 3)}
                         >
                           대부분 (3점)
@@ -140,73 +175,7 @@ const SurveyPage: React.FC = () => {
           <div className={styles.b5} onClick={handleSubmit}>
             <b className={styles.div3}>설문 완료</b>
           </div>
-          <div className={styles.b7} onClick={onBItAMinTextClick}>
-            <b className={styles.div3}>취소</b>
-          </div>
         </div>
-        <div className={styles.navbar}>
-          <div className={styles.bitamin} onClick={onBItAMinTextClick}>
-            BItAMin
-          </div>
-          <div className={styles.parent38}>
-            <div className={styles.div217} onClick={onContainerClick}>
-              <div className={styles.wrapper38}>
-                <div className={styles.div3}>상담</div>
-              </div>
-              <div className={styles.rectangleDiv} />
-            </div>
-            <div className={styles.div217} onClick={onContainerClick}>
-              <div className={styles.wrapper38}>
-                <div className={styles.div3}>미션</div>
-              </div>
-              <div className={styles.rectangleDiv} />
-            </div>
-            <div className={styles.div217} onClick={onContainerClick}>
-              <div className={styles.parent39}>
-                <div className={styles.div3}>건강</div>
-                <div className={styles.upWrapper}>
-                  <div className={styles.up}>UP !</div>
-                </div>
-              </div>
-              <div className={styles.rectangleDiv} />
-            </div>
-          </div>
-          <div className={styles.div223}>
-            <div className={styles.frameGroup}>
-              <div className={styles.personcircleParent}>
-                <img
-                  className={styles.personcircleIcon}
-                  alt=""
-                  src="PersonCircle.svg"
-                />
-                <div className={styles.frameContainer}>
-                  <div className={styles.wrapper40}>
-                    <div className={styles.div224}>
-                      <span className={styles.txt}>
-                        <span>김싸피</span>
-                        <span className={styles.span}>
-                          <span>{}</span>
-                          <span className={styles.span1}>님</span>
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-                  <div className={styles.vectorWrapper}>
-                    <img
-                      className={styles.vectorIcon}
-                      alt=""
-                      src="Vector.svg"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className={styles.wrapper41} onClick={onContainerClick}>
-                <img className={styles.icon} alt="" src="쪽지 버튼.svg" />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className={styles.child3} />
       </div>
     </>
   )

@@ -14,12 +14,14 @@ import MessageListMainPage from 'stories/pages/message/MessageListMainPage'
 import ParticipantListPage from 'stories/pages/message/ParticipantListPage'
 import ReplyPage from 'stories/pages/message/ReplyPage'
 import AdiminPage from 'stories/pages/admin/AdiminPage'
+import AdiminDetail from '@/stories/pages/admin/AdminDetail'
 import LandingPage from 'stories/pages/main/LandingPage'
 import ExLogin from 'stories/pages/account/ExLogin'
 import MyPage from 'stories/pages/account/MyPage'
 import ComponentPage from 'stories/pages/ComponentPage'
 import AuthPage from '@/stories/pages/account/AuthPage'
 import PrivateRoute from './PrivateRouter'
+import PasswordChangePage from '@/stories/pages/account/PasswordChangePage'
 
 const AppRouter: React.FC = () => {
   return (
@@ -33,6 +35,7 @@ const AppRouter: React.FC = () => {
         <Route path="/home" element={<MainPage />} />
         <Route path="/survey" element={<SurveyPage />} />
         <Route path="/mypage" element={<MyPage />} />
+        <Route path="/change-password" element={<PasswordChangePage />} />
         <Route path="/counsultationlist" element={<ConsultationListPage />} />
         <Route path="/counsultation" element={<ConsultationPage />} />
         <Route
@@ -44,7 +47,17 @@ const AppRouter: React.FC = () => {
         <Route path="/messagelist" element={<MessageListMainPage />} />
         <Route path="/participantlist" element={<ParticipantListPage />} />
         <Route path="/reply" element={<ReplyPage />} />
-        <Route path="/admin" element={<AdiminPage />} />
+
+        {/* 관리자페이지 */}
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute authentication={true} requiredRole="ROLE_ADMIN">
+              <AdiminPage />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/admin/:id" element={<AdiminDetail />} />
       </Route>
 
       {/* 인증 하지 않아야만 가능한 페이지 */}

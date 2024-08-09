@@ -2,15 +2,38 @@ import React from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import useAuthStore from '@/store/useAuthStore'
 
-const PrivateRoute: React.FC<{ authentication: boolean }> = ({
-  authentication,
-}) => {
-  const { accessToken } = useAuthStore()
+interface PrivateRouteProps {
+  authentication: boolean
+  requiredRole?: string
+  children?: React.ReactNode
+}
 
+const PrivateRoute: React.FC<PrivateRouteProps> = ({
+  authentication,
+  requiredRole,
+  children,
+}) => {
+  const { accessToken, role } = useAuthStore()
+
+  // 사용자 인증을 위해 토큰 확인
   if (authentication) {
-    return accessToken ? <Outlet /> : <Navigate to="/login" />
+    if (!accessToken) {
+      return <Navigate to="/loginex" />
+    }
+    if (requiredRole && role !== requiredRole) {
+      return <Navigate to="/home" />
+    }
+    return children ? <>{children}</> : <Outlet />
   } else {
-    return !accessToken ? <Outlet /> : <Navigate to="/home" />
+    return !accessToken ? (
+      children ? (
+        <>{children}</>
+      ) : (
+        <Outlet />
+      )
+    ) : (
+      <Navigate to="/home" />
+    )
   }
 }
 

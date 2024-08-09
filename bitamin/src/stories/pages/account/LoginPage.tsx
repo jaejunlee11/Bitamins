@@ -14,7 +14,6 @@ const LoginPage: React.FC = () => {
   const {
     setAccessToken: setAuthAccessToken,
     setRefreshToken: setAuthRefreshToken,
-    clearAuth,
   } = useAuthStore()
 
   // 이거 없애도 되려낭
@@ -32,9 +31,13 @@ const LoginPage: React.FC = () => {
 
       const { accessToken, refreshToken } = response.data
       console.log('Server response:', response.data) // 서버 응답 확인
+      console.log('Access Token:', accessToken) // 토큰 확인
+      console.log('Refresh Token:', refreshToken)
+
       setAccessToken(accessToken) // axiosInstance에 accessToken 설정
       setAuthAccessToken(accessToken) // zustand 상태 관리에 accessToken 설정
       setAuthRefreshToken(refreshToken) // zustand 상태 관리에 refreshToken 설정
+
       setCookie('refreshToken', refreshToken, {
         path: '/',
         secure: true,
@@ -43,14 +46,13 @@ const LoginPage: React.FC = () => {
 
       // 세션 스토리지에 인증 상태 저장
       sessionStorage.setItem('isAuthenticated', 'true')
-
       alert('Login successful!')
       navigate('/home')
     } catch (error: any) {
+      console.error('Login error:', error.response || error.message)
       const errorMessage =
         error.response?.data?.message || error.message || 'Login failed'
       alert(`Login failed: ${errorMessage}`)
-      console.error('Login error:', error)
     }
   }
 
