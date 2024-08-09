@@ -1,63 +1,66 @@
-import React, { useState, useEffect } from 'react'
-import DatePicker, { registerLocale, setDefaultLocale } from 'react-datepicker'
-import { format } from 'date-fns'
-import ko from 'date-fns/locale/ko'
-import styles from '/src/styles/mission/quest2.module.css'
-import 'react-datepicker/dist/react-datepicker.css'
-import '/src/styles/mission/custom-datepicker.css'
-import { fetchMissionDatesByMonth, fetchMissionsByDate } from '@/api/missionAPI'
+import React, { useState, useEffect } from 'react';
+import DatePicker, { registerLocale, setDefaultLocale } from 'react-datepicker';
+import { format } from 'date-fns';
+import ko from 'date-fns/locale/ko';
+import styles from '/src/styles/mission/quest2.module.css';
+import 'react-datepicker/dist/react-datepicker.css';
+import '/src/styles/mission/custom-datepicker.css';
+import { fetchMonthMissionAndPhrase, fetchMissionsByDate } from '@/api/missionAPI';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error
-registerLocale('ko', ko)
-setDefaultLocale('ko')
+// @ts-ignore
+registerLocale('ko', ko);
+setDefaultLocale('ko');
 
 interface CalendarProps {
   onDateChange: (date: Date | null) => void;
 }
 
 const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
-  const [missionDate, setMissionDate] = useState<Date | null>(null)
-  const [todayMissionExists, setTodayMissionExists] = useState<boolean>(true)
-  const [loading, setLoading] = useState<boolean>(false)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [missionDate, setMissionDate] = useState<Date | null>(null);
+  const [todayMissionExists, setTodayMissionExists] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [monthMissions, setMonthMissions] = useState<any[]>([]);
 
   const fetchMissionDate = async (date: Date) => {
-    const formattedDate = format(date, 'yyyy-MM-dd') // 일까지 포함한 형식으로 변경
+    const formattedDate = format(date, 'yyyy-MM-dd');
     try {
-      setLoading(true)
-      const data = await fetchMissionsByDate(formattedDate)
-      const missionDate = new Date(data.completeDate)
-      setMissionDate(missionDate)
-      const today = new Date().toISOString().split('T')[0]
-      setTodayMissionExists(missionDate.toISOString().split('T')[0] === today)
+      setLoading(true);
+      const data = await fetchMissionsByDate(formattedDate);
+      const missionDate = new Date(data.completeDate);
+      setMissionDate(missionDate);
+      const today = new Date().toISOString().split('T')[0];
+      setTodayMissionExists(missionDate.toISOString().split('T')[0] === today);
+
+      // 월간 미션 및 문구 데이터 가져오기
+      const monthData = await fetchMonthMissionAndPhrase(formattedDate);
+      setMonthMissions(monthData);
     } catch (error) {
-      console.error('Error fetching mission date:', error)
+      console.error('Error fetching mission date:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    const today = new Date()
-    setSelectedDate(today)
-    fetchMissionDate(today)
-    onDateChange(today) // 페이지 로드 시 오늘 날짜를 선택된 상태로 설정
-  }, [])
+    const today = new Date();
+    setSelectedDate(today);
+    fetchMissionDate(today);
+    onDateChange(today);
+  }, []);
 
   const handleDateChange = (date: Date | null) => {
     if (date) {
-      // 선택된 날짜를 UTC 시간으로 설정하여 하루 전날짜가 되는 문제를 해결
-      const correctedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
-      setSelectedDate(correctedDate)
-      setMissionDate(null) // 상태 초기화
-      onDateChange(correctedDate)
+      const correctedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      setSelectedDate(correctedDate);
+      setMissionDate(null);
+      onDateChange(correctedDate);
     }
-  }
+  };
 
   const handleMonthChange = (date: Date) => {
-    fetchMissionDate(date)
-  }
+    fetchMissionDate(date);
+  };
 
   const renderCustomHeader = ({
                                 date,
@@ -68,69 +71,89 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
     decreaseMonth: () => void;
     increaseMonth: () => void;
   }) => (
-    <div className={styles.header}>
-      <button onClick={() => {
-        decreaseMonth()
-        handleMonthChange(date)
-      }}>{'<'}</button>
-      <span>{format(date, 'yyyy.MM')}</span>
-      <button onClick={() => {
-        increaseMonth()
-        handleMonthChange(date)
-      }}>{'>'}</button>
-    </div>
-  )
+      <div className={styles.header}>
+        <button
+            onClick={() => {
+              decreaseMonth();
+              handleMonthChange(date);
+            }}
+        >
+          {'<'}
+        </button>
+        <span>{format(date, 'yyyy.MM')}</span>
+        <button
+            onClick={() => {
+              increaseMonth();
+              handleMonthChange(date);
+            }}
+        >
+          {'>'}
+        </button>
+      </div>
+  );
 
   const getDayClassName = (date: Date) => {
-    const isSelected = selectedDate && date.getTime() === selectedDate.getTime()
-    const isOutsideCurrentMonth = date.getMonth() !== (selectedDate ? selectedDate.getMonth() : new Date().getMonth())
-    const hasMission = missionDate && missionDate.toDateString() === date.toDateString()
-    const isFutureDate = date > new Date()
+    const isSelected = selectedDate && date.getTime() === selectedDate.getTime();
+    const isOutsideCurrentMonth =
+        date.getMonth() !== (selectedDate ? selectedDate.getMonth() : new Date().getMonth());
+    const hasMission = missionDate && missionDate.toDateString() === date.toDateString();
+    const isFutureDate = date > new Date();
 
     if (isFutureDate) {
-      return styles.disabledDay
+      return styles.disabledDay;
     } else if (isSelected) {
-      return styles.selectedDay
+      return styles.selectedDay;
     } else if (isOutsideCurrentMonth) {
-      return 'react-datepicker__day--outside-month'
+      return 'react-datepicker__day--outside-month';
     } else if (hasMission) {
-      return styles.hasMission
+      return styles.hasMission;
     }
-    return ''
-  }
+    return '';
+  };
 
   const getWeekDayClassName = (date: Date) => {
-    const day = date.getDay()
+    const day = date.getDay();
     if (day === 0) {
-      return styles.sunday
+      return styles.sunday;
     } else if (day === 6) {
-      return styles.saturday
+      return styles.saturday;
     }
-    return ''
-  }
+    return '';
+  };
 
   const filterDate = (date: Date) => {
-    const today = new Date()
-    return date <= today
-  }
+    const today = new Date();
+    return date <= today;
+  };
 
   return (
-    <div className={styles.calendarContainer} style={{ zIndex: 1000 }}>
-      <DatePicker
-        selected={selectedDate}
-        onChange={handleDateChange}
-        inline
-        locale="ko"
-        renderCustomHeader={renderCustomHeader}
-        calendarClassName={styles.customCalendar}
-        dayClassName={getDayClassName}
-        filterDate={filterDate}
-        formatWeekDay={(day) => day.substr(0, 1)}
-        weekDayClassName={getWeekDayClassName}
-      />
-      {loading && <p>로딩 중...</p>}
-    </div>
-  )
-}
+      <div className={styles.calendarContainer} style={{ zIndex: 1000 }}>
+        <DatePicker
+            selected={selectedDate}
+            onChange={handleDateChange}
+            inline
+            locale="ko"
+            renderCustomHeader={renderCustomHeader}
+            calendarClassName={styles.customCalendar}
+            dayClassName={getDayClassName}
+            filterDate={filterDate}
+            formatWeekDay={(day) => day.substr(0, 1)}
+            weekDayClassName={getWeekDayClassName}
+        />
+        {loading && <p>로딩 중...</p>}
 
-export default Calendar
+        {/* 월간 미션 및 문구 출력 */}
+        <div className={styles.missionList}>
+          {monthMissions.map((mission, index) => (
+              <div key={index} className={styles.missionItem}>
+                <p>미션 ID: {mission.memberMissionId}</p>
+                <p>문구 ID: {mission.memberPhraseId !== null ? mission.memberPhraseId : '문구 없음'}</p>
+                <p>활동 날짜: {mission.activityDate}</p>
+              </div>
+          ))}
+        </div>
+      </div>
+  );
+};
+
+export default Calendar;

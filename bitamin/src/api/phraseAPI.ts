@@ -1,9 +1,9 @@
-import api from '../../../../새 폴더/녹음 저장 완료/bitamin/src/api/axiosInstance.ts';
-import axiosInstance from '../../../../새 폴더/녹음 저장 완료/bitamin/src/api/axiosInstance.ts';
+import axiosInstance from './axiosInstance.ts';
+import axios from 'axios';
 
 export const getPhrases = async () => {
   try {
-    const response = await api.get('/missions/phrases');
+    const response = await axiosInstance.get('/missions/phrases');
     return response.data;
   } catch (error) {
     console.error('Error fetching the phrase:', error);
@@ -38,7 +38,13 @@ export const getMemberPhraseByDate = async (date: string) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching saved member phrase:', error);
+      if (axios.isAxiosError(error)) {
+          if (error instanceof Error && (error as any).response?.status !== 500) {
+              console.error('Error fetching record:', error);
+          }
+      } else {
+          console.error('Unexpected error:', error);
+      }
     throw error;
   }
 };

@@ -52,7 +52,9 @@ const CompleteMission: React.FC<CompleteMissionProps> = ({ selectedDate }) => {
       const recordDate = await getMemberPhraseByDate(date)
       setRecord(recordDate)
     } catch (error) {
-      console.error('Error fetching record:', error)
+      if (error instanceof Error && (error as any).response?.status !== 500) {
+        console.error('Error fetching record:', error)
+      }
     } finally {
       setLoading(false)
     }

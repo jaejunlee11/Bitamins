@@ -1,4 +1,4 @@
-import axiosInstance from '../../../../새 폴더/경험치까지/src/api/axiosInstance.ts';
+import axiosInstance from './axiosInstance.ts';
 
 const BASE_URL = 'https://i11b105.p.ssafy.io/api';
 
@@ -9,7 +9,6 @@ export const fetchMissionsByDate = async (completeDate: string) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching missions:', error);
     // @ts-ignore
     if (error.response) {
       // @ts-ignore
@@ -19,19 +18,17 @@ export const fetchMissionsByDate = async (completeDate: string) => {
   }
 };
 
-// 해당 월의 미션이 기록된 날짜 목록 가져오기
-export const fetchMissionDatesByMonth = async (date: string) => {
-  try {
-    const response = await axiosInstance.get(
-      `${BASE_URL}/missions/month`, {
-        params: { date }
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching mission dates:', error);
-    throw error;
-  }
+// 월간 미션 및 문구 조회
+export const fetchMonthMissionAndPhrase = async (date: string) => {
+    try {
+        const response = await axiosInstance.get(`${BASE_URL}/missions/month`, {
+            params: { date },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching month mission and phrase:', error);
+        throw error;
+    }
 };
 
 // 미션 제출하기
