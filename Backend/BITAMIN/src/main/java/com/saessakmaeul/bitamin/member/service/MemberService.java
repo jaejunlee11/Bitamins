@@ -1,5 +1,8 @@
 package com.saessakmaeul.bitamin.member.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saessakmaeul.bitamin.exception.ApplicationException;
 import com.saessakmaeul.bitamin.member.dto.request.*;
 import com.saessakmaeul.bitamin.member.dto.request.HealthReportRequestDTO;
@@ -12,6 +15,11 @@ import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
 import com.saessakmaeul.bitamin.service.S3Service;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +28,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -45,6 +57,21 @@ public class MemberService {
     private final S3Service s3Service;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+
+    @Value("${KAKAO_API_KEY}")
+    private String apiKey;
+
+    @Value("${GOOGLE_API_KEY}")
+    private String googleApiKey;
+
+    @Value("${GOOGLE_PASSWORD}")
+    private String googlePassword;
+
+    @Value("${NAVER_ID}")
+    private String naverApiId;
+
+    @Value("${NAVER_PASSWORD}")
+    private String naverApiPassword;
 
     @Transactional
     public Long register(MemberRequestDTO memberDTO, MultipartFile image) throws IOException {
@@ -159,6 +186,201 @@ public class MemberService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    //네이버 로그인
+    public LoginRequest naverLogin(String code) throws Exception {
+        // 엑세스 토큰 획득
+        String accessToken = getNavertoken(code);
+        // 로그인 진행
+        return getNaverLoginRequest(accessToken);
+    }
+
+    // 네이버 엑세스 토큰 획득
+    private String getNavertoken(String code) throws JsonProcessingException {
+        String tokenUrl = "https://nid.naver.com/oauth2.0/token";
+
+        // 요청으로 엑세스 토큰 꺼내기
+        HttpHeaders tokenHeaders = new HttpHeaders();
+        tokenHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> tokenBody = new LinkedMultiValueMap<>();
+
+        String naverURI = UriComponentsBuilder.fromHttpUrl(tokenUrl)
+                .queryParam("grant_type", "authorization_code")
+                .queryParam("client_id", naverApiId)
+                .queryParam("client_secret",naverApiPassword)
+                .queryParam("code", code)
+                .build()
+                .encode()
+                .toUriString();
+
+        HttpEntity<MultiValueMap<String, String>> tokenRequestEntity = new HttpEntity<>(tokenBody, tokenHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> tokenResponse = restTemplate.exchange(naverURI, HttpMethod.GET, tokenRequestEntity, String.class);
+
+        // 엑세스 토큰 꺼내기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode tokenJsonNode = objectMapper.readTree(tokenResponse.getBody());
+        return tokenJsonNode.get("access_token").asText();
+    }
+
+    private LoginRequest getNaverLoginRequest(String accessToken) throws Exception {
+        String userInfoUrl = "https://openapi.naver.com/v1/nid/me";
+
+        // 엑세스 토큰으로 검색
+        HttpHeaders userInfoHeaders = new HttpHeaders();
+        userInfoHeaders.add("Authorization", "Bearer " + accessToken);
+        userInfoHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> userInfoBody = new LinkedMultiValueMap<>();
+
+        HttpEntity<MultiValueMap<String, String>> userInfoRequestEntity = new HttpEntity<>(userInfoBody, userInfoHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> userInfoResponse = restTemplate.exchange(userInfoUrl, HttpMethod.GET, userInfoRequestEntity, String.class);
+
+        // 결과값 꺼내오기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode userInfoJsonNode = objectMapper.readTree(userInfoResponse.getBody());
+        System.out.println(userInfoJsonNode);
+        String id = userInfoJsonNode.get("response").get("id").asText();
+        String email = userInfoJsonNode.get("response").get("email").asText();
+
+        // 저장된 유저가 없다면 Exception 발생
+        memberRepository.findByEmail(email).orElseThrow(()->new Exception("N:등록된 유저가 없습니다./"+email+"/"+id));
+
+        // 저장된 유저가 있다면 로그인을 위해 request body 생성
+        return new LoginRequest(email,id);
+    }
+
+    //구글 로그인
+    public LoginRequest googleLogin(String code) throws Exception {
+        // 엑세스 토큰 획득
+        String accessToken = getgoogletoken(code);
+        // 로그인 진행
+        return getGoogleLoginRequest(accessToken);
+    }
+
+    // 구글 엑세스 토큰 획득
+    private String getgoogletoken(String code) throws JsonProcessingException {
+                String redirectUri = "https://i11b105.p.ssafy.io/api/auth/google"; // 배포
+//        String redirectUri = "http://localhost:8080/api/auth/google"; // 테스트
+        String tokenUrl = "https://oauth2.googleapis.com/token";
+
+        // 요청으로 엑세스 토큰 꺼내기
+        HttpHeaders tokenHeaders = new HttpHeaders();
+        tokenHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> tokenBody = new LinkedMultiValueMap<>();
+        tokenBody.add("grantType", "authorization_code");
+        tokenBody.add("clientId", googleApiKey);
+        tokenBody.add("clientSecret",googlePassword);
+        tokenBody.add("redirectUri", redirectUri);
+        tokenBody.add("code", code);
+
+        HttpEntity<MultiValueMap<String, String>> tokenRequestEntity = new HttpEntity<>(tokenBody, tokenHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> tokenResponse = restTemplate.exchange(tokenUrl, HttpMethod.POST, tokenRequestEntity, String.class);
+
+        // 엑세스 토큰 꺼내기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode tokenJsonNode = objectMapper.readTree(tokenResponse.getBody());
+        return tokenJsonNode.get("id_token").asText();
+    }
+
+    private LoginRequest getGoogleLoginRequest(String accessToken) throws Exception {
+        String userInfoUrl = "https://oauth2.googleapis.com/tokeninfo";
+
+        // 엑세스 토큰으로 검색
+        HttpHeaders userInfoHeaders = new HttpHeaders();
+        userInfoHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> userInfoBody = new LinkedMultiValueMap<>();
+        userInfoBody.add("id_token", accessToken);
+
+        HttpEntity<MultiValueMap<String, String>> userInfoRequestEntity = new HttpEntity<>(userInfoBody, userInfoHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> userInfoResponse = restTemplate.exchange(userInfoUrl, HttpMethod.POST, userInfoRequestEntity, String.class);
+
+        // 결과값 꺼내오기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode userInfoJsonNode = objectMapper.readTree(userInfoResponse.getBody());
+        String id = userInfoJsonNode.get("sub").asText();
+        String email = userInfoJsonNode.get("email").asText();
+
+        // 저장된 유저가 없다면 Exception 발생
+        memberRepository.findByEmail(email).orElseThrow(()->new Exception("G:등록된 유저가 없습니다./"+email+"/"+id));
+
+        // 저장된 유저가 있다면 로그인을 위해 request body 생성
+        return new LoginRequest(email,id);
+    }
+
+    public LoginRequest kakaoLogin(String code) throws Exception {
+        // 엑세스 토큰 획득
+        String accessToken = getKakaotoken(code);
+        // 로그인 진행
+        return getLoginRequest(accessToken);
+    }
+
+    // 카카오톡 엑세스 토큰 획득
+    private String getKakaotoken(String code) throws JsonProcessingException {
+                String redirectUri = "https://i11b105.p.ssafy.io/api/auth/kakao"; // 배포
+//        String redirectUri = "http://localhost:8080/api/auth/kakao"; // 테스트
+        String tokenUrl = "https://kauth.kakao.com/oauth/token";
+
+        // 요청으로 엑세스 토큰 꺼내기
+        HttpHeaders tokenHeaders = new HttpHeaders();
+        tokenHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> tokenBody = new LinkedMultiValueMap<>();
+        tokenBody.add("grant_type", "authorization_code");
+        tokenBody.add("client_id", apiKey);
+        tokenBody.add("redirect_uri", redirectUri);
+        tokenBody.add("code", code);
+
+        HttpEntity<MultiValueMap<String, String>> tokenRequestEntity = new HttpEntity<>(tokenBody, tokenHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> tokenResponse = restTemplate.exchange(tokenUrl, HttpMethod.POST, tokenRequestEntity, String.class);
+
+        // 엑세스 토큰 꺼내기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode tokenJsonNode = objectMapper.readTree(tokenResponse.getBody());
+        return tokenJsonNode.get("access_token").asText();
+    }
+
+    private LoginRequest getLoginRequest(String accessToken) throws Exception {
+        String userInfoUrl = "https://kapi.kakao.com/v2/user/me";
+
+        // 엑세스 토큰으로 검색
+        HttpHeaders userInfoHeaders = new HttpHeaders();
+        userInfoHeaders.add("Authorization", "Bearer " + accessToken);
+        userInfoHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> userInfoBody = new LinkedMultiValueMap<>();
+        userInfoBody.add("property_keys", "[\"kakao_account.profile\",\"kakao_account.email\"]");
+
+        HttpEntity<MultiValueMap<String, String>> userInfoRequestEntity = new HttpEntity<>(userInfoBody, userInfoHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> userInfoResponse = restTemplate.exchange(userInfoUrl, HttpMethod.POST, userInfoRequestEntity, String.class);
+
+        // 결과값 꺼내오기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode userInfoJsonNode = objectMapper.readTree(userInfoResponse.getBody());
+        String id = userInfoJsonNode.get("id").asText();
+        String email = userInfoJsonNode.get("kakao_account").get("email").asText();
+        System.out.println(passwordEncoder.encode(id));
+
+        // 저장된 유저가 없다면 Exception 발생
+        memberRepository.findByEmail(email).orElseThrow(()->new Exception("K:등록된 유저가 없습니다./"+email+"/"+id));
+
+        // 저장된 유저가 있다면 로그인을 위해 request body 생성
+        return new LoginRequest(email,id);
     }
 
 
