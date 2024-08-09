@@ -40,9 +40,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -618,4 +616,22 @@ public class MemberService {
             throw new RuntimeException(e);
         }
     }
+
+    public Map<String, Object> getHealthReportStatsForMember(Long userId) {
+        LocalDate nowDate = LocalDate.now();
+        LocalDate beforeDate = nowDate.minusDays(7);
+
+        List<Object[]> result = healthReportRepository.findCountAndLatestCheckupDate(userId, beforeDate, nowDate);
+        Object[] data = result.get(0);
+
+        Long count = (Long) data[0];
+        LocalDate latestCheckupDate = (LocalDate) data[1];
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("result", count > 0 ? 1 : 0);
+        response.put("latestCheckupDate", latestCheckupDate);
+
+        return response;
+    }
+
 }
