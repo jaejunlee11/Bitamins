@@ -265,8 +265,7 @@ public class MemberService {
 
     // 구글 엑세스 토큰 획득
     private String getgoogletoken(String code) throws JsonProcessingException {
-                String redirectUri = "https://i11b105.p.ssafy.io/api/auth/google"; // 배포
-//        String redirectUri = "http://localhost:8080/api/auth/google"; // 테스트
+                String redirectUri = "https://i11b105.p.ssafy.io/api/release/auth/google"; // 배포
         String tokenUrl = "https://oauth2.googleapis.com/token";
 
         // 요청으로 엑세스 토큰 꺼내기
@@ -328,8 +327,7 @@ public class MemberService {
 
     // 카카오톡 엑세스 토큰 획득
     private String getKakaotoken(String code) throws JsonProcessingException {
-                String redirectUri = "https://i11b105.p.ssafy.io/api/auth/kakao"; // 배포
-//        String redirectUri = "http://localhost:8080/api/auth/kakao"; // 테스트
+                String redirectUri = "https://i11b105.p.ssafy.io/api/release/auth/kakao"; // 배포
         String tokenUrl = "https://kauth.kakao.com/oauth/token";
 
         // 요청으로 엑세스 토큰 꺼내기

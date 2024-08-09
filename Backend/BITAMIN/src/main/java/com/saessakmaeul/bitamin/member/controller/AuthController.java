@@ -136,8 +136,7 @@ public class AuthController {
      */
     @GetMapping("/kakao/login")
     public ResponseEntity<?> kakaoLogin() throws URISyntaxException {
-        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/kakao"; //배포
-//        String redirectUri = "http://localhost:8080/api/auth/kakao"; //테스트
+        String redirectUri = "https://i11b105.p.ssafy.io/api/release/auth/kakao"; //배포
         String kakaoAuthUri = "https://kauth.kakao.com/oauth/authorize?client_id=" + apiKey + "&redirect_uri=" + redirectUri + "&response_type=code";
         // 리다이렉트
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -152,8 +151,7 @@ public class AuthController {
         try{
             // 로그인
             LoginRequest loginRequest = memberService.kakaoLogin(code);
-            URI redirectUri = new URI("http://localhost:5173/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
-//            URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+            URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setLocation(redirectUri);
             return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
@@ -162,8 +160,7 @@ public class AuthController {
                 StringTokenizer st = new StringTokenizer(e.getMessage(),"/");
                 st.nextToken();
                 // 리다이렉트
-//                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
-                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken()" + token; //테스트
+                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
                 URI redirectUriWithParams = new URI(redirectUrl);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setLocation(redirectUriWithParams);
@@ -184,8 +181,7 @@ public class AuthController {
      */
     @GetMapping("/google/login")
     public ResponseEntity<?> googleLogin() throws URISyntaxException {
-        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/google"; //배
-//        String redirectUri = "http://localhost:8080/api/auth/google"; // 테스트용
+        String redirectUri = "https://i11b105.p.ssafy.io/api/release/auth/google"; //배
         String scope = "email profile openid";
 
         // 공백때문에 uri처리 추가
@@ -210,8 +206,8 @@ public class AuthController {
         try{
             // 로그인
             LoginRequest loginRequest = memberService.googleLogin(code);
-            URI redirectUri = new URI("http://localhost:5173/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
-//            URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+//            URI redirectUri = new URI("http://localhost:5173/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+            URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setLocation(redirectUri);
             return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
@@ -220,8 +216,8 @@ public class AuthController {
                 StringTokenizer st = new StringTokenizer(e.getMessage(),"/");
                 st.nextToken();
                 // 리다이렉트
-//                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
-                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken()" + token; //테스트
+                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
+//                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken(); //테스트
                 URI redirectUriWithParams = new URI(redirectUrl);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setLocation(redirectUriWithParams);
@@ -242,8 +238,7 @@ public class AuthController {
      */
     @GetMapping("/naver/login")
     public ResponseEntity<?> naverLogin() throws URISyntaxException {
-        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/naver"; //배포
-//        String redirectUri = "http://localhost:8080/api/auth/naver"; // 테스트용
+        String redirectUri = "https://i11b105.p.ssafy.io/api/release/auth/naver"; //배포
 
         // 공백때문에 uri처리 추가
         String googleAuthUri = UriComponentsBuilder.fromHttpUrl("https://nid.naver.com/oauth2.0/authorize")
