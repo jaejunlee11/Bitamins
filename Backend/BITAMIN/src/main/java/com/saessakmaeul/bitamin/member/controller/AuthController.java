@@ -163,7 +163,7 @@ public class AuthController {
                 st.nextToken();
                 // 리다이렉트
 //                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
-                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken()" + token; //테스트
+                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken(); //테스트
                 URI redirectUriWithParams = new URI(redirectUrl);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setLocation(redirectUriWithParams);
@@ -221,7 +221,7 @@ public class AuthController {
                 st.nextToken();
                 // 리다이렉트
 //                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
-                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken()" + token; //테스트
+                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken(); //테스트
                 URI redirectUriWithParams = new URI(redirectUrl);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setLocation(redirectUriWithParams);
