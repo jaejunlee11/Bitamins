@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,6 +21,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -30,6 +33,9 @@ public class MemberController {
     private final MemberService memberService;
     private final DongCodeRepository dongCodeRepository;
     private final JwtUtil jwtUtil;
+
+    @Value("${KAKAO_API_KEY}")
+    private String apiKey;
 
     public MemberController(@Lazy MemberService memberService, DongCodeRepository dongCodeRepository, JwtUtil jwtUtil) {
         this.memberService = memberService;
@@ -173,6 +179,24 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 탈퇴 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    //카카오 로그아웃
+    @GetMapping("/kakao/logout")
+    public ResponseEntity<?> logout()
+    {
+        try {
+            String redirectUrl = "https://kauth.kakao.com/oauth/logout?client_id="+apiKey+"&logout_redirect_uri=https://i11b105.p.ssafy.io";
+            URI redirectUriWithParams = new URI(redirectUrl);
+            // 리다이렉트
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setLocation(redirectUriWithParams);
+            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("로그아웃 실패");
         }
     }
 
