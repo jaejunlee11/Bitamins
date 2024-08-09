@@ -45,9 +45,9 @@ public class MemberController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<MemberListResponseDTO>> getMemberList() {
+    public ResponseEntity<List<MemberListResponse>> getMemberList() {
         try {
-            List<MemberListResponseDTO> members = memberService.getMemberList();
+            List<MemberListResponse> members = memberService.getMemberList();
             return ResponseEntity.ok(members);
         } catch (Exception e) {
             logger.error("회원 목록 조회 오류: ", e);
@@ -56,7 +56,7 @@ public class MemberController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestPart("memberDTO") MemberRequestDTO memberDTO, @RequestPart(value = "image", required = false) MultipartFile image) {
+    public ResponseEntity<?> register(@RequestPart("memberDTO") MemberRequest memberDTO, @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
             Long memberId = memberService.register(memberDTO, image);
             return ResponseEntity.ok(memberId);
@@ -78,7 +78,7 @@ public class MemberController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
             }
             Long userId = jwtUtil.extractUserId(token);
-            MemberResponseDTO member = memberService.getMemberById(userId);
+            MemberResponse member = memberService.getMemberById(userId);
             return member != null ? ResponseEntity.ok(member) : ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원을 찾을 수 없습니다.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
@@ -90,7 +90,7 @@ public class MemberController {
 
     @PutMapping("/update-member")
     public ResponseEntity<?> updateMemberByToken(HttpServletRequest request,
-                                                 @RequestPart("memberUpdateRequestDTO") MemberUpdateRequestDTO memberUpdateRequestDTO,
+                                                 @RequestPart("memberUpdateRequestDTO") MemberUpdateRequest memberUpdateRequestDTO,
                                                  @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
             String token = getTokenFromRequest(request);
@@ -202,14 +202,14 @@ public class MemberController {
     }
 
     @PostMapping("/self-assessment")
-    public ResponseEntity<?> createHealthReport(@RequestBody HealthReportRequestDTO healthReportRequestDTO, HttpServletRequest request) {
+    public ResponseEntity<?> createHealthReport(@RequestBody HealthReportRequest healthReportRequestDTO, HttpServletRequest request) {
         try {
             String token = getTokenFromRequest(request);
             if (token == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
             }
             Long userId = jwtUtil.extractUserId(token);
-            HealthReportResponseDTO dto = memberService.saveHealthReport(healthReportRequestDTO, userId);
+            HealthReportResponse dto = memberService.saveHealthReport(healthReportRequestDTO, userId);
             return ResponseEntity.ok(dto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
@@ -227,7 +227,7 @@ public class MemberController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
             }
             Long userId = jwtUtil.extractUserId(token);
-            List<HealthReportResponseDTO> healthReports = memberService.getHealthReportsByUserId(userId);
+            List<HealthReportResponse> healthReports = memberService.getHealthReportsByUserId(userId);
             return ResponseEntity.ok(healthReports);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
