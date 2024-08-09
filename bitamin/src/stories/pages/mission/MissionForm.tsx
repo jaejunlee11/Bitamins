@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from '/src/styles/mission/quest2.module.css';
 import { submitMission, fetchTodayMission, substituteMission } from '@/api/missionAPI';
-import useMissionStore from '@/store/missionStore';
+import useMissionStore from '@/store/useMissionStore';
 
 interface Mission {
     id: number;
@@ -20,9 +20,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData, on
     const [missionReview, setMissionReview] = useState('');
     const [missionImage, setMissionImage] = useState<File | null>(null);
 
-    const { mission, setMission, substitutionCount, increaseSubstitutionCount } = useMissionStore();
+    const { mission, setMission, substitutionCount, increaseSubstitutionCount, resetMissionIfNewDay } = useMissionStore();
 
     useEffect(() => {
+        resetMissionIfNewDay();  // 날짜가 바뀌었을 경우 미션 초기화
         const fetchMission = async () => {
             if (!mission && !missionData) {
                 try {
@@ -37,7 +38,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ selectedDate, missionData, on
         };
 
         fetchMission();
-    }, [mission, missionData, setMission]);
+    }, [mission, missionData, setMission, resetMissionIfNewDay]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {

@@ -14,6 +14,7 @@ interface MissionState {
     setMission: (mission: Mission) => void;
     increaseSubstitutionCount: () => void;
     resetSubstitutionCount: () => void;
+    resetMissionIfNewDay: () => void;
 }
 
 const getCurrentDate = (): string => {
@@ -52,6 +53,13 @@ const useMissionStore = create<MissionState>((set) => ({
         localStorage.removeItem('substitutionCount');
         localStorage.removeItem('lastSubstitutionDate');
         set({ substitutionCount: 0, lastSubstitutionDate: getCurrentDate() });
+    },
+    resetMissionIfNewDay: () => {
+        const currentDate = getCurrentDate();
+        if (localStorage.getItem('lastSubstitutionDate') !== currentDate) {
+            localStorage.removeItem('mission');
+            set({ mission: null, lastSubstitutionDate: currentDate, substitutionCount: 0 });
+        }
     },
 }));
 
