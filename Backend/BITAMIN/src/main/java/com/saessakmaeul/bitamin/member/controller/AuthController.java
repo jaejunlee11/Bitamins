@@ -38,6 +38,9 @@ public class AuthController {
     @Value("${GOOGLE_API_KEY}")
     private String googleApiKey;
 
+    @Value("${NAVER_ID}")
+    private String naverApiId;
+
     @Autowired
     public AuthController(MemberService memberService, JwtUtil jwtUtil) {
         this.memberService = memberService;
@@ -133,8 +136,8 @@ public class AuthController {
      */
     @GetMapping("/kakao/login")
     public ResponseEntity<?> kakaoLogin() throws URISyntaxException {
-//        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/kakao"; //배
-        String redirectUri = "http://localhost:8080/api/auth/kakao"; //테스트
+        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/kakao"; //배포
+//        String redirectUri = "http://localhost:8080/api/auth/kakao"; //테스트
         String kakaoAuthUri = "https://kauth.kakao.com/oauth/authorize?client_id=" + apiKey + "&redirect_uri=" + redirectUri + "&response_type=code";
         // 리다이렉트
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -149,8 +152,8 @@ public class AuthController {
         try{
             // 로그인
             LoginRequest loginRequest = memberService.kakaoLogin(code);
-//            URI redirectUri = new URI("http://localhost:5173/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
-            URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+            URI redirectUri = new URI("http://localhost:5173/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+//            URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setLocation(redirectUri);
             return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
@@ -159,8 +162,8 @@ public class AuthController {
                 StringTokenizer st = new StringTokenizer(e.getMessage(),"/");
                 st.nextToken();
                 // 리다이렉트
-                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
-                // String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken()" + token; //테스트
+//                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
+                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken()" + token; //테스트
                 URI redirectUriWithParams = new URI(redirectUrl);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setLocation(redirectUriWithParams);
@@ -181,8 +184,8 @@ public class AuthController {
      */
     @GetMapping("/google/login")
     public ResponseEntity<?> googleLogin() throws URISyntaxException {
-//        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/google"; //배
-        String redirectUri = "http://localhost:8080/api/auth/google"; // 테스트용
+        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/google"; //배
+//        String redirectUri = "http://localhost:8080/api/auth/google"; // 테스트용
         String scope = "email profile openid";
 
         // 공백때문에 uri처리 추가
@@ -213,12 +216,69 @@ public class AuthController {
             httpHeaders.setLocation(redirectUri);
             return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
         } catch (Exception e) {
-            if(e.getMessage().contains("K:등록된 유저가 없습니다.")){
+            if(e.getMessage().contains("G:등록된 유저가 없습니다.")){
                 StringTokenizer st = new StringTokenizer(e.getMessage(),"/");
                 st.nextToken();
                 // 리다이렉트
-                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
-                // String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken()" + token; //테스트
+//                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
+                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken()" + token; //테스트
+                URI redirectUriWithParams = new URI(redirectUrl);
+                HttpHeaders httpHeaders = new HttpHeaders();
+                httpHeaders.setLocation(redirectUriWithParams);
+                return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+            }
+            return ResponseEntity.status(500).body("로그인 실패");
+        }
+    }
+
+    // 소셜 로그인 과정
+    /*
+        1. naver 소셜 로그인 요청(버튼 클릭)
+        2. naver 로그인 창으로 이동
+        3. 로그인시 엑세스 토큰 획득
+        4. 엑세스 토큰으로 DB에 확인
+            4.1. 정보가 있는 경우 로그인
+            4.2. 정보가 없는 경우 회원가입 창으로 이동(email,이름,비밀번호 넘겨주기)
+     */
+    @GetMapping("/naver/login")
+    public ResponseEntity<?> naverLogin() throws URISyntaxException {
+        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/naver"; //배포
+//        String redirectUri = "http://localhost:8080/api/auth/naver"; // 테스트용
+
+        // 공백때문에 uri처리 추가
+        String googleAuthUri = UriComponentsBuilder.fromHttpUrl("https://nid.naver.com/oauth2.0/authorize")
+                .queryParam("client_id", naverApiId)
+                .queryParam("redirect_uri", redirectUri)
+                .queryParam("response_type", "code")
+                .queryParam("state", "bitamin")
+                .build()
+                .encode()
+                .toUriString();
+
+        // 리다이렉트
+        HttpHeaders httpHeaders = new HttpHeaders();
+        URI redirectUriWithParams = new URI(googleAuthUri);
+        httpHeaders.setLocation(redirectUriWithParams);
+        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+    }
+
+    @GetMapping("/naver")
+    public ResponseEntity<?> naver(@RequestParam("code") String code) throws Exception {
+        try{
+            // 로그인
+            LoginRequest loginRequest = memberService.naverLogin(code);
+            URI redirectUri = new URI("http://localhost:5173/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+//            URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setLocation(redirectUri);
+            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        } catch (Exception e) {
+            if(e.getMessage().contains("N:등록된 유저가 없습니다.")){
+                StringTokenizer st = new StringTokenizer(e.getMessage(),"/");
+                st.nextToken();
+                // 리다이렉트
+//                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
+                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken(); //테스트
                 URI redirectUriWithParams = new URI(redirectUrl);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setLocation(redirectUriWithParams);
