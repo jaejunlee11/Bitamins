@@ -1,6 +1,7 @@
 package com.saessakmaeul.bitamin.mission.service;
 
 import com.saessakmaeul.bitamin.mission.dto.request.MemberPhraseRequest;
+import com.saessakmaeul.bitamin.mission.dto.response.ApiResponse;
 import com.saessakmaeul.bitamin.mission.dto.response.MemberPhraseResponse;
 import com.saessakmaeul.bitamin.mission.dto.response.SavedMemberPhraseResponse;
 import com.saessakmaeul.bitamin.mission.entity.MemberPhrase;
@@ -28,31 +29,38 @@ public class MemberPhraseService {
     private final PhraseRepository phraseRepository;
 
     // 녹음한 문구 조회하기
-    public SavedMemberPhraseResponse readSavedMemberPhrase(Long memberId, String date) {
+    public ApiResponse<SavedMemberPhraseResponse> readSavedMemberPhrase(Long memberId, String date) {
         // 녹음된 날짜 형변환
         LocalDate savedDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
 
         // 유저가 해당 날짜에 녹음한 문구 조회
         Optional<MemberPhrase> memberPhraseOpt = memberPhraseRepository.findByMemberIdAndSaveDate(memberId,savedDate);
+
+        if(memberPhraseOpt.isEmpty()){
+            return ApiResponse.<SavedMemberPhraseResponse>builder()
+                    .success(false)
+                    .message("해당 날짜에 녹음한 문구가 없습니다.")
+                    .data(null)
+                    .build();
+        }
+
         MemberPhrase savedMemberPhrase = memberPhraseOpt.orElseThrow(() -> new RuntimeException("해당 날짜에 녹음한 문구가 없습니다."));
         Long savedPhraseId = memberPhraseOpt.map(MemberPhrase::getPhraseId).orElse(null);
 
-        // 문구 ID가 null일 경우 null 반환
-        if(savedPhraseId == null){
-            return null;
-        }
-
         // 문구 ID를 통해서 해당 문구 조회
         Optional<Phrase> savedPhraseOpt = phraseRepository.findById(savedPhraseId);
-        Phrase savedPhrase = savedPhraseOpt.orElseThrow(()-> new RuntimeException("해당 문구가 없습니다."));
-
-        // 문구가 없는 경우 null 반환
-        if(savedPhrase == null){
-            return null;
+        if(savedPhraseOpt.isEmpty()){
+            return ApiResponse.<SavedMemberPhraseResponse>builder()
+                    .success(false)
+                    .message("해당 문구가 없습니다.")
+                    .data(null)
+                    .build();
         }
 
+        Phrase savedPhrase = savedPhraseOpt.get();
+
         // SavedMemberMissionResponse로 반환
-        return SavedMemberPhraseResponse.builder()
+        SavedMemberPhraseResponse response = SavedMemberPhraseResponse.builder()
                 .id(savedMemberPhrase.getId())
                 .memberId(savedMemberPhrase.getMemberId())
                 .phraseId(savedMemberPhrase.getPhraseId())
@@ -60,11 +68,17 @@ public class MemberPhraseService {
                 .saveDate(savedMemberPhrase.getSaveDate())
                 .phraseUrl(savedMemberPhrase.getPhraseUrl())
                 .build();
+
+        return ApiResponse.<SavedMemberPhraseResponse>builder()
+                .success(true)
+                .message("문구 조회에 성공했습니다.")
+                .data(response)
+                .build();
     }
 
     // 오늘의 문구 녹음 등록
     @Transactional
-    public MemberPhraseResponse createMemberPhrase(Long memberId, MemberPhraseRequest memberPhraseRequest) throws IOException {
+    public ApiResponse<MemberPhraseResponse> createMemberPhrase(Long memberId, MemberPhraseRequest memberPhraseRequest) throws IOException {
         // MemberPhraseRequest에서 LocalDate로 변환
         LocalDate saveDate = LocalDate.parse(memberPhraseRequest.getSaveDate(), DateTimeFormatter.ISO_DATE);
 
@@ -85,12 +99,18 @@ public class MemberPhraseService {
         // 저장하기
         MemberPhrase savedMemberPhrase = memberPhraseRepository.save(memberPhrase);
 
-        return MemberPhraseResponse.builder()
+        MemberPhraseResponse response = MemberPhraseResponse.builder()
                 .id(savedMemberPhrase.getId())
                 .memberId(savedMemberPhrase.getMemberId())
                 .phraseId(savedMemberPhrase.getPhraseId())
                 .saveDate(savedMemberPhrase.getSaveDate())
                 .phraseUrl(savedMemberPhrase.getPhraseUrl())
+                .build();
+
+        return ApiResponse.<MemberPhraseResponse>builder()
+                .success(true)
+                .message("문구 녹음 등록에 성공했습니다.")
+                .data(response)
                 .build();
     }
 
