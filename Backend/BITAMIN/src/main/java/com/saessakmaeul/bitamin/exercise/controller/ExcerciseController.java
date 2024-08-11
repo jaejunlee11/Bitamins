@@ -1,6 +1,7 @@
 package com.saessakmaeul.bitamin.exercise.controller;
 
 import com.saessakmaeul.bitamin.exercise.dto.responseDto.ExcersizeDetailResponse;
+import com.saessakmaeul.bitamin.exercise.dto.responseDto.ExcersizeModelResponse;
 import com.saessakmaeul.bitamin.exercise.entity.Excersize;
 import com.saessakmaeul.bitamin.exercise.service.ExcersizeService;
 import com.saessakmaeul.bitamin.util.JwtUtil;
@@ -24,6 +25,16 @@ public class ExcerciseController {
             ExcersizeDetailResponse response = excersizeService.getExcersize(id);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/model/{level}")
+    public ResponseEntity<?> getModel(@PathVariable(name = "level") int level, @RequestHeader(name = "Authorization",required = false) String token) {
+        try{
+            ExcersizeModelResponse response = excersizeService.getExcersizeModel(level);
+            return ResponseEntity.ok(response);
+        } catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
