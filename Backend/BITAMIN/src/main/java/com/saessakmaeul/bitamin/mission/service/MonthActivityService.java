@@ -1,5 +1,6 @@
 package com.saessakmaeul.bitamin.mission.service;
 
+import com.saessakmaeul.bitamin.mission.dto.response.ApiResponse;
 import com.saessakmaeul.bitamin.mission.dto.response.MonthMissionAndPhraseResponse;
 import com.saessakmaeul.bitamin.mission.entity.MemberMission;
 import com.saessakmaeul.bitamin.mission.entity.MemberPhrase;
@@ -24,7 +25,7 @@ public class MonthActivityService {
     private final MemberMissionRepository memberMissionRepository;
     private final MemberPhraseRepository memberPhraseRepository;
 
-    public List<MonthMissionAndPhraseResponse> getActivitiesForMonth(Long memberId, String date) {
+    public ApiResponse<List<MonthMissionAndPhraseResponse>> getActivitiesForMonth(Long memberId, String date) {
         // 전체 날짜에서 YearMonth 추출
         LocalDate parsedDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
         YearMonth yearMonth = YearMonth.from(parsedDate);
@@ -48,6 +49,18 @@ public class MonthActivityService {
             }
         }
 
-        return responses;
+        if(responses.isEmpty()) {
+            return ApiResponse.<List<MonthMissionAndPhraseResponse>>builder()
+                    .success(false)
+                    .message("이번 달 미션 활동이 없습니다.")
+                    .data(new ArrayList<>())
+                    .build();
+        }
+
+        return ApiResponse.<List<MonthMissionAndPhraseResponse>>builder()
+                .success(true)
+                .message("월간 활동 조회에 성공했습니다.")
+                .data(responses)
+                .build();
     }
 }
