@@ -40,58 +40,58 @@ public class JwtFilter extends OncePerRequestFilter {
 
         logger.debug(requestURI + " " + method);
 
-        if(requestURI.startsWith("/api")) chain.doFilter(request, response);
+//        if(requestURI.startsWith("/api")) chain.doFilter(request, response);
 
-    //     if(requestURI.startsWith("/api/auth/login") ||
-    //             requestURI.startsWith("/api/auth/kakao") ||
-    //             requestURI.startsWith("/api/auth/google") ||
-    //             requestURI.startsWith("/api/auth/naver") ||
-    //             requestURI.startsWith("/api/members/register") ||
-    //             requestURI.startsWith("/api/members/sidoNames") ||
-    //             requestURI.startsWith("/api/members/gugunNames") ||
-    //             requestURI.startsWith("/api/members/dongNames")) {
-    //         chain.doFilter(request, response);
-    //         return;
-    //     }
+         if(requestURI.startsWith("/api/auth/login") ||
+                 requestURI.startsWith("/api/auth/kakao") ||
+                 requestURI.startsWith("/api/auth/google") ||
+                 requestURI.startsWith("/api/auth/naver") ||
+                 requestURI.startsWith("/api/members/register") ||
+                 requestURI.startsWith("/api/members/sidoNames") ||
+                 requestURI.startsWith("/api/members/gugunNames") ||
+                 requestURI.startsWith("/api/members/dongNames")) {
+             chain.doFilter(request, response);
+             return;
+         }
 
-    //     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-    //         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-    //         response.getWriter().write("The token is missing or invalid");
-    //         return;
-    //     }
+         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+             response.getWriter().write("The token is missing or invalid");
+             return;
+         }
 
-    //     jwt = authorizationHeader.substring(7);
-    //     userEmail = jwtUtil.extractEmail(jwt);
+         jwt = authorizationHeader.substring(7);
+         userEmail = jwtUtil.extractEmail(jwt);
 
-    //     System.out.println(userEmail);
+         System.out.println(userEmail);
 
 
-    //     if (userEmail == null) {
-    //         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-    //         response.getWriter().write("No email: Unable to authenticate.");
-    //         return;
-    //     }
+         if (userEmail == null) {
+             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+             response.getWriter().write("No email: Unable to authenticate.");
+             return;
+         }
 
-    //     if(SecurityContextHolder.getContext().getAuthentication() != null) {
-    //         chain.doFilter(request, response);
-    //         return;
-    //     }
+         if(SecurityContextHolder.getContext().getAuthentication() != null) {
+             chain.doFilter(request, response);
+             return;
+         }
 
-    //     UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(userEmail);
+         UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(userEmail);
 
-    //     if (!jwtUtil.extractEmail(jwt).equals(userDetails.getUsername()) || jwtUtil.isTokenExpired(jwt)) {
-    //         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-    //         response.getWriter().write("The email is not valid, or the token has expired.");
-    //         return;
-    //     }
+         if (!jwtUtil.extractEmail(jwt).equals(userDetails.getUsername()) || jwtUtil.isTokenExpired(jwt)) {
+             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+             response.getWriter().write("The email is not valid, or the token has expired.");
+             return;
+         }
 
-    //     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
+         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
 
-    //     usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+         usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-    //     SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
-    //     chain.doFilter(request, response);
+         chain.doFilter(request, response);
     }
 
 }
