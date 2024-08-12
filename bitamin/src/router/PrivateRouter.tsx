@@ -18,7 +18,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
   // 사용자 인증을 위해 토큰 확인
   if (authentication) {
     if (!accessToken) {
-      return <Navigate to="/loginex" />
+      return <Navigate to="/login" />
     }
     if (requiredRole && role !== requiredRole) {
       return <Navigate to="/home" />

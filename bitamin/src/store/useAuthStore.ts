@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 interface AuthState {
   accessToken: string | null
@@ -78,7 +78,7 @@ const useAuthStore = create(
     }),
     {
       name: 'auth-storage', // 로컬 스토리지에 저장될 키 이름
-      getStorage: () => localStorage, // 사용할 스토리지 (기본값은 localStorage)
+      storage: createJSONStorage(() => localStorage), // 사용할 스토리지 (기본값은 localStorage)
     }
   )
 )

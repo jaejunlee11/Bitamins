@@ -1,5 +1,5 @@
 import axios from 'axios'
-import useAuthStore from '../store/useAuthStore'
+import useAuthStore from 'store/useAuthStore'
 
 const axiosInstance = axios.create({
   baseURL: 'https://i11b105.p.ssafy.io/api', // API 기본 URL 설정

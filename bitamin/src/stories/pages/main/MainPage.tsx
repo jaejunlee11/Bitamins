@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import usePhraseStore from '@/store/usePhraseStore'
 import styles from 'styles/main/MainPage.module.css'
 import mainConsultImg from 'assets/image/mainConsultImg.png'
 import mainQuestImg from 'assets/image/mainQuestImg.png'
@@ -11,19 +12,44 @@ import recordAgain from 'assets/image/recordAgain.png'
 import recordPlay from 'assets/image/recordPlay.png'
 import ModalExample from 'stories/organisms/ModalExample'
 import HeaderAfterLogin from '@/stories/organisms/common/HeaderAfterLogin'
+import { getPhrases, saveAudio } from '@/api/phraseAPI'
 
 const MainPage: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false)
   const [isEnded, setIsEnded] = useState(false)
   const [media, setMedia] = useState<MediaRecorder | null>(null)
-  const [audioUrl, setAudioUrl] = useState<Blob | null>(null)
-  // const [isSaved, setIsSaved] = useState(false);
-  // const [isRecorded, setIsRecorded] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [consultOpacityClass, setConsultOpacityClass] = useState(
     styles.transparent
   )
   const [questOpacityClass, setQuestOpacityClass] = useState(styles.transparent)
+  const { phraseContent, phraseId, setPhrase } = usePhraseStore()
 
+  useEffect(() => {
+    const savedPhrase = localStorage.getItem('phraseContent')
+    const savedPhraseId = localStorage.getItem('phraseId')
+    const savedDate = localStorage.getItem('phraseDate')
+    const todayDate = new Date().toISOString().split('T')[0]
+
+    if (savedPhrase && savedPhraseId && savedDate === todayDate) {
+      setPhrase(savedPhrase, savedPhraseId)
+    } else {
+      getPhrases()
+        .then((data) => {
+          if (data && data.phraseContent && data.id) {
+            setPhrase(data.phraseContent, data.id)
+            localStorage.setItem('phraseContent', data.phraseContent)
+            localStorage.setItem('phraseId', data.id)
+            localStorage.setItem('phraseDate', todayDate) // 현재 날짜를 저장
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching the phrase:', error)
+        })
+    }
+  }, [setPhrase])
+
+  // 나머지 코드들은 이전과 동일합니다.
   const onRecAudio = () => {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -31,8 +57,8 @@ const MainPage: React.FC = () => {
         const mediaRecorder = new MediaRecorder(stream)
 
         mediaRecorder.addEventListener('dataavailable', (e) => {
-          setAudioUrl(e.data)
-          // setIsRecorded(true);
+          const blob = e.data
+          setAudioBlob(blob)
           setIsRecording(false)
         })
 
@@ -57,21 +83,46 @@ const MainPage: React.FC = () => {
   }
 
   const onPlayAudio = useCallback(() => {
-    if (audioUrl) {
-      const audio = new Audio(URL.createObjectURL(audioUrl))
+    if (audioBlob) {
+      const audio = new Audio(URL.createObjectURL(audioBlob))
       audio.play()
     }
-  }, [audioUrl])
+  }, [audioBlob])
 
   const onSaveAudio = () => {
     // 여기에 서버로 업로드하는 로직을 추가할 수 있습니다.
     // setIsSaved(true);
+    if (phraseId && audioBlob) {
+      const formData = new FormData()
+      formData.append(
+        'memberPhraseRequest',
+        new Blob(
+          [
+            JSON.stringify({
+              phraseId: phraseId,
+              saveDate: new Date().toISOString().split('T')[0],
+            }),
+          ],
+          { type: 'application/json' }
+        )
+      )
+      formData.append('phraseRecord', audioBlob)
+
+      saveAudio(formData)
+        .then((response) => {
+          alert('녹음이 성공적으로 저장되었습니다.')
+        })
+        .catch((error) => {
+          console.error('Error saving the audio:', error)
+          alert('녹음 저장에 실패했습니다.')
+        })
+    } else {
+      alert('녹음 파일이 없거나 문구 ID를 찾을 수 없습니다.')
+    }
   }
 
   const onResetAudio = () => {
-    setAudioUrl(null)
-    // setIsSaved(false);
-    // setIsRecorded(false);
+    setAudioBlob(null)
     setIsRecording(false)
     setIsEnded(false)
   }
@@ -92,38 +143,32 @@ const MainPage: React.FC = () => {
     onPlayAudio()
   }, [onPlayAudio])
 
-  const onRectangleClick = useCallback(() => {
-    // Add your code here
-  }, [])
+  const onRectangleClick = useCallback(() => {}, [])
 
   const handleMouseEnterConsult = () => {
     setConsultOpacityClass(styles.opaque)
-    // @ts-ignore
     document
       .querySelector(`.${styles.consultBorder}`)
-      .classList.add(styles.glow)
+      ?.classList.add(styles.glow)
   }
 
   const handleMouseLeaveConsult = () => {
     setConsultOpacityClass(styles.transparent)
-    // @ts-ignore
     document
       .querySelector(`.${styles.consultBorder}`)
-      .classList.remove(styles.glow)
+      ?.classList.remove(styles.glow)
   }
 
   const handleMouseEnterQuest = () => {
     setQuestOpacityClass(styles.opaque)
-    // @ts-ignore
-    document.querySelector(`.${styles.questBorder}`).classList.add(styles.glow)
+    document.querySelector(`.${styles.questBorder}`)?.classList.add(styles.glow)
   }
 
   const handleMouseLeaveQuest = () => {
     setQuestOpacityClass(styles.transparent)
-    // @ts-ignore
     document
       .querySelector(`.${styles.questBorder}`)
-      .classList.remove(styles.glow)
+      ?.classList.remove(styles.glow)
   }
 
   return (
@@ -131,7 +176,7 @@ const MainPage: React.FC = () => {
       <HeaderAfterLogin username="{username}" />
       <ModalExample />
       <div className={styles.div}>
-        <div className={styles.navbar}>
+        {/* <div className={styles.navbar}>
           <div className={styles.bitamin}>BItAMin</div>
           <div className={styles.parent}>
             <div className={styles.div4} onClick={onRectangleClick}>
@@ -196,11 +241,10 @@ const MainPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
         <div className={styles.inner}>
           <div className={styles.div3}>
-            <p className={styles.p}>오늘 하루도 최선을 다한 당신,</p>
-            <p className={styles.p}>멋져요!</p>
+            <p className={styles.p}>{phraseContent}</p>
           </div>
         </div>
         <div className={styles.recordBtns}>

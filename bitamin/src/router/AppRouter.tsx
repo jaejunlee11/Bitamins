@@ -1,5 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import MainPage from 'stories/pages/main/MainPage'
+import MissionPage from 'stories/pages/mission/MissionPage'
+import Weather from 'stories/pages/mission/Weather'
 import LoginPage from 'stories/pages/account/LoginPage'
 import SignUpPage from 'stories/pages/account/SignUpPage'
 import SurveyPage from 'stories/pages/account/SurveyPage'
@@ -11,6 +14,7 @@ import ConsultationSharingPage from 'stories/pages/counsultation/ConsultationSha
 import HealthUpListPage from 'stories/pages/healthup/HealthUpListPage'
 import HealthUpPage from 'stories/pages/healthup/HealthUpPage'
 import MessageListMainPage from 'stories/pages/message/MessageListMainPage'
+import MessageDetailPage from 'stories/organisms/MessageDetailPage'
 import ParticipantListPage from 'stories/pages/message/ParticipantListPage'
 import ReplyPage from 'stories/pages/message/ReplyPage'
 import AdiminPage from 'stories/pages/admin/AdiminPage'
@@ -22,6 +26,18 @@ import ComponentPage from 'stories/pages/ComponentPage'
 import AuthPage from '@/stories/pages/account/AuthPage'
 import PrivateRoute from './PrivateRouter'
 import PasswordChangePage from '@/stories/pages/account/PasswordChangePage'
+import MissionForm from '@/stories/pages/mission/MissionForm.tsx'
+import CompleteMission from '@/stories/pages/mission/CompleteMission.tsx'
+import CalendarCompleteMission from '@/stories/pages/mission/CalendarCompleteMission.tsx'
+import MyPlant from '@/stories/pages/mission/MyPlant.tsx'
+
+const getCurrentDate = (): string => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 const AppRouter: React.FC = () => {
   return (
@@ -29,15 +45,15 @@ const AppRouter: React.FC = () => {
       {/* 인증 여부 없이도 접속 가능한 페이지 */}
       <Route path="" element={<LandingPage />} />
       <Route path="/component" element={<ComponentPage />} />
+      <Route path="/home" element={<MainPage />} />
 
       {/* 인증 반드시 필요한 페이지 */}
       <Route element={<PrivateRoute authentication={true} />}>
-        <Route path="/home" element={<MainPage />} />
         <Route path="/survey" element={<SurveyPage />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/change-password" element={<PasswordChangePage />} />
-        <Route path="/counsultationlist" element={<ConsultationListPage />} />
-        <Route path="/counsultation" element={<ConsultationPage />} />
+        <Route path="/consultationlist" element={<ConsultationListPage />} />
+        <Route path="/consultation" element={<ConsultationPage />} />
         <Route
           path="/counsultationsharing"
           element={<ConsultationSharingPage />}
@@ -45,8 +61,15 @@ const AppRouter: React.FC = () => {
         <Route path="/healthuplist" element={<HealthUpListPage />} />
         <Route path="/healthup" element={<HealthUpPage />} />
         <Route path="/messagelist" element={<MessageListMainPage />} />
+        <Route path="/messages/:messageId" element={<MessageDetailPage />} />
         <Route path="/participantlist" element={<ParticipantListPage />} />
         <Route path="/reply" element={<ReplyPage />} />
+        <Route path="/mission" element={<MissionPage />} />
+        <Route path="/missionform" element={<MissionForm />} />
+        <Route path="/complete" element={<CompleteMission />} />
+        <Route path="/completecal" element={<CalendarCompleteMission />} />
+        <Route path="/weather" element={<Weather />} />
+        <Route path="/plant" element={<MyPlant />} />
 
         {/* 관리자페이지 */}
         <Route

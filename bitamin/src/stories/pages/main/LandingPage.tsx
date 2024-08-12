@@ -1,8 +1,16 @@
+import { useCallback } from 'react'
 import styles from 'styles/main/LandingPage.module.css'
+import { useNavigate } from 'react-router-dom'
 
 const LandingPage: React.FC = () => {
+  const navigate = useNavigate()
+
+  const onClickLandingPage = useCallback(() => {
+    navigate('/signup')
+  }, [])
+
   return (
-    <div className={styles.div}>
+    <div className={styles.div} onClick={onClickLandingPage}>
       <div className={styles.betterTomorrowBetter}>
         Better tomorrow, Better Mind
       </div>
