@@ -42,7 +42,12 @@ const CompleteMission: React.FC<CompleteMissionProps> = ({ selectedDate }) => {
   }
 
   useEffect(() => {
-    setMission(null) // 상태 초기화
+    if (mission !== null) {
+      console.log(mission)
+    }
+  }, [mission])
+
+  useEffect(() => {
     getMission(selectedDate)
   }, [selectedDate])
 
@@ -107,7 +112,7 @@ const CompleteMission: React.FC<CompleteMissionProps> = ({ selectedDate }) => {
         </>
       ) : (
         selectedDate === todayDate ? (
-          <MissionForm selectedDate={selectedDate} onSubmitSuccess={handleSubmitSuccess} /> // 오늘 날짜에 미션이 없으면 MissionForm을 표시합니다.
+          <MissionForm selectedDate={selectedDate} onSubmitSuccess={handleSubmitSuccess} /> // 오늘 날짜에 미션이 없으면 MissionForm
         ) : (
           <p>해당 날짜에 완료된 미션이 없습니다.</p>
         )

@@ -2,46 +2,49 @@ import axiosInstance from './axiosInstance.ts';
 
 const BASE_URL = 'https://i11b105.p.ssafy.io/api';
 
+// 완료된 미션 불러오기
 export const fetchMissionsByDate = async (completeDate: string) => {
   try {
     const response = await axiosInstance.get('/missions/completed', {
       params: { date: completeDate }
     });
-    return response.data;
-  } catch (error) {
-    // @ts-ignore
-    if (error.response) {
-      // @ts-ignore
-      console.error('Response data:', error.response.data);
+
+    if (response.data.success) {
+      console.log(response.data.message);
+      return response.data.data;
+    } else {
+      return console.log(null)
     }
+  } catch (error) {
     throw error;
   }
 };
 
+
 // 월간 미션 및 문구 조회
 export const fetchMonthMissionAndPhrase = async (date: string) => {
-    try {
-        const response = await axiosInstance.get(`${BASE_URL}/missions/month`, {
-            params: { date },
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching month mission and phrase:', error);
-        throw error;
-    }
+  try {
+    const response = await axiosInstance.get(`${BASE_URL}/missions/month`, {
+      params: { date },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching month mission and phrase:', error);
+    throw error;
+  }
 };
 
 // 미션 제출하기
 export const submitMission = async (missionData: FormData) => {
   try {
     const response = await axiosInstance.post(
-      '/missions',
-      missionData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+        '/missions',
+        missionData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
     );
     return response.data;
   } catch (error) {
