@@ -479,6 +479,7 @@ public class MemberService {
                 member.setName(memberUpdateRequestDTO.getName());
                 member.setNickname(memberUpdateRequestDTO.getNickname());
                 member.setBirthday(memberUpdateRequestDTO.getBirthday());
+                member.setProfileUrl(memberUpdateRequestDTO.getProfileUrl());
 
                 if (memberUpdateRequestDTO.getSidoName() != null || memberUpdateRequestDTO.getGugunName() != null || memberUpdateRequestDTO.getDongName() != null) {
                     String dongCode = findDongCode(memberUpdateRequestDTO.getSidoName(), memberUpdateRequestDTO.getGugunName(), memberUpdateRequestDTO.getDongName());
@@ -488,8 +489,6 @@ public class MemberService {
                 if (image != null && !image.isEmpty()) {
                     String fileUrl = s3Service.uploadFile(image);
                     member.setProfileUrl(fileUrl);
-                } else {
-                    member.setProfileUrl(memberUpdateRequestDTO.getProfileUrl());
                 }
 
                 memberRepository.save(member);
