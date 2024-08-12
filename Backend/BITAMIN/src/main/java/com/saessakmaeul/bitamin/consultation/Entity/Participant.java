@@ -19,14 +19,14 @@ public class Participant {
     @Column
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", referencedColumnName = "id")
     private Member memberId;
 
     @Column(name = "member_nickname")
     private String memberNickname;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "consultation_id", referencedColumnName = "id")
     private Consultation consultationId;
 
