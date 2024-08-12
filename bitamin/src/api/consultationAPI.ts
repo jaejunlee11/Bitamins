@@ -104,3 +104,15 @@ export const sendChatGPTMessage = async (
     throw error
   }
 }
+
+export const leaveConsultation = async (consultationId: number) => {
+  try {
+    const response = await axiosInstance.delete(
+      `consultations/${consultationId}`
+    )
+    return response
+  } catch (error) {
+    console.error('Error Leaving Consultation', error)
+    throw error
+  }
+}
