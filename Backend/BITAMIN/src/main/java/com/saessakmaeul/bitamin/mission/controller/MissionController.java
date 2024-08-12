@@ -27,38 +27,38 @@ public class MissionController {
 
     // 데일리 미션 조회
     @GetMapping
-    public MissionResponse getMission(@RequestHeader(value = "Authorization", required = false) String tokenHeader){
+    public ApiResponse<MissionResponse> getMission(@RequestHeader(value = "Authorization", required = false) String tokenHeader){
         // ID 추출
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
         // Service 호출
-        MissionResponse missionResponse = missionService.readMission(memberId);
+        ApiResponse<MissionResponse> missionResponse = missionService.readMission(memberId);
         return missionResponse;
     }
 
     // 미션 교체
     @GetMapping("/substitute")
-    public MissionResponse getMissionSubstitute(@RequestParam("missionId") Long missionId){
+    public ApiResponse<MissionResponse> getMissionSubstitute(@RequestParam("missionId") Long missionId){
         // Service 호출
-        MissionResponse missionResponse = missionService.changeMission(missionId);
+        ApiResponse<MissionResponse> missionResponse = missionService.changeMission(missionId);
         return missionResponse;
     }
 
     // 완료한 미션 조회 기능
     @GetMapping("/completed")
-    public CompletedMemberMissionResponse getMissionCompleted(@RequestHeader(value = "Authorization", required = false) String tokenHeader
+    public ApiResponse<CompletedMemberMissionResponse> getMissionCompleted(@RequestHeader(value = "Authorization", required = false) String tokenHeader
                                                , @RequestParam("date") String date){
         // ID 추출
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
         // Service 호출
-        CompletedMemberMissionResponse completedMemberMissionResponse = memberMissionService.completedMission(memberId, date);
+        ApiResponse<CompletedMemberMissionResponse> completedMemberMissionResponse = memberMissionService.completedMission(memberId, date);
         return completedMemberMissionResponse;
     }
 
     // 미션 리뷰 등록 기능
     @PostMapping
-    public MemberMissionResponse postMission(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+    public ApiResponse<MemberMissionResponse> postMission(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                              @RequestPart("memberMissionRequest") MemberMissionRequest memberMissionRequest,
                                              @RequestPart("missionImage") MultipartFile missionImage) throws IOException {
         // ID 추출
@@ -68,32 +68,32 @@ public class MissionController {
         memberMissionRequest.setMissionImage(missionImage);
 
         // Service 호출
-        MemberMissionResponse memberMissionResponse = memberMissionService.createMemberMission(memberId, memberMissionRequest);
+        ApiResponse<MemberMissionResponse> memberMissionResponse = memberMissionService.createMemberMission(memberId, memberMissionRequest);
         return memberMissionResponse;
     }
 
     // 반려 식물 경험치 조회 기능
     @GetMapping("/plant")
-    public MemberExperienceResponse getExperience(@RequestHeader(value = "Authorization", required = false) String tokenHeader){
+    public ApiResponse<MemberExperienceResponse> getExperience(@RequestHeader(value = "Authorization", required = false) String tokenHeader){
         // ID 추출
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
         // Service 호출
-        MemberExperienceResponse memberExperienceResponse = experienceService.readExperience(memberId);
+        ApiResponse<MemberExperienceResponse> memberExperienceResponse = experienceService.readExperience(memberId);
         return memberExperienceResponse;
     }
 
     // 오늘의 문구 조회 기능
     @GetMapping("/phrases")
-    public PhraseResponse getPhrase(){
+    public ApiResponse<PhraseResponse> getPhrase(){
         // Service 호출
-        PhraseResponse phraseResponse = phraseService.readPhrase();
+        ApiResponse<PhraseResponse> phraseResponse = phraseService.readPhrase();
         return phraseResponse;
     }
 
     // 오늘의 녹음 등록 기능
     @PostMapping("/phrases")
-    public MemberPhraseResponse postPhrase(@RequestHeader(value = "Authorization", required = false) String tokenHeader
+    public ApiResponse<MemberPhraseResponse> postPhrase(@RequestHeader(value = "Authorization", required = false) String tokenHeader
                                     , @RequestPart("memberPhraseRequest") MemberPhraseRequest memberPhraseRequest
                                     , @RequestPart("phraseRecord") MultipartFile phraseRecord) throws IOException {
         // ID 추출
@@ -103,31 +103,31 @@ public class MissionController {
         memberPhraseRequest.setPhraseRecord(phraseRecord);
 
         // Service 호출
-        MemberPhraseResponse memberPhraseResponse = memberPhraseService.createMemberPhrase(memberId, memberPhraseRequest);
+        ApiResponse<MemberPhraseResponse> memberPhraseResponse = memberPhraseService.createMemberPhrase(memberId, memberPhraseRequest);
         return memberPhraseResponse;
     }
 
     // 오늘의 문구 녹음 조회 기능
     @GetMapping("/phrases/recorded")
-    public SavedMemberPhraseResponse getSavedMemberPhrase(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+    public ApiResponse<SavedMemberPhraseResponse> getSavedMemberPhrase(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                                           @RequestParam("date") String date){
         // ID 추출
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
         // Service 호출
-        SavedMemberPhraseResponse savedMemberPhrasesResponse = memberPhraseService.readSavedMemberPhrase(memberId, date);
+        ApiResponse<SavedMemberPhraseResponse> savedMemberPhrasesResponse = memberPhraseService.readSavedMemberPhrase(memberId, date);
         return savedMemberPhrasesResponse;
     }
 
     // 이번 달 진행한 미션과 녹음 리스트 조회
     @GetMapping("/month")
-    public List<MonthMissionAndPhraseResponse> getMonthMissionAndPhrase(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+    public ApiResponse<List<MonthMissionAndPhraseResponse>> getMonthMissionAndPhrase(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                                                         @RequestParam String date){
         // ID 추출
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
         // Service 호출
-        List<MonthMissionAndPhraseResponse> monthMissionAndPhraseResponses = monthActivityService.getActivitiesForMonth(memberId, date);
+        ApiResponse<List<MonthMissionAndPhraseResponse>> monthMissionAndPhraseResponses = monthActivityService.getActivitiesForMonth(memberId, date);
         return monthMissionAndPhraseResponses;
     }
 
