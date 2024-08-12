@@ -30,6 +30,7 @@ import MissionForm from '@/stories/pages/mission/MissionForm.tsx'
 import CompleteMission from '@/stories/pages/mission/CompleteMission.tsx'
 import CalendarCompleteMission from '@/stories/pages/mission/CalendarCompleteMission.tsx'
 import MyPlant from '@/stories/pages/mission/MyPlant.tsx'
+import ModalExampleUsage from '@/stories/organisms/ModalExampleUsage'
 
 const getCurrentDate = (): string => {
   const today = new Date()
@@ -46,6 +47,7 @@ const AppRouter: React.FC = () => {
       <Route path="" element={<LandingPage />} />
       <Route path="/component" element={<ComponentPage />} />
       <Route path="/home" element={<MainPage />} />
+      <Route path="/modal" element={<ModalExampleUsage />} />
 
       {/* 인증 반드시 필요한 페이지 */}
       <Route element={<PrivateRoute authentication={true} />}>

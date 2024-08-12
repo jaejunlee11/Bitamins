@@ -174,7 +174,7 @@ const MainPage: React.FC = () => {
   return (
     <>
       <HeaderAfterLogin username="{username}" />
-      <ModalExample />
+      {/* <ModalExample /> */}
       <div className={styles.div}>
         {/* <div className={styles.navbar}>
           <div className={styles.bitamin}>BItAMin</div>
