@@ -60,6 +60,8 @@ public class ConsultationController {
     @PostMapping("/participants")
     public ResponseEntity<?> joinRoom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                       @RequestBody JoinRoomRequest joinRoomRequest) throws OpenViduJavaClientException, OpenViduHttpException {
+        openVidu.fetch();
+
         Map<String,Object> params = new HashMap<>();
 
 //        // 상담 시작 시간이 지났는지 아닌지 확인
@@ -67,11 +69,11 @@ public class ConsultationController {
 
         // 입장 가능한 세션인지 확인
         Session session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
-        System.out.println("첫번째 안됨");
-        if (session == null) {
-            session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
-            System.out.println("두번째 생성");
-        }
+//        System.out.println("첫번째 안됨");
+//        if (session == null) {
+//            session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
+//            System.out.println("두번째 생성");
+//        }
         
         if(session == null) return ResponseEntity.status(404).body("유효하지 않은 세션입니다.");
         
@@ -101,6 +103,8 @@ public class ConsultationController {
     @PostMapping("/random-participants")
     public ResponseEntity<?> joinRandom(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                         @RequestBody JoinRandomRequest joinRandomRequest) throws OpenViduJavaClientException, OpenViduHttpException{
+        openVidu.fetch();
+
         Map<String,Object> params = new HashMap<>();
 
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
