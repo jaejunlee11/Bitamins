@@ -488,9 +488,9 @@ public class MemberService {
                 if (image != null && !image.isEmpty()) {
                     String fileUrl = s3Service.uploadFile(image);
                     member.setProfileUrl(fileUrl);
-                } else if (memberUpdateRequestDTO.getProfileUrl() != "null") {
+                } else if (memberUpdateRequestDTO.getProfileUrl().equals("null")) {
                     member.setProfileUrl(memberUpdateRequestDTO.getProfileUrl());
-                } else if (memberUpdateRequestDTO.getProfileUrl() == "null") {
+                } else if (memberUpdateRequestDTO.getProfileUrl().equals("null")) {
                     member.setProfileUrl("null");
                 }
 
