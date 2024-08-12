@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { fetchUserInfo } from '@/api/userAPI'
 
 declare global {
   interface Window {
@@ -13,29 +12,36 @@ interface Marker {
     lng: number
   }
   content: string
+  label: string
 }
+
 interface MapBoxProps {
   lat: number
   lng: number
 }
 
 const MapBox: React.FC<MapBoxProps> = ({ lat, lng }) => {
-  const [info, setInfo] = useState<Marker | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [markers, setMarkers] = useState<Marker[]>([])
   const [places, setPlaces] = useState<any[]>([])
   const mapRef = useRef<any>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
+  const markerRefs = useRef<any[]>([]) // 마커 참조 저장
+  const [savedCenter] = useState({ lat, lng }) // 초기 중심
+  const [savedLevel] = useState<number>(5) // 초기 확대/축소 레벨
 
-  // 유저 좌표
-  const defaultCenter = { lat, lng }
-  const defaultLevel = 5 // 기본 확대/축소 레벨
+  const defaultLevel = 5
 
-  useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return
+  const getLabelFromIndex = (index: number): string => {
+    return String.fromCharCode(65 + index)
+  }
+
+  const initializeMap = () => {
+    if (!mapContainerRef.current) return
 
     const options = {
-      center: new window.kakao.maps.LatLng(lat, lng),
-      level: defaultLevel,
+      center: new window.kakao.maps.LatLng(savedCenter.lat, savedCenter.lng),
+      level: savedLevel,
     }
 
     mapRef.current = new window.kakao.maps.Map(mapContainerRef.current, options)
@@ -55,19 +61,14 @@ const MapBox: React.FC<MapBoxProps> = ({ lat, lng }) => {
     const ps = new window.kakao.maps.services.Places()
 
     const searchOptions = {
-      location: new window.kakao.maps.LatLng(
-        defaultCenter.lat,
-        defaultCenter.lng
-      ),
-      radius: 10000, // 반경 10km 내 검색
+      location: new window.kakao.maps.LatLng(savedCenter.lat, savedCenter.lng),
+      radius: 10000,
     }
 
-    // 키워드 검색
     ps.keywordSearch(
       '정신건강',
       (data: any, status: any, _pagination: any) => {
         if (status === window.kakao.maps.services.Status.OK) {
-          // console.log('Search Data:', data) // 검색 데이터를 로그로 출력합니다.
           const bounds = new window.kakao.maps.LatLngBounds()
           const newMarkers: Marker[] = []
           const newPlaces: any[] = []
@@ -78,34 +79,45 @@ const MapBox: React.FC<MapBoxProps> = ({ lat, lng }) => {
               parseFloat(data[i].x)
             )
 
+            const label = getLabelFromIndex(i)
+
             newMarkers.push({
               position: {
                 lat: parseFloat(data[i].y),
                 lng: parseFloat(data[i].x),
               },
               content: data[i].place_name,
+              label: label,
             })
 
-            newPlaces.push(data[i])
+            newPlaces.push({ ...data[i], label })
             bounds.extend(latLng)
           }
           setMarkers(newMarkers)
           setPlaces(newPlaces)
           mapRef.current.setBounds(bounds)
 
-          newMarkers.forEach((marker) => {
+          newMarkers.forEach((marker, index) => {
             const markerPosition = new window.kakao.maps.LatLng(
               marker.position.lat,
               marker.position.lng
             )
             const kakaoMarker = new window.kakao.maps.Marker({
               position: markerPosition,
+              title: marker.label,
             })
 
             kakaoMarker.setMap(mapRef.current)
+            markerRefs.current.push(kakaoMarker) // 마커 참조 저장
+
+            const customOverlay = new window.kakao.maps.CustomOverlay({
+              position: markerPosition,
+              content: `<div style="padding:5px;background-color:white;border:1px solid black;border-radius:3px;">${marker.label}</div>`,
+            })
+            customOverlay.setMap(mapRef.current)
 
             window.kakao.maps.event.addListener(kakaoMarker, 'click', () => {
-              setInfo(marker)
+              setSelectedIndex(index)
             })
           })
         } else {
@@ -114,41 +126,29 @@ const MapBox: React.FC<MapBoxProps> = ({ lat, lng }) => {
       },
       searchOptions
     )
+  }
+
+  useEffect(() => {
+    initializeMap()
   }, [])
 
   const handleCenter = () => {
     if (mapRef.current) {
       mapRef.current.setCenter(
-        new window.kakao.maps.LatLng(defaultCenter.lat, defaultCenter.lng)
+        new window.kakao.maps.LatLng(savedCenter.lat, savedCenter.lng)
       )
-      mapRef.current.setLevel(defaultLevel) // 확대/축소 레벨을 기본값으로 설정
+      mapRef.current.setLevel(savedLevel)
+      initializeMap() // 초기화 시 마커와 검색 결과를 다시 로드
     }
   }
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', paddingBottom: '50px' }}>
       <div
         id="map"
         style={{ width: '100%', height: '500px' }}
         ref={mapContainerRef}
       />
-      {info && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '50px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 10,
-            backgroundColor: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          }}
-        >
-          <div>{info.content}</div>
-        </div>
-      )}
       <button
         onClick={handleCenter}
         style={{
@@ -167,31 +167,36 @@ const MapBox: React.FC<MapBoxProps> = ({ lat, lng }) => {
         내 동네로 돌아가기
       </button>
       <div style={{ marginTop: '20px' }}>
-        <h2>검색된 병원 목록</h2>
-        <ul>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
           {places.map((place, index) => (
-            <li key={index}>
+            <div
+              key={index}
+              style={{
+                flex: '0 1 calc(50% - 20px)',
+                backgroundColor: '#fff',
+                padding: '10px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                color: selectedIndex === index ? '#ff713c' : 'black',
+              }}
+            >
               <strong>
                 <a
                   href={place.place_url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  style={{ color: 'inherit', textDecoration: 'none' }}
                 >
-                  {place.place_name}
+                  {place.label}. {place.place_name}
                 </a>
               </strong>
               <br />
               {place.address_name}
               <br />
               {place.phone ? `전화번호: ${place.phone}` : '전화번호 정보 없음'}
-              <br />
-              {/* 카카오 Q&A에는 제공X라고 하긴 했는데 github 찾아보고 가져올 수 있으면 하겠음 */}
-              {/* {place.opening_hours
-                ? `영업시간: ${place.opening_hours}`
-                : '영업시간 정보 없음'} */}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   )

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '@/api/axiosInstance'
 import styles from 'styles/account/SurveyPage.module.css'
+import HeaderAfterLogin from '@/stories/organisms/common/HeaderAfterLogin'
+import Footer from '@/stories/organisms/common/Footer'
 
 const questions = [
   '평소에는 아무렇지도 않던 일들이 괴롭고 귀찮게 느껴졌다.',
@@ -31,6 +33,7 @@ const SurveyPage: React.FC = () => {
   const [canTakeSurvey, setCanTakeSurvey] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(true)
   const navigate = useNavigate()
+  const username = 'User Name'
 
   useEffect(() => {
     const checkSurveyEligibility = async () => {
@@ -110,8 +113,8 @@ const SurveyPage: React.FC = () => {
 
   return (
     <>
+      <HeaderAfterLogin username={username} />
       <div className={styles.div}>
-        <img className={styles.child} alt="" src="Rectangle 4014.svg" />
         <div className={styles.item} />
         <div className={styles.inner} />
         <div className={styles.groupDiv}>
@@ -130,39 +133,41 @@ const SurveyPage: React.FC = () => {
                 <div className={styles.frameParent}>
                   {questions.map((question, index) => (
                     <div key={index} className={styles.questionList}>
-                      <div className={styles.div1}>
-                        <div className={styles.wrapper}>
-                          <div className={styles.div2}>{index + 1}</div>
+                      <div className={styles.questionBox}>
+                        <div className={styles.div1}>
+                          <div className={styles.wrapper}>
+                            <div className={styles.div2}>{index + 1}</div>
+                          </div>
+                          <div className={styles.container}>
+                            <div className={styles.div3}>{question}</div>
+                          </div>
                         </div>
-                        <div className={styles.container}>
-                          <div className={styles.div3}>{question}</div>
+                        <div className={styles.group}>
+                          <button
+                            className={`${styles.div5} ${scores[index] === 0 ? styles.selected : ''}`}
+                            onClick={() => handleScoreChange(index, 0)}
+                          >
+                            극히 드물게 (0점)
+                          </button>
+                          <button
+                            className={`${styles.div7} ${scores[index] === 1 ? styles.selected : ''}`}
+                            onClick={() => handleScoreChange(index, 1)}
+                          >
+                            가끔 (1점)
+                          </button>
+                          <button
+                            className={`${styles.div9} ${scores[index] === 2 ? styles.selected : ''}`}
+                            onClick={() => handleScoreChange(index, 2)}
+                          >
+                            자주 (2점)
+                          </button>
+                          <button
+                            className={`${styles.div5} ${scores[index] === 3 ? styles.selected : ''}`}
+                            onClick={() => handleScoreChange(index, 3)}
+                          >
+                            대부분 (3점)
+                          </button>
                         </div>
-                      </div>
-                      <div className={styles.group}>
-                        <button
-                          className={`${styles.div5} ${scores[index] === 0 ? styles.selected : ''}`}
-                          onClick={() => handleScoreChange(index, 0)}
-                        >
-                          극히 드물게 (0점)
-                        </button>
-                        <button
-                          className={`${styles.div7} ${scores[index] === 1 ? styles.selected : ''}`}
-                          onClick={() => handleScoreChange(index, 1)}
-                        >
-                          가끔 (1점)
-                        </button>
-                        <button
-                          className={`${styles.div9} ${scores[index] === 2 ? styles.selected : ''}`}
-                          onClick={() => handleScoreChange(index, 2)}
-                        >
-                          자주 (2점)
-                        </button>
-                        <button
-                          className={`${styles.div5} ${scores[index] === 3 ? styles.selected : ''}`}
-                          onClick={() => handleScoreChange(index, 3)}
-                        >
-                          대부분 (3점)
-                        </button>
                       </div>
                     </div>
                   ))}
@@ -177,6 +182,7 @@ const SurveyPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   )
 }

@@ -1,15 +1,29 @@
-import { FunctionComponent, useCallback, useState } from 'react'
+import { FunctionComponent, useCallback, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAuthStore from '@/store/useAuthStore'
 import { useCookies } from 'react-cookie'
+import axiosInstance from '@/api/axiosInstance'
 
-const HeaderAfterLogin: FunctionComponent<{ username: string }> = ({
-  username,
-}) => {
+const HeaderAfterLogin: FunctionComponent = () => {
   const navigate = useNavigate()
   const { accessToken, refreshToken, clearAuth } = useAuthStore()
   const [, , removeCookie] = useCookies(['refreshToken'])
   const [dropdownVisible, setDropdownVisible] = useState(false)
+  const [username, setUsername] = useState('') // username 상태 추가
+
+  // 유저 이름 불러오기
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const response = await axiosInstance.get('/user/me') // 유저 정보를 불러오는 API 엔드포인트를 호출합니다.
+        setUsername(response.data.name) // 가져온 유저 이름을 상태에 설정합니다.
+      } catch (error) {
+        console.error('Failed to fetch username:', error)
+      }
+    }
+
+    fetchUsername()
+  }, [])
 
   const onBItAMinTextClick = useCallback(() => {
     navigate('/home')
