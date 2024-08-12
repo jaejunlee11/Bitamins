@@ -480,6 +480,7 @@ public class MemberService {
                 member.setNickname(memberUpdateRequestDTO.getNickname());
                 member.setBirthday(memberUpdateRequestDTO.getBirthday());
                 member.setProfileUrl(memberUpdateRequestDTO.getProfileUrl());
+                System.out.println(member.getProfileUrl());
 
                 if (memberUpdateRequestDTO.getSidoName() != null || memberUpdateRequestDTO.getGugunName() != null || memberUpdateRequestDTO.getDongName() != null) {
                     String dongCode = findDongCode(memberUpdateRequestDTO.getSidoName(), memberUpdateRequestDTO.getGugunName(), memberUpdateRequestDTO.getDongName());
