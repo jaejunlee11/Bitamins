@@ -69,11 +69,6 @@ public class ConsultationController {
 
         // 입장 가능한 세션인지 확인
         Session session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
-//        System.out.println("첫번째 안됨");
-//        if (session == null) {
-//            session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
-//            System.out.println("두번째 생성");
-//        }
         
         if(session == null) return ResponseEntity.status(404).body("유효하지 않은 세션입니다.");
         
