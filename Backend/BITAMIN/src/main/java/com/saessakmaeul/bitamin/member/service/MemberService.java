@@ -114,6 +114,8 @@ public class MemberService {
             if (image != null && !image.isEmpty()) {
                 String fileUrl = s3Service.uploadFile(image);
                 member.setProfileUrl(fileUrl);
+            } else if (image == null) {
+                member.setProfileUrl("null");
             }
 
             member = memberRepository.save(member);
@@ -126,8 +128,6 @@ public class MemberService {
             throw new RuntimeException("입력 정보 부족 : " + e.getMessage(), e);
         }
     }
-
-
 
 
     public String findDongCode(String sidoName, String gugunName, String dongName) {
@@ -183,7 +183,6 @@ public class MemberService {
     }
 
 
-
     @Transactional
     public boolean checkPassword(Long userId, String password) {
         try {
@@ -209,7 +208,6 @@ public class MemberService {
             throw new RuntimeException(e);
         }
     }
-
 
 
     @Transactional
@@ -249,7 +247,7 @@ public class MemberService {
         String naverURI = UriComponentsBuilder.fromHttpUrl(tokenUrl)
                 .queryParam("grant_type", "authorization_code")
                 .queryParam("client_id", naverApiId)
-                .queryParam("client_secret",naverApiPassword)
+                .queryParam("client_secret", naverApiPassword)
                 .queryParam("code", code)
                 .build()
                 .encode()
@@ -289,10 +287,10 @@ public class MemberService {
         String email = userInfoJsonNode.get("response").get("email").asText();
 
         // 저장된 유저가 없다면 Exception 발생
-        memberRepository.findByEmail(email).orElseThrow(()->new Exception("N:등록된 유저가 없습니다./"+email+"/"+id));
+        memberRepository.findByEmail(email).orElseThrow(() -> new Exception("N:등록된 유저가 없습니다./" + email + "/" + id));
 
         // 저장된 유저가 있다면 로그인을 위해 request body 생성
-        return new LoginRequest(email,id);
+        return new LoginRequest(email, id);
     }
 
     //구글 로그인
@@ -305,7 +303,7 @@ public class MemberService {
 
     // 구글 엑세스 토큰 획득
     private String getgoogletoken(String code) throws JsonProcessingException {
-                String redirectUri = "https://i11b105.p.ssafy.io/api/auth/google"; // 배포
+        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/google"; // 배포
 //        String redirectUri = "http://localhost:8080/api/auth/google"; // 테스트
         String tokenUrl = "https://oauth2.googleapis.com/token";
 
@@ -316,7 +314,7 @@ public class MemberService {
         MultiValueMap<String, String> tokenBody = new LinkedMultiValueMap<>();
         tokenBody.add("grantType", "authorization_code");
         tokenBody.add("clientId", googleApiKey);
-        tokenBody.add("clientSecret",googlePassword);
+        tokenBody.add("clientSecret", googlePassword);
         tokenBody.add("redirectUri", redirectUri);
         tokenBody.add("code", code);
 
@@ -353,10 +351,10 @@ public class MemberService {
         String email = userInfoJsonNode.get("email").asText();
 
         // 저장된 유저가 없다면 Exception 발생
-        memberRepository.findByEmail(email).orElseThrow(()->new Exception("G:등록된 유저가 없습니다./"+email+"/"+id));
+        memberRepository.findByEmail(email).orElseThrow(() -> new Exception("G:등록된 유저가 없습니다./" + email + "/" + id));
 
         // 저장된 유저가 있다면 로그인을 위해 request body 생성
-        return new LoginRequest(email,id);
+        return new LoginRequest(email, id);
     }
 
     public LoginRequest kakaoLogin(String code) throws Exception {
@@ -368,7 +366,7 @@ public class MemberService {
 
     // 카카오톡 엑세스 토큰 획득
     private String getKakaotoken(String code) throws JsonProcessingException {
-                String redirectUri = "https://i11b105.p.ssafy.io/api/auth/kakao"; // 배포
+        String redirectUri = "https://i11b105.p.ssafy.io/api/auth/kakao"; // 배포
 //        String redirectUri = "http://localhost:8080/api/auth/kakao"; // 테스트
         String tokenUrl = "https://kauth.kakao.com/oauth/token";
 
@@ -417,10 +415,10 @@ public class MemberService {
         System.out.println(passwordEncoder.encode(id));
 
         // 저장된 유저가 없다면 Exception 발생
-        memberRepository.findByEmail(email).orElseThrow(()->new Exception("K:등록된 유저가 없습니다./"+email+"/"+id));
+        memberRepository.findByEmail(email).orElseThrow(() -> new Exception("K:등록된 유저가 없습니다./" + email + "/" + id));
 
         // 저장된 유저가 있다면 로그인을 위해 request body 생성
-        return new LoginRequest(email,id);
+        return new LoginRequest(email, id);
     }
 
 
@@ -490,8 +488,10 @@ public class MemberService {
                 if (image != null && !image.isEmpty()) {
                     String fileUrl = s3Service.uploadFile(image);
                     member.setProfileUrl(fileUrl);
-                } else {
-                    member.setProfileUrl(null);
+                } else if (memberUpdateRequestDTO.getProfileUrl() != "null") {
+                    member.setProfileUrl(memberUpdateRequestDTO.getProfileUrl());
+                } else if (memberUpdateRequestDTO.getProfileUrl() == "null") {
+                    member.setProfileUrl("null");
                 }
 
                 memberRepository.save(member);
@@ -507,7 +507,6 @@ public class MemberService {
             throw new RuntimeException("회원 정보 수정 중 오류 발생", e);
         }
     }
-
 
 
     @Transactional
@@ -558,7 +557,6 @@ public class MemberService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
-
 
 
     public AuthResponse refreshToken(String cookieRefreshToken) {
@@ -631,7 +629,6 @@ public class MemberService {
             throw new RuntimeException("자가진단 결과 저장 중 오류 발생", e);
         }
     }
-
 
 
     public List<HealthReportResponse> getHealthReportsByUserId(Long userId) {
