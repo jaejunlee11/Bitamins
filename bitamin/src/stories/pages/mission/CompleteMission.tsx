@@ -66,7 +66,6 @@ const CompleteMission: React.FC<CompleteMissionProps> = ({ selectedDate }) => {
   }
 
   useEffect(() => {
-    setRecord(null) // 상태 초기화
     getRecord(selectedDate)
   }, [selectedDate])
 
