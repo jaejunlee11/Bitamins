@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,7 +21,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -31,6 +35,9 @@ public class MemberController {
     private final DongCodeRepository dongCodeRepository;
     private final JwtUtil jwtUtil;
 
+    @Value("${KAKAO_API_KEY}")
+    private String apiKey;
+
     public MemberController(@Lazy MemberService memberService, DongCodeRepository dongCodeRepository, JwtUtil jwtUtil) {
         this.memberService = memberService;
         this.dongCodeRepository = dongCodeRepository;
@@ -38,9 +45,9 @@ public class MemberController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<MemberListResponseDTO>> getMemberList() {
+    public ResponseEntity<List<MemberListResponse>> getMemberList() {
         try {
-            List<MemberListResponseDTO> members = memberService.getMemberList();
+            List<MemberListResponse> members = memberService.getMemberList();
             return ResponseEntity.ok(members);
         } catch (Exception e) {
             logger.error("회원 목록 조회 오류: ", e);
@@ -49,7 +56,7 @@ public class MemberController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestPart("memberDTO") MemberRequestDTO memberDTO, @RequestPart(value = "image", required = false) MultipartFile image) {
+    public ResponseEntity<?> register(@RequestPart("memberDTO") MemberRequest memberDTO, @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
             Long memberId = memberService.register(memberDTO, image);
             return ResponseEntity.ok(memberId);
@@ -71,7 +78,7 @@ public class MemberController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
             }
             Long userId = jwtUtil.extractUserId(token);
-            MemberResponseDTO member = memberService.getMemberById(userId);
+            MemberResponse member = memberService.getMemberById(userId);
             return member != null ? ResponseEntity.ok(member) : ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원을 찾을 수 없습니다.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
@@ -83,7 +90,7 @@ public class MemberController {
 
     @PutMapping("/update-member")
     public ResponseEntity<?> updateMemberByToken(HttpServletRequest request,
-                                                 @RequestPart("memberUpdateRequestDTO") MemberUpdateRequestDTO memberUpdateRequestDTO,
+                                                 @RequestPart("memberUpdateRequestDTO") MemberUpdateRequest memberUpdateRequestDTO,
                                                  @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
             String token = getTokenFromRequest(request);
@@ -176,15 +183,33 @@ public class MemberController {
         }
     }
 
+    //카카오 로그아웃
+    @GetMapping("/kakao/logout")
+    public ResponseEntity<?> logout()
+    {
+        try {
+            String redirectUrl = "https://kauth.kakao.com/oauth/logout?client_id="+apiKey+"&logout_redirect_uri=https://i11b105.p.ssafy.io";
+            URI redirectUriWithParams = new URI(redirectUrl);
+            // 리다이렉트
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setLocation(redirectUriWithParams);
+            return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("로그아웃 실패");
+        }
+    }
+
     @PostMapping("/self-assessment")
-    public ResponseEntity<?> createHealthReport(@RequestBody HealthReportRequestDTO healthReportRequestDTO, HttpServletRequest request) {
+    public ResponseEntity<?> createHealthReport(@RequestBody HealthReportRequest healthReportRequestDTO, HttpServletRequest request) {
         try {
             String token = getTokenFromRequest(request);
             if (token == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
             }
             Long userId = jwtUtil.extractUserId(token);
-            HealthReportResponseDTO dto = memberService.saveHealthReport(healthReportRequestDTO, userId);
+            HealthReportResponse dto = memberService.saveHealthReport(healthReportRequestDTO, userId);
             return ResponseEntity.ok(dto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
@@ -202,7 +227,7 @@ public class MemberController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 없습니다.");
             }
             Long userId = jwtUtil.extractUserId(token);
-            List<HealthReportResponseDTO> healthReports = memberService.getHealthReportsByUserId(userId);
+            List<HealthReportResponse> healthReports = memberService.getHealthReportsByUserId(userId);
             return ResponseEntity.ok(healthReports);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청: " + e.getMessage());
@@ -278,4 +303,17 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("닉네임 중복 확인 중 오류 발생: " + e.getMessage());
         }
     }
+
+    // 자가검진 기록 일주일간 기록 여부 검색
+    @GetMapping("/self-assessment/check")
+    public ResponseEntity<?> getSelfAssessmentCheck(HttpServletRequest request) {
+        String token = getTokenFromRequest(request);
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Long userId = jwtUtil.extractUserId(token);
+        Map<String, Object> response = memberService.getHealthReportStatsForMember(userId);
+        return ResponseEntity.ok(response);
+    }
+
 }

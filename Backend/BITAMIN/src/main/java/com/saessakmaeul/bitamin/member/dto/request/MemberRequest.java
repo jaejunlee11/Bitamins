@@ -1,6 +1,5 @@
-package com.saessakmaeul.bitamin.member.dto.response;
+package com.saessakmaeul.bitamin.member.dto.request;
 
-import com.saessakmaeul.bitamin.member.entity.Role;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,15 +10,16 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
-public class MemberListResponseDTO {
-    private Long id;
+public class MemberRequest {
     private String email;
     private String password;
     private String name;
     private String nickname;
+    private String sidoName;
+    private String gugunName;
+    private String dongName;
     private String dongCode;
     private LocalDate birthday;
-    private String profileUrl;
-    private Role role;
+    private MultipartFile profileImage;
 
 }
