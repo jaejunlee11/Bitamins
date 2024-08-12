@@ -111,9 +111,9 @@ public class JwtUtil {
         }
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
+//    public String extractUsername(String token) {
+//        return extractClaim(token, Claims::getSubject);
+//    }
 
     public Long extractUserId(String token) {
         return extractClaim(token, claims -> claims.get("id", Long.class));

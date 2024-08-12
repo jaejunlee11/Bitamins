@@ -1,8 +1,11 @@
 package com.saessakmaeul.bitamin.member.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saessakmaeul.bitamin.exception.ApplicationException;
 import com.saessakmaeul.bitamin.member.dto.request.*;
-import com.saessakmaeul.bitamin.member.dto.request.HealthReportRequestDTO;
+import com.saessakmaeul.bitamin.member.dto.request.HealthReportRequest;
 import com.saessakmaeul.bitamin.member.dto.response.*;
 import com.saessakmaeul.bitamin.member.entity.*;
 import com.saessakmaeul.bitamin.member.repository.DongCodeRepository;
@@ -12,6 +15,11 @@ import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
 import com.saessakmaeul.bitamin.service.S3Service;
 import com.saessakmaeul.bitamin.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +28,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -28,9 +40,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,9 +56,50 @@ public class MemberService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
+    @Value("${KAKAO_API_KEY}")
+    private String apiKey;
+
+    @Value("${GOOGLE_API_KEY}")
+    private String googleApiKey;
+
+    @Value("${GOOGLE_PASSWORD}")
+    private String googlePassword;
+
+    @Value("${NAVER_ID}")
+    private String naverApiId;
+
+    @Value("${NAVER_PASSWORD}")
+    private String naverApiPassword;
+
     @Transactional
-    public Long register(MemberRequestDTO memberDTO, MultipartFile image) throws IOException {
+    public Long register(MemberRequest memberDTO, MultipartFile image) throws IOException {
         try {
+            // 필수 값 체크
+            if (memberDTO.getEmail() == null || memberDTO.getEmail().isEmpty()) {
+                throw new IllegalArgumentException("이메일은 필수 입력 항목입니다.");
+            }
+            if (memberRepository.countByEmail(memberDTO.getEmail()) > 0) {
+                throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            }
+            if (memberDTO.getPassword() == null || memberDTO.getPassword().isEmpty()) {
+                throw new IllegalArgumentException("비밀번호는 필수 입력 항목입니다.");
+            }
+            if (memberDTO.getName() == null || memberDTO.getName().isEmpty()) {
+                throw new IllegalArgumentException("이름은 필수 입력 항목입니다.");
+            }
+            if (memberDTO.getNickname() == null || memberDTO.getNickname().isEmpty()) {
+                throw new IllegalArgumentException("닉네임은 필수 입력 항목입니다.");
+            }
+            if (memberRepository.countByNickname(memberDTO.getNickname()) > 0) {
+                throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+            }
+            if (memberDTO.getSidoName() == null || memberDTO.getSidoName().isEmpty()) {
+                throw new IllegalArgumentException("시,도 정보는 필수 입력 항목입니다.");
+            }
+            if (memberDTO.getBirthday() == null) {
+                throw new IllegalArgumentException("생일은 필수 입력 항목입니다.");
+            }
+
             String dongCode = findDongCode(memberDTO.getSidoName(), memberDTO.getGugunName(), memberDTO.getDongName());
             Member member = Member.builder()
                     .email(memberDTO.getEmail())
@@ -66,16 +117,17 @@ public class MemberService {
             }
 
             member = memberRepository.save(member);
-
             return member.getId();
         } catch (IOException e) {
             throw new IOException(e);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("잘못된 입력 값 : " + e, e);
+            throw new IllegalArgumentException("잘못된 입력 값 : " + e.getMessage(), e);
         } catch (Exception e) {
-            throw new RuntimeException("입력 정보 부족 : " + e, e);
+            throw new RuntimeException("입력 정보 부족 : " + e.getMessage(), e);
         }
     }
+
+
 
 
     public String findDongCode(String sidoName, String gugunName, String dongName) {
@@ -83,9 +135,9 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 주소에 대한 동 코드를 찾을 수 없습니다."));
     }
 
-    public List<MemberListResponseDTO> getMemberList() {
+    public List<MemberListResponse> getMemberList() {
         return memberRepository.findAll().stream()
-                .map(member -> MemberListResponseDTO.builder()
+                .map(member -> MemberListResponse.builder()
                         .id(member.getId())
                         .name(member.getName())
                         .email(member.getEmail())
@@ -102,6 +154,14 @@ public class MemberService {
     @Transactional
     public boolean changePassword(Long userId, ChangePasswordRequest changePasswordRequest) {
         try {
+            // 필수 값 체크
+            if (changePasswordRequest.getCurrentPassword() == null || changePasswordRequest.getCurrentPassword().isEmpty()) {
+                throw new IllegalArgumentException("현재 비밀번호는 필수 입력 항목입니다.");
+            }
+            if (changePasswordRequest.getNewPassword() == null || changePasswordRequest.getNewPassword().isEmpty()) {
+                throw new IllegalArgumentException("새 비밀번호는 필수 입력 항목입니다.");
+            }
+
             Optional<Member> optionalMember = memberRepository.findById(userId);
             if (optionalMember.isPresent()) {
                 Member member = optionalMember.get();
@@ -123,9 +183,15 @@ public class MemberService {
     }
 
 
+
     @Transactional
     public boolean checkPassword(Long userId, String password) {
         try {
+            // 필수 값 체크
+            if (password == null || password.isEmpty()) {
+                throw new IllegalArgumentException("비밀번호는 필수 입력 항목입니다.");
+            }
+
             Optional<Member> optionalMember = memberRepository.findById(userId);
             if (optionalMember.isPresent()) {
                 Member member = optionalMember.get();
@@ -145,6 +211,7 @@ public class MemberService {
     }
 
 
+
     @Transactional
     public void deleteMember(Long memberId) {
         try {
@@ -161,16 +228,211 @@ public class MemberService {
         }
     }
 
+    //네이버 로그인
+    public LoginRequest naverLogin(String code) throws Exception {
+        // 엑세스 토큰 획득
+        String accessToken = getNavertoken(code);
+        // 로그인 진행
+        return getNaverLoginRequest(accessToken);
+    }
 
-    public MemberResponseDTO getMemberById(Long userId) {
+    // 네이버 엑세스 토큰 획득
+    private String getNavertoken(String code) throws JsonProcessingException {
+        String tokenUrl = "https://nid.naver.com/oauth2.0/token";
+
+        // 요청으로 엑세스 토큰 꺼내기
+        HttpHeaders tokenHeaders = new HttpHeaders();
+        tokenHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> tokenBody = new LinkedMultiValueMap<>();
+
+        String naverURI = UriComponentsBuilder.fromHttpUrl(tokenUrl)
+                .queryParam("grant_type", "authorization_code")
+                .queryParam("client_id", naverApiId)
+                .queryParam("client_secret",naverApiPassword)
+                .queryParam("code", code)
+                .build()
+                .encode()
+                .toUriString();
+
+        HttpEntity<MultiValueMap<String, String>> tokenRequestEntity = new HttpEntity<>(tokenBody, tokenHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> tokenResponse = restTemplate.exchange(naverURI, HttpMethod.GET, tokenRequestEntity, String.class);
+
+        // 엑세스 토큰 꺼내기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode tokenJsonNode = objectMapper.readTree(tokenResponse.getBody());
+        return tokenJsonNode.get("access_token").asText();
+    }
+
+    private LoginRequest getNaverLoginRequest(String accessToken) throws Exception {
+        String userInfoUrl = "https://openapi.naver.com/v1/nid/me";
+
+        // 엑세스 토큰으로 검색
+        HttpHeaders userInfoHeaders = new HttpHeaders();
+        userInfoHeaders.add("Authorization", "Bearer " + accessToken);
+        userInfoHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> userInfoBody = new LinkedMultiValueMap<>();
+
+        HttpEntity<MultiValueMap<String, String>> userInfoRequestEntity = new HttpEntity<>(userInfoBody, userInfoHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> userInfoResponse = restTemplate.exchange(userInfoUrl, HttpMethod.GET, userInfoRequestEntity, String.class);
+
+        // 결과값 꺼내오기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode userInfoJsonNode = objectMapper.readTree(userInfoResponse.getBody());
+        System.out.println(userInfoJsonNode);
+        String id = userInfoJsonNode.get("response").get("id").asText();
+        String email = userInfoJsonNode.get("response").get("email").asText();
+
+        // 저장된 유저가 없다면 Exception 발생
+        memberRepository.findByEmail(email).orElseThrow(()->new Exception("N:등록된 유저가 없습니다./"+email+"/"+id));
+
+        // 저장된 유저가 있다면 로그인을 위해 request body 생성
+        return new LoginRequest(email,id);
+    }
+
+    //구글 로그인
+    public LoginRequest googleLogin(String code) throws Exception {
+        // 엑세스 토큰 획득
+        String accessToken = getgoogletoken(code);
+        // 로그인 진행
+        return getGoogleLoginRequest(accessToken);
+    }
+
+    // 구글 엑세스 토큰 획득
+    private String getgoogletoken(String code) throws JsonProcessingException {
+                String redirectUri = "https://i11b105.p.ssafy.io/api/auth/google"; // 배포
+//        String redirectUri = "http://localhost:8080/api/auth/google"; // 테스트
+        String tokenUrl = "https://oauth2.googleapis.com/token";
+
+        // 요청으로 엑세스 토큰 꺼내기
+        HttpHeaders tokenHeaders = new HttpHeaders();
+        tokenHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> tokenBody = new LinkedMultiValueMap<>();
+        tokenBody.add("grantType", "authorization_code");
+        tokenBody.add("clientId", googleApiKey);
+        tokenBody.add("clientSecret",googlePassword);
+        tokenBody.add("redirectUri", redirectUri);
+        tokenBody.add("code", code);
+
+        HttpEntity<MultiValueMap<String, String>> tokenRequestEntity = new HttpEntity<>(tokenBody, tokenHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> tokenResponse = restTemplate.exchange(tokenUrl, HttpMethod.POST, tokenRequestEntity, String.class);
+
+        // 엑세스 토큰 꺼내기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode tokenJsonNode = objectMapper.readTree(tokenResponse.getBody());
+        return tokenJsonNode.get("id_token").asText();
+    }
+
+    private LoginRequest getGoogleLoginRequest(String accessToken) throws Exception {
+        String userInfoUrl = "https://oauth2.googleapis.com/tokeninfo";
+
+        // 엑세스 토큰으로 검색
+        HttpHeaders userInfoHeaders = new HttpHeaders();
+        userInfoHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> userInfoBody = new LinkedMultiValueMap<>();
+        userInfoBody.add("id_token", accessToken);
+
+        HttpEntity<MultiValueMap<String, String>> userInfoRequestEntity = new HttpEntity<>(userInfoBody, userInfoHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> userInfoResponse = restTemplate.exchange(userInfoUrl, HttpMethod.POST, userInfoRequestEntity, String.class);
+
+        // 결과값 꺼내오기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode userInfoJsonNode = objectMapper.readTree(userInfoResponse.getBody());
+        String id = userInfoJsonNode.get("sub").asText();
+        String email = userInfoJsonNode.get("email").asText();
+
+        // 저장된 유저가 없다면 Exception 발생
+        memberRepository.findByEmail(email).orElseThrow(()->new Exception("G:등록된 유저가 없습니다./"+email+"/"+id));
+
+        // 저장된 유저가 있다면 로그인을 위해 request body 생성
+        return new LoginRequest(email,id);
+    }
+
+    public LoginRequest kakaoLogin(String code) throws Exception {
+        // 엑세스 토큰 획득
+        String accessToken = getKakaotoken(code);
+        // 로그인 진행
+        return getLoginRequest(accessToken);
+    }
+
+    // 카카오톡 엑세스 토큰 획득
+    private String getKakaotoken(String code) throws JsonProcessingException {
+                String redirectUri = "https://i11b105.p.ssafy.io/api/auth/kakao"; // 배포
+//        String redirectUri = "http://localhost:8080/api/auth/kakao"; // 테스트
+        String tokenUrl = "https://kauth.kakao.com/oauth/token";
+
+        // 요청으로 엑세스 토큰 꺼내기
+        HttpHeaders tokenHeaders = new HttpHeaders();
+        tokenHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> tokenBody = new LinkedMultiValueMap<>();
+        tokenBody.add("grant_type", "authorization_code");
+        tokenBody.add("client_id", apiKey);
+        tokenBody.add("redirect_uri", redirectUri);
+        tokenBody.add("code", code);
+
+        HttpEntity<MultiValueMap<String, String>> tokenRequestEntity = new HttpEntity<>(tokenBody, tokenHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> tokenResponse = restTemplate.exchange(tokenUrl, HttpMethod.POST, tokenRequestEntity, String.class);
+
+        // 엑세스 토큰 꺼내기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode tokenJsonNode = objectMapper.readTree(tokenResponse.getBody());
+        return tokenJsonNode.get("access_token").asText();
+    }
+
+    private LoginRequest getLoginRequest(String accessToken) throws Exception {
+        String userInfoUrl = "https://kapi.kakao.com/v2/user/me";
+
+        // 엑세스 토큰으로 검색
+        HttpHeaders userInfoHeaders = new HttpHeaders();
+        userInfoHeaders.add("Authorization", "Bearer " + accessToken);
+        userInfoHeaders.add("Content-Type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> userInfoBody = new LinkedMultiValueMap<>();
+        userInfoBody.add("property_keys", "[\"kakao_account.profile\",\"kakao_account.email\"]");
+
+        HttpEntity<MultiValueMap<String, String>> userInfoRequestEntity = new HttpEntity<>(userInfoBody, userInfoHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> userInfoResponse = restTemplate.exchange(userInfoUrl, HttpMethod.POST, userInfoRequestEntity, String.class);
+
+        // 결과값 꺼내오기
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode userInfoJsonNode = objectMapper.readTree(userInfoResponse.getBody());
+        String id = userInfoJsonNode.get("id").asText();
+        String email = userInfoJsonNode.get("kakao_account").get("email").asText();
+        System.out.println(passwordEncoder.encode(id));
+
+        // 저장된 유저가 없다면 Exception 발생
+        memberRepository.findByEmail(email).orElseThrow(()->new Exception("K:등록된 유저가 없습니다./"+email+"/"+id));
+
+        // 저장된 유저가 있다면 로그인을 위해 request body 생성
+        return new LoginRequest(email,id);
+    }
+
+
+    public MemberResponse getMemberById(Long userId) {
         try {
             Optional<Member> optionalMember = memberRepository.findById(userId);
             if (optionalMember.isPresent()) {
                 Member member = optionalMember.get();
-                Optional<DongCodeResponseDTO> dongInformationOptional = dongCodeRepository.findNamesByDongCode(member.getDongCode());
+                Optional<DongCodeResponse> dongInformationOptional = dongCodeRepository.findNamesByDongCode(member.getDongCode());
                 if (dongInformationOptional.isPresent()) {
-                    DongCodeResponseDTO dongInformation = dongInformationOptional.get();
-                    return MemberResponseDTO.builder()
+                    DongCodeResponse dongInformation = dongInformationOptional.get();
+                    return MemberResponse.builder()
                             .email(member.getEmail())
                             .password(member.getPassword())
                             .name(member.getName())
@@ -200,8 +462,19 @@ public class MemberService {
 
 
     @Transactional
-    public int updateMember(Long userId, MemberUpdateRequestDTO memberUpdateRequestDTO, MultipartFile image) throws IOException {
+    public int updateMember(Long userId, MemberUpdateRequest memberUpdateRequestDTO, MultipartFile image) throws IOException {
         try {
+            // 필수 값 체크
+            if (memberUpdateRequestDTO.getName() == null || memberUpdateRequestDTO.getName().isEmpty()) {
+                throw new IllegalArgumentException("이름은 필수 입력 항목입니다.");
+            }
+            if (memberUpdateRequestDTO.getNickname() == null || memberUpdateRequestDTO.getNickname().isEmpty()) {
+                throw new IllegalArgumentException("닉네임은 필수 입력 항목입니다.");
+            }
+            if (memberUpdateRequestDTO.getBirthday() == null) {
+                throw new IllegalArgumentException("생일은 필수 입력 항목입니다.");
+            }
+
             Optional<Member> optionalMember = memberRepository.findById(userId);
             if (optionalMember.isPresent()) {
                 Member member = optionalMember.get();
@@ -220,6 +493,7 @@ public class MemberService {
                 } else {
                     member.setProfileUrl(null);
                 }
+
                 memberRepository.save(member);
                 return 1;
             } else {
@@ -235,9 +509,17 @@ public class MemberService {
     }
 
 
+
     @Transactional
     public AuthResponse login(LoginRequest loginRequest) {
         try {
+            if (loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty()) {
+                throw new IllegalArgumentException("이메일은 필수 입력 항목입니다.");
+            }
+            if (loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
+                throw new IllegalArgumentException("비밀번호는 필수 입력 항목입니다.");
+            }
+
             Member user = memberRepository.findByEmail(loginRequest.getEmail())
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
@@ -324,7 +606,7 @@ public class MemberService {
     }
 
     @Transactional
-    public HealthReportResponseDTO saveHealthReport(HealthReportRequestDTO healthReportRequestDTO, Long userId) {
+    public HealthReportResponse saveHealthReport(HealthReportRequest healthReportRequestDTO, Long userId) {
         try {
             HealthReport healthReport = new HealthReport();
             healthReport.setCheckupScore(healthReportRequestDTO.getCheckupScore());
@@ -336,7 +618,7 @@ public class MemberService {
 
             HealthReport savedHealthReport = healthReportRepository.save(healthReport);
 
-            HealthReportResponseDTO healthReportResponseDTO = new HealthReportResponseDTO();
+            HealthReportResponse healthReportResponseDTO = new HealthReportResponse();
             healthReportResponseDTO.setId(savedHealthReport.getId());
             healthReportResponseDTO.setCheckupScore(savedHealthReport.getCheckupScore());
             healthReportResponseDTO.setCheckupDate(savedHealthReport.getCheckupDate());
@@ -352,14 +634,14 @@ public class MemberService {
 
 
 
-    public List<HealthReportResponseDTO> getHealthReportsByUserId(Long userId) {
+    public List<HealthReportResponse> getHealthReportsByUserId(Long userId) {
         try {
             List<HealthReport> healthReports = healthReportRepository.findByMemberId(userId);
             if (healthReports.isEmpty()) {
                 throw new IllegalArgumentException("등록된 결과가 없습니다.");
             }
             return healthReports.stream().map(healthReport -> {
-                HealthReportResponseDTO dto = new HealthReportResponseDTO();
+                HealthReportResponse dto = new HealthReportResponse();
                 dto.setId(healthReport.getId());
                 dto.setCheckupScore(healthReport.getCheckupScore());
                 dto.setCheckupDate(healthReport.getCheckupDate());
@@ -396,4 +678,22 @@ public class MemberService {
             throw new RuntimeException(e);
         }
     }
+
+    public Map<String, Object> getHealthReportStatsForMember(Long userId) {
+        LocalDate nowDate = LocalDate.now();
+        LocalDate beforeDate = nowDate.minusDays(7);
+
+        List<Object[]> result = healthReportRepository.findCountAndLatestCheckupDate(userId, beforeDate, nowDate);
+        Object[] data = result.get(0);
+
+        Long count = (Long) data[0];
+        LocalDate latestCheckupDate = (LocalDate) data[1];
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("result", count > 0 ? 1 : 0);
+        response.put("latestCheckupDate", latestCheckupDate);
+
+        return response;
+    }
+
 }
