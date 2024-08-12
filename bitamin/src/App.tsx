@@ -7,7 +7,7 @@ import Footer from 'stories/organisms/common/Footer'
 
 const AppContent: React.FC = () => {
   const location = useLocation()
-  const excludeFooterPaths = ['/'] // Footer를 제외할 경로들
+  const excludeFooterPaths = ['/', '/consult'] // Footer를 제외할 경로들
 
   const isLoggedIn = false // 로그인 상태를 확인하는 로직이 필요
 
