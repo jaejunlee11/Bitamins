@@ -14,6 +14,7 @@ import {
   joinRandomRoom,
   createRoom,
   sendChatGPTMessage,
+  leaveConsultation,
 } from 'api/consultationAPI'
 
 // Consultation List 상태 관리
@@ -137,7 +138,7 @@ export const useCreateRoom = create<CreateRoomState>()(
 // 랜덤 방 참여 상태 관리
 interface joinRandomRoomState {
   type: string | null
-  consultation: JoinConsultation | null
+  joinconsultation: JoinConsultation | null
   joinRandomRoom: (type: string) => Promise<JoinConsultation>
 }
 
@@ -145,11 +146,11 @@ export const useJoinRandomRoom = create<joinRandomRoomState>()(
   persist(
     (set) => ({
       type: null,
-      consultation: null,
+      joinconsultation: null,
       joinRandomRoom: async (type: string) => {
         try {
           const response = await joinRandomRoom(type)
-          set({ consultation: response })
+          set({ joinconsultation: response })
           return response
         } catch (error) {
           console.error('Failed to join room:', error)
@@ -224,3 +225,19 @@ export const useChatStore = create<ChatState>()(
     }
   )
 )
+
+export const leaveConsultationAndReset = async (consultationId: number) => {
+  try {
+    // API 호출
+    const response = await leaveConsultation(consultationId)
+
+    // API 호출 성공 시 상태 초기화
+    const { resetConsultation } = joinConsultation.getState()
+    resetConsultation()
+
+    return response
+  } catch (error) {
+    console.error('Error Leaving Consultation and Resetting Store', error)
+    throw error
+  }
+}

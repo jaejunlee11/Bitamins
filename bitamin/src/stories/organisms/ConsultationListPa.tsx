@@ -5,20 +5,15 @@ import {
   joinConsultation,
   useJoinRandomRoom,
 } from 'store/useConsultationStore'
-import {
-  RoomSearch,
-  Consultation,
-  ConsultationList,
-  JoinConsultation,
-} from 'ts/consultationType' // 인터페이스 가져오기
+import { RoomSearch, Consultation, JoinConsultation } from 'ts/consultationType'
+import CreateRoomModal from './CreateRoomModal'
+import RandomConsultationModal from './RandomConsultationModal'
 
 const ConsultationListPa: React.FC = () => {
   const navigate = useNavigate()
 
-  // zustand 스토어에서 상태 및 액션 가져오기
   const { ConsultationList, fetchConsultations } = fetchConsultationList(
     (state) => ({
-      // ConsultationList의 기본값을 빈 객체로 설정하여 안전하게 접근할 수 있도록 합니다.
       ConsultationList: state.ConsultationList || { consultationList: [] },
       fetchConsultations: state.fetchConsultations,
     })
@@ -29,7 +24,6 @@ const ConsultationListPa: React.FC = () => {
     setJoinConsultation: state.setJoinConsultation,
   }))
 
-  // 로딩 및 에러 상태 추가
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [passwords, setPasswords] = useState<{ [key: number]: string }>({})
@@ -38,7 +32,9 @@ const ConsultationListPa: React.FC = () => {
     joinRandomRoom: state.joinRandomRoom,
   }))
 
-  // 상담 리스트를 로드하는 함수
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isRandomModalOpen, setIsRandomModalOpen] = useState<boolean>(false)
+
   const loadConsultations = async (
     page: number,
     size: number,
@@ -49,19 +45,15 @@ const ConsultationListPa: React.FC = () => {
       size,
       type,
     }
-    console.log(type)
     try {
       await fetchConsultations(roomSearch)
-      console.log('Fetched Consultations:', ConsultationList)
     } catch (error) {
-      console.error('Failed to fetch consultations:', error)
       setError('Failed to fetch consultations')
     } finally {
       setLoading(false)
     }
   }
 
-  // 컴포넌트가 마운트될 때 상담 리스트를 로드
   useEffect(() => {
     loadConsultations(0, 100, selectedType)
   }, [selectedType])
@@ -78,22 +70,15 @@ const ConsultationListPa: React.FC = () => {
       const joinData = {
         id: consultation.id,
         isPrivated: consultation.isPrivated,
-        password: consultation.password || '',
+        password: passwords[consultation.id] || '',
         startTime: consultation.startTime,
         sessionId: consultation.sessionId,
       }
 
-      // joinRoom이 성공적으로 완료되기를 기다립니다.
       const consult: JoinConsultation = await joinRoom(joinData)
-
-      // joinRoom이 완료된 후 콘솔에 로그를 출력합니다.
-      console.log('Join Room Result:', consult)
-      console.log('Room joined:', joinData)
       setJoinConsultation(consult)
-      // 페이지를 이동시킵니다.
       navigate('/consult')
     } catch (error) {
-      console.error('Failed to join the room:', error)
       setError('Failed to join the room')
       navigate('/consultationlist')
     }
@@ -102,100 +87,98 @@ const ConsultationListPa: React.FC = () => {
   const handleJoinRandomRoom = async (type: string) => {
     try {
       await joinRandomRoom(type)
-      // alert(`Fetched random participants for ${type}`)
     } catch (error) {
-      alert('Failed to fetch random participants')
-      console.error('Error fetching random participants:', error)
+      setError('Failed to fetch random participants')
     }
   }
 
   const handleTypeChange = (type: string) => {
-    console.log(type)
     setSelectedType(type)
   }
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>{error}</div>
+  const openModal = () => setIsModalOpen(true)
+  const closeModal = () => setIsModalOpen(false)
+
+  const openRandomModal = () => setIsRandomModalOpen(true)
+  const closeRandomModal = () => setIsRandomModalOpen(false)
+
+  if (loading) return <div className="text-center mt-8">Loading...</div>
+  if (error) return <div className="text-center text-red-500">{error}</div>
 
   return (
-    <div>
-      <h1>Consultation List</h1>
-
-      {/* 유형 선택 버튼 그룹 */}
-      <div>
-        <button onClick={() => handleTypeChange('전체')}>전체</button>
-        <button onClick={() => handleTypeChange('음악')}>음악</button>
-        <button onClick={() => handleTypeChange('미술')}>미술</button>
-        <button onClick={() => handleTypeChange('영화')}>영화</button>
-        <button onClick={() => handleTypeChange('독서')}>독서</button>
-        <button onClick={() => handleTypeChange('대화')}>대화</button>
+    <div className="max-w-screen-lg mx-auto p-8 bg-pink-50 min-h-screen">
+      <div className="flex justify-center space-x-4 mb-6">
+        {['전체', '독서', '영화', '그림', '음악', '대화'].map((type) => (
+          <button
+            key={type}
+            onClick={() => handleTypeChange(type)}
+            className={`py-2 px-4 rounded-full ${
+              selectedType === type
+                ? 'bg-orange-400 text-white'
+                : 'bg-pink-100 text-gray-700'
+            }`}
+          >
+            {type}
+          </button>
+        ))}
       </div>
 
-      <ul>
-        {/* consultationList가 존재할 때만 map 함수를 사용 */}
-        {ConsultationList.consultationList &&
-          ConsultationList.consultationList.map(
-            (consultation: Consultation) => (
-              <li key={consultation.id}>
-                <p>
-                  <strong>Category:</strong> {consultation.category}
-                </p>
-                <p>
-                  <strong>Title:</strong> {consultation.title}
-                </p>
-                <p>
-                  <strong>Start Time:</strong> {consultation.startTime}
-                </p>
-                <p>
-                  <strong>End Time:</strong> {consultation.endTime}
-                </p>
-                <p>
-                  <strong>Current Participants:</strong>{' '}
-                  {consultation.currentParticipants}
-                </p>
-                <p>
-                  <strong>Session ID:</strong> {consultation.sessionId}
-                </p>
-                {consultation.isPrivated ? (
-                  <div>
-                    <input
-                      type="password"
-                      placeholder="Enter password"
-                      value={passwords[consultation.id] || ''}
-                      onChange={(e) =>
-                        handlePasswordChange(consultation.id, e.target.value)
-                      }
-                    />
-                    <button onClick={() => handleJoinRoom(consultation)}>
-                      Join Room
-                    </button>
-                  </div>
-                ) : (
-                  <button onClick={() => handleJoinRoom(consultation)}>
-                    Join Room
-                  </button>
-                )}
-                <br />
-              </li>
-            )
-          )}
+      <ul className="space-y-4">
+        {ConsultationList.consultationList.map((consultation: Consultation) => (
+          <li
+            key={consultation.id}
+            className="flex items-center justify-between p-4 bg-pink-50 rounded-lg shadow-md"
+          >
+            <div className="flex items-center space-x-4">
+              <span className="py-1 px-2 bg-pink-200 text-gray-700 rounded-full">
+                {consultation.category}
+              </span>
+              <span className="text-gray-700">{consultation.startTime}</span>
+              <span className="text-gray-700">{consultation.title}</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-gray-700">
+                {consultation.currentParticipants} / 5
+              </span>
+              <button
+                onClick={() => handleJoinRoom(consultation)}
+                className="py-2 px-4 bg-orange-400 text-white rounded-lg shadow"
+              >
+                입장
+              </button>
+            </div>
+          </li>
+        ))}
       </ul>
-      <div>
-        <h2>Fetch Random Participants</h2>
-        <button onClick={() => handleJoinRandomRoom('전체')}>전체</button>
-        <br />
-        <button onClick={() => handleJoinRandomRoom('음악')}>음악</button>
-        <br />
-        <button onClick={() => handleJoinRandomRoom('미술')}>미술</button>
-        <br />
-        <button onClick={() => handleJoinRandomRoom('영화')}>영화</button>
-        <br />
-        <button onClick={() => handleJoinRandomRoom('독서')}>독서</button>
-        <br />
-        <button onClick={() => handleJoinRandomRoom('대화')}>대화</button>
-        <br />
-        <br />
+
+      <div className="flex justify-center mt-10">
+        <button
+          onClick={openModal}
+          className="bg-pink-100 p-4 rounded-lg text-gray-700 hover:bg-pink-200 transition"
+        >
+          <i className="fas fa-plus-circle mr-2"></i>새로운 방을 생성하세요
+        </button>
       </div>
+
+      <p className="text-center text-gray-500 mt-4">
+        어디로 들어가야 할 지 모르겠다면?{' '}
+        <span
+          className="text-orange-400 underline cursor-pointer"
+          onClick={openRandomModal}
+        >
+          click here !
+        </span>
+      </p>
+
+      {isModalOpen && <CreateRoomModal onClose={closeModal} />}
+
+      {isRandomModalOpen && (
+        <RandomConsultationModal
+          isOpen={isRandomModalOpen}
+          onClose={closeRandomModal}
+          onJoin={handleJoinRandomRoom}
+        />
+      )}
     </div>
   )
 }
