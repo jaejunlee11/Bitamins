@@ -270,4 +270,11 @@ public class ConsultationController {
         return ResponseEntity.status(200).body(gptResponses);
     }
 
+    @GetMapping("/openvidu")
+    public ResponseEntity<?> findOpenVidu() {
+        List<Session> sessions = openVidu.getActiveSessions();
+        System.out.println("session: " + sessions);
+        return ResponseEntity.status(200).body(sessions);
+    }
+
 }
