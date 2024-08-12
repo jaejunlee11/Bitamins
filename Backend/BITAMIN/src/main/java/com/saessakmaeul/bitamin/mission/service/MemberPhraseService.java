@@ -44,8 +44,8 @@ public class MemberPhraseService {
                     .build();
         }
 
-        MemberPhrase savedMemberPhrase = memberPhraseOpt.orElseThrow(() -> new RuntimeException("해당 날짜에 녹음한 문구가 없습니다."));
-        Long savedPhraseId = memberPhraseOpt.map(MemberPhrase::getPhraseId).orElse(null);
+        MemberPhrase savedMemberPhrase = memberPhraseOpt.get();
+        Long savedPhraseId = savedMemberPhrase.getPhraseId();
 
         // 문구 ID를 통해서 해당 문구 조회
         Optional<Phrase> savedPhraseOpt = phraseRepository.findById(savedPhraseId);

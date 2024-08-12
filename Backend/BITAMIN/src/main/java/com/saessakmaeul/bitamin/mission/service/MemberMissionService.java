@@ -49,7 +49,7 @@ public class MemberMissionService {
         }
 
         MemberMission completedMemberMission = memberMissionOpt.get();
-        Long completedMissionId = memberMissionOpt.map(MemberMission::getMissionId).orElse(null);
+        Long completedMissionId = completedMemberMission.getMissionId();
 
         // 미션 ID를 통해서 해당 미션 찾기
         Optional<Mission> completedMissionOpt = missionRepository.findById(completedMissionId);
