@@ -20,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -429,40 +430,48 @@ public class ConsultationService {
 
     }
 
-    // 만약 나중에 Broadcast 필요한 상황이 오면 구현
-//    public BroadcastInformationResponse broadcastInformation(Long id) {
-//        Optional<Consultation> consultation = consultationRepository.findById(id);
-//
-//        if(consultation.isEmpty()) return null;
-//
-//        // 참가자 리스트 조회
-//        List<Participant> list = participantRepository.findByConsultationId(consultation.get().getId());
-//
-//        List<ParticipantResponse> pList = list.stream().map(participant -> {
-//            Member member = memberRepository.findById(participant.getMemberId())
-//                    .orElseThrow(() -> new RuntimeException("Member not found"));
-//
-//            return ParticipantResponse.builder()
-//                    .id(participant.getId())
-//                    .memberId(participant.getMemberId())
-//                    .memberNickname(participant.getMemberNickname())
-//                    .consultationId(participant.getConsultationId())
-//                    .consultationDate(participant.getConsultationDate())
-//                    .profileKey(member.getProfileKey())
-//                    .profileUrl(member.getProfileUrl())
-//                    .build();
-//        }).collect(Collectors.toList());
-//
-//        return BroadcastInformationResponse.builder()
-//                .id(consultation.get().getId())
-//                .category(consultation.get().getCategory())
-//                .title(consultation.get().getTitle())
-//                .isPrivated(consultation.get().getIsPrivated())
-//                .password(consultation.get().getPassword())
-//                .startTime(consultation.get().getStartTime())
-//                .endTime(consultation.get().getEndTime())
-//                .currentParticipants(consultation.get().getCurrentParticipants())
-//                .participants(pList)
-//                .build();
-//    }
+    // 상세 조회
+    public ConsultationDetailResponse consultationDetail(Long id, Long memberId) {
+        Optional<Consultation> consultation = consultationRepository.findById(id);
+
+        if(consultation.isEmpty()) return null;
+
+        if(consultation.get().getStartTime().isAfter(LocalDateTime.now())) return null;
+
+        Member m = Member.builder().id(memberId).build();
+
+        Optional<Participant> p = participantRepository.findByMemberIdAndConsultationId(m, consultation.get());
+
+        if(p.isEmpty()) return null;
+
+        // 참가자 리스트 조회
+        List<Participant> list = participantRepository.findByConsultationId(consultation.get());
+
+        List<ParticipantResponse> pList = list.stream().map(participant -> {
+            Member member = memberRepository.findById(participant.getMemberId().getId())
+                    .orElseThrow(() -> new RuntimeException("Member not found"));
+
+            return ParticipantResponse.builder()
+                    .id(participant.getId())
+                    .memberId(participant.getMemberId().getId())
+                    .memberNickname(participant.getMemberNickname())
+                    .consultationId(participant.getConsultationId().getId())
+                    .consultationDate(participant.getConsultationDate())
+                    .profileKey(member.getProfileKey())
+                    .profileUrl(member.getProfileUrl())
+                    .build();
+        }).collect(Collectors.toList());
+
+        return ConsultationDetailResponse.builder()
+                .id(consultation.get().getId())
+                .category(consultation.get().getCategory())
+                .title(consultation.get().getTitle())
+                .isPrivated(consultation.get().getIsPrivated())
+                .password(consultation.get().getPassword())
+                .startTime(consultation.get().getStartTime())
+                .endTime(consultation.get().getEndTime())
+                .currentParticipants(consultation.get().getCurrentParticipants())
+                .participants(pList)
+                .build();
+    }
 }
