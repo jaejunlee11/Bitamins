@@ -40,9 +40,6 @@ public class Member {
     private LocalDate birthday;
 
     @Column(length = 255)
-    private String profileKey;
-
-    @Column(length = 255)
     private String profileUrl;
 
     @Enumerated(EnumType.STRING)
