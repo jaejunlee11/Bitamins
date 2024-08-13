@@ -269,11 +269,16 @@ public class ConsultationController {
         return ResponseEntity.status(200).body(gptResponses);
     }
 
-    @GetMapping("/openvidu")
-    public ResponseEntity<?> findOpenVidu() {
-        List<Session> sessions = openVidu.getActiveSessions();
-        System.out.println("session: " + sessions);
-        return ResponseEntity.status(200).body(sessions);
-    }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> ConsultationDetail(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+                                                @PathVariable("id") Long id) {
 
+        Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
+
+        ConsultationDetailResponse consultationDetailResponse = consultationService.consultationDetail(id, memberId);
+
+        if(consultationDetailResponse == null) return ResponseEntity.status(404).body("올바르지 않은 접근입니다.");
+
+        return ResponseEntity.status(200).body(consultationDetailResponse);
+    }
 }
