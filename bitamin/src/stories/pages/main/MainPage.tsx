@@ -15,7 +15,7 @@ import { getPhrases, saveAudio } from '@/api/phraseAPI'
 import { useNavigate } from 'react-router-dom'
 
 const MainPage: React.FC = () => {
-  const navigate = useNavigate()  
+  const navigate = useNavigate()
 
   const [isRecording, setIsRecording] = useState(false)
   const [isEnded, setIsEnded] = useState(false)

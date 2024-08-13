@@ -2,7 +2,6 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 20px;
   padding: 20px;
 }
 
@@ -27,6 +26,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 20px;
 }
 
 .label-container {
@@ -42,8 +42,8 @@ img {
 
 canvas {
   border: 2px solid #ff713c;
-  width: 400px;
-  height: 400px;
+  width: 100%;
+  height: auto;
 }
 
 button {
