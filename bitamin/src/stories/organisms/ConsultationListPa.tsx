@@ -8,6 +8,7 @@ import {
 import { RoomSearch, Consultation, JoinConsultation } from 'ts/consultationType'
 import CreateRoomModal from './CreateRoomModal'
 import RandomConsultationModal from './RandomConsultationModal'
+import PasswordModal from './PasswordModal' // PasswordModal 임포트
 
 const ConsultationListPa: React.FC = () => {
   const navigate = useNavigate()
@@ -24,16 +25,19 @@ const ConsultationListPa: React.FC = () => {
     setJoinConsultation: state.setJoinConsultation,
   }))
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [passwords, setPasswords] = useState<{ [key: number]: string }>({})
-  const [selectedType, setSelectedType] = useState<string>('전체')
   const { joinRandomRoom } = useJoinRandomRoom((state) => ({
     joinRandomRoom: state.joinRandomRoom,
   }))
 
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [passwords, setPasswords] = useState<{ [key: number]: string }>({})
+  const [selectedType, setSelectedType] = useState<string>('전체')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [isRandomModalOpen, setIsRandomModalOpen] = useState<boolean>(false)
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false)
+  const [currentConsultation, setCurrentConsultation] =
+    useState<Consultation | null>(null)
 
   const loadConsultations = async (
     page: number,
@@ -58,19 +62,21 @@ const ConsultationListPa: React.FC = () => {
     loadConsultations(0, 100, selectedType)
   }, [selectedType])
 
-  const handlePasswordChange = (consultationId: number, value: string) => {
-    setPasswords((prevPasswords) => ({
-      ...prevPasswords,
-      [consultationId]: value,
-    }))
+  const handlePasswordSubmit = (password: string) => {
+    if (currentConsultation) {
+      setPasswords((prev) => ({ ...prev, [currentConsultation.id]: password }))
+      attemptJoinRoom(currentConsultation, password)
+    }
   }
 
-  const handleJoinRoom = async (consultation: Consultation) => {
+  const attemptJoinRoom = async (
+    consultation: Consultation,
+    password: string
+  ) => {
     try {
-      const joinData = {
+      const joinData: JoinConsultation = {
         id: consultation.id,
-        isPrivated: consultation.isPrivated,
-        password: passwords[consultation.id] || '',
+        password,
         startTime: consultation.startTime,
         sessionId: consultation.sessionId,
       }
@@ -79,9 +85,18 @@ const ConsultationListPa: React.FC = () => {
       setJoinConsultation(consult)
       navigate('/consult')
     } catch (error) {
-      setError('Failed to join the room')
-      navigate('/consultationlist')
+      alert('비밀번호가 틀렸습니다. 다시 시도해주세요.')
+      setIsPasswordModalOpen(true) // 비밀번호 틀리면 모달 재오픈
     }
+  }
+
+  const handleJoinRoom = async (consultation: Consultation) => {
+    if (consultation.isPrivated && !passwords[consultation.id]) {
+      setCurrentConsultation(consultation)
+      setIsPasswordModalOpen(true)
+      return
+    }
+    attemptJoinRoom(consultation, passwords[consultation.id] || '')
   }
 
   const handleJoinRandomRoom = async (type: string) => {
@@ -101,6 +116,11 @@ const ConsultationListPa: React.FC = () => {
 
   const openRandomModal = () => setIsRandomModalOpen(true)
   const closeRandomModal = () => setIsRandomModalOpen(false)
+
+  const formatTime = (time: string): string => {
+    const date = new Date(time)
+    return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`
+  }
 
   if (loading) return <div className="text-center mt-8">Loading...</div>
   if (error) return <div className="text-center text-red-500">{error}</div>
@@ -130,10 +150,17 @@ const ConsultationListPa: React.FC = () => {
             className="flex items-center justify-between p-4 bg-pink-50 rounded-lg shadow-md"
           >
             <div className="flex items-center space-x-4">
-              <span className="py-1 px-2 bg-pink-200 text-gray-700 rounded-full">
+              <div style={{ width: '1.5rem', textAlign: 'center' }}>
+                {consultation.isPrivated && (
+                  <i className="fas fa-lock text-gray-600"></i>
+                )}
+              </div>
+              <span className="py-1 px-2 bg-pink-200 text-gray-700 rounded-full min-w-[50px] text-center">
                 {consultation.category}
               </span>
-              <span className="text-gray-700">{consultation.startTime}</span>
+              <span className="text-gray-700 min-w-[50px] text-center">
+                {formatTime(consultation.startTime)}
+              </span>
               <span className="text-gray-700">{consultation.title}</span>
             </div>
             <div className="flex items-center space-x-4">
@@ -177,6 +204,14 @@ const ConsultationListPa: React.FC = () => {
           isOpen={isRandomModalOpen}
           onClose={closeRandomModal}
           onJoin={handleJoinRandomRoom}
+        />
+      )}
+
+      {isPasswordModalOpen && (
+        <PasswordModal
+          isOpen={isPasswordModalOpen}
+          onClose={() => setIsPasswordModalOpen(false)}
+          onSubmit={handlePasswordSubmit}
         />
       )}
     </div>

@@ -1,4 +1,5 @@
 import axiosInstance from 'api/axiosInstance'
+import axios from 'axios'
 import {
   RoomSearch,
   Consultation,
@@ -113,6 +114,16 @@ export const leaveConsultation = async (consultationId: number) => {
     return response
   } catch (error) {
     console.error('Error Leaving Consultation', error)
+    throw error
+  }
+}
+
+export const getConsultation = async (consultationId: number) => {
+  try {
+    const response = await axiosInstance.get(`consultations/${consultationId}`)
+    return response
+  } catch (error) {
+    console.log('Error getting Consultation', error)
     throw error
   }
 }
