@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import DatePicker, { registerLocale, setDefaultLocale } from 'react-datepicker'
-import { format } from 'date-fns'
+import { format, Locale } from 'date-fns' // Locale 타입을 date-fns에서 가져옴
 import ko from 'date-fns/locale/ko'
 import styles from '/src/styles/mission/quest2.module.css'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -10,15 +10,18 @@ import {
   fetchMissionsByDate,
 } from '@/api/missionAPI'
 
-// @ts-ignore
-registerLocale('ko', ko)
+registerLocale('ko', ko as unknown as Locale)
 setDefaultLocale('ko')
 
 interface CalendarProps {
-  onDateChange: (date: Date | null) => void
+  onDateChange: (date: Date | null, missionData: any) => void
+  onMissionDataChange?: (data: any) => void // 선택적 prop으로 추가
 }
 
-const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
+const Calendar: React.FC<CalendarProps> = ({
+  onDateChange,
+  onMissionDataChange,
+}) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
   const [missionDate, setMissionDate] = useState<Date | null>(null)
   const [todayMissionExists, setTodayMissionExists] = useState<boolean>(true)
@@ -35,9 +38,13 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
       const today = new Date().toISOString().split('T')[0]
       setTodayMissionExists(missionDate.toISOString().split('T')[0] === today)
 
-      // 월간 미션 및 문구 데이터 가져오기
       const monthData = await fetchMonthMissionAndPhrase(formattedDate)
       setMonthMissions(monthData)
+
+      onDateChange(missionDate, data)
+      if (onMissionDataChange) {
+        onMissionDataChange(data)
+      }
     } catch (error) {
       console.error('Error fetching mission date:', error)
     } finally {
@@ -49,7 +56,6 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
     const today = new Date()
     setSelectedDate(today)
     fetchMissionDate(today)
-    onDateChange(today)
   }, [])
 
   const handleDateChange = (date: Date | null) => {
@@ -59,12 +65,12 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
       )
       setSelectedDate(correctedDate)
       setMissionDate(null)
-      onDateChange(correctedDate)
+      fetchMissionDate(correctedDate)
     }
   }
 
   const handleMonthChange = async (date: Date) => {
-    fetchMissionDate(date) // 기존 함수 호출
+    fetchMissionDate(date)
 
     try {
       setLoading(true)
@@ -92,7 +98,7 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
         className={styles.prevButton}
         onClick={() => {
           decreaseMonth()
-          handleMonthChange(new Date(date.getFullYear(), date.getMonth() - 1)) // 이전 달로 이동
+          handleMonthChange(new Date(date.getFullYear(), date.getMonth() - 1))
         }}
       >
         {'<'}
@@ -102,7 +108,7 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
         className={styles.nextButton}
         onClick={() => {
           increaseMonth()
-          handleMonthChange(new Date(date.getFullYear(), date.getMonth() + 1)) // 다음 달로 이동
+          handleMonthChange(new Date(date.getFullYear(), date.getMonth() + 1))
         }}
       >
         {'>'}
@@ -174,17 +180,6 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
         weekDayClassName={getWeekDayClassName}
       />
       {loading && <p>로딩 중...</p>}
-
-      {/* 월간 미션 및 문구 출력 */}
-      {/*<div className={styles.missionList}>*/}
-      {/*    {monthMissions.map((mission, index) => (*/}
-      {/*        <div key={index} className={styles.missionItem}>*/}
-      {/*            <p>미션 ID: {mission.memberMissionId}</p>*/}
-      {/*            <p>문구 ID: {mission.memberPhraseId !== null ? mission.memberPhraseId : '문구 없음'}</p>*/}
-      {/*            <p>활동 날짜: {mission.activityDate}</p>*/}
-      {/*        </div>*/}
-      {/*    ))}*/}
-      {/*</div>*/}
     </div>
   )
 }

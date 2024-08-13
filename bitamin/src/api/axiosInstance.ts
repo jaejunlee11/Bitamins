@@ -59,7 +59,7 @@ axiosInstance.interceptors.response.use(
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`
           return axiosInstance(originalRequest)
         } catch (refreshError) {
-          clearAuth()
+          // clearAuth()
           return Promise.reject(refreshError)
         }
       }

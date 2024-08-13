@@ -37,7 +37,18 @@ export const registerUser = async (signupForm: any) => {
     throw new Error('Failed to register')
   }
 }
-
+// 이메일 중복 확인 함수
+export const checkEmail = async (email: string) => {
+  try {
+    const response = await axiosInstance.post(
+      `/members/register/check-email/${email}`
+    )
+    return response.data // 1 : 중복 존재, 0 : 중복 없음
+  } catch (error: any) {
+    console.error('Error response: ', error.response)
+    throw new Error('Failed to check email')
+  }
+}
 // 닉네임 중복 확인 함수 추가
 export const checkNickname = async (nickname: string) => {
   try {
@@ -118,7 +129,7 @@ export const updateUserInfo = async (userInfo: any) => {
       sidoName: userInfo.sidoName,
       gugunName: userInfo.gugunName,
       dongName: userInfo.dongName,
-      // image: userInfo.image,
+      profileUrl: userInfo.profileUrl, // 기존 프로필 URL을 유지
     }
 
     const formData = new FormData()

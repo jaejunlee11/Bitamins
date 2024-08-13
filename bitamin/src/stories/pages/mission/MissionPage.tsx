@@ -33,7 +33,13 @@ const MissionPage: React.FC = () => {
             onMissionDataChange={handleMissionDataChange}
           />
         </div>
-        <MissionForm selectedDate={selectedDate} missionData={missionData} />
+        <MissionForm
+          selectedDate={selectedDate}
+          missionData={missionData}
+          onSubmitSuccess={() => {
+            // handle submission success
+          }}
+        />
         <Mission />
         <Weather />
       </div>

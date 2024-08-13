@@ -10,7 +10,6 @@ import recordSave from 'assets/image/recordSave.png'
 import recordStop from 'assets/image/recordEnd.png'
 import recordAgain from 'assets/image/recordAgain.png'
 import recordPlay from 'assets/image/recordPlay.png'
-import ModalExample from 'stories/organisms/ModalExample'
 import HeaderAfterLogin from '@/stories/organisms/common/HeaderAfterLogin'
 import { getPhrases, saveAudio } from '@/api/phraseAPI'
 
@@ -173,7 +172,7 @@ const MainPage: React.FC = () => {
 
   return (
     <>
-      <HeaderAfterLogin username="{username}" />
+      {/* <HeaderAfterLogin username="{username}" /> */}
       {/* <ModalExample /> */}
       <div className={styles.div}>
         {/* <div className={styles.navbar}>

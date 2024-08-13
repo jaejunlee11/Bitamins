@@ -1,13 +1,30 @@
-import { useState, useCallback, useEffect, ChangeEvent } from 'react'
+import { useState, useEffect, ChangeEvent, useRef } from 'react'
 import styles from 'styles/account/MyPage.module.css'
 import HospitalMap from 'stories/organisms/HospitalMap'
-import Button from 'stories/atoms/Button'
-import { fetchUserInfo, updateUserInfo } from '@/api/userAPI'
-import { fetchHealthReports } from '@/api/userAPI'
+import {
+  fetchUserInfo,
+  updateUserInfo,
+  checkEmail,
+  checkNickname,
+  fetchSidoNames,
+  fetchGugunNames,
+  fetchDongNames,
+  fetchHealthReports,
+} from '@/api/userAPI'
 import { useNavigate } from 'react-router-dom'
 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts'
+
 const MyPage: React.FC = () => {
-  const navigate = useNavigate()
   const [userInfo, setUserInfo] = useState({
     email: '',
     name: '',
@@ -16,28 +33,40 @@ const MyPage: React.FC = () => {
     sidoName: '',
     gugunName: '',
     dongName: '',
-    image: null as File | null, // 새로 업로드할 파일
-    profileUrl: '', // 서버에서 받아온 이미지 URL
+    image: null as File | null,
+    profileUrl: '',
     checkupScore: 0,
-    checkupDate: '', // 건강 보고서 날짜
+    checkupDate: '',
   })
+  const [emailValid, setemailValid] = useState<boolean | null>(null)
+  const [nicknameValid, setNicknameValid] = useState<boolean | null>(null)
+  const [sidoNames, setSidoNames] = useState<string[]>([])
+  const [gugunNames, setGugunNames] = useState<string[]>([])
+  const [dongNames, setDongNames] = useState<string[]>([])
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const navigate = useNavigate()
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [initialProfileUrl, setInitialProfileUrl] = useState<string | null>(
+    null
+  )
+  const [selectedResult, setSelectedResult] = useState<{
+    date: string
+    score: number
+  } | null>(null)
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null) // 미리보기 URL 상태
-
-  // 타입 불일치로 초기값 number 타입으로 설정
   const [location, setLocation] = useState({
-    lat: 0, // 기본값 설정
-    lng: 0, // 기본값 설정
+    lat: 0,
+    lng: 0,
   })
 
-  const [isPhotoUploadOpen, setIsPhotoUploadOpen] = useState(false)
-  const [isFrameOpen, setFrameOpen] = useState(false)
-  const [isFrame1Open, setFrame1Open] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [isImageDeleted, setIsImageDeleted] = useState(false)
 
   const [healthReports, setHealthReports] = useState<any[]>([])
+  const [chartData, setChartData] = useState<any[]>([]) // 차트 데이터 상태 추가
 
-  // 점수에 따른 메시지 반환 함수
   const getScoreMessage = (score: number): string => {
     if (score <= 15) {
       return `현재 당신의 점수는 정상 범위에 속합니다. 유의미한 수준의 우울감이 나타나지 않으며, 전반적으로 안정된 상태를 유지하고 있습니다. 이러한 상태를 지속적으로 유지하기 위해 현재의 생활 습관을 잘 관리하시길 권장드립니다. 만약 기분 변화가 느껴지거나 불안함이 생긴다면, 가벼운 산책이나 취미 생활을 통해 긍정적인 기운을 유지하는 것도 도움이 될 수 있습니다.`
@@ -54,7 +83,6 @@ const MyPage: React.FC = () => {
     const getUserInfo = async () => {
       try {
         const data = await fetchUserInfo()
-        // console.log('Fetched user data:', data) // 데이터를 확인하는 로그
         setUserInfo((prevUserInfo) => ({
           ...prevUserInfo,
           email: data.email,
@@ -66,13 +94,25 @@ const MyPage: React.FC = () => {
           dongName: data.dongName,
           profileUrl: data.profileUrl,
         }))
-        // 서버에서 받은 프로필 이미지 URL을 미리보기 URL로 설정
         setPreviewUrl(data.profileUrl)
+        setInitialProfileUrl(data.profileUrl) // 초기 profileUrl 설정
 
         setLocation({
           lat: parseFloat(data.lat),
           lng: parseFloat(data.lng),
         })
+        const sidoNames = await fetchSidoNames()
+        setSidoNames(sidoNames)
+
+        if (data.sidoName) {
+          const gugunNames = await fetchGugunNames(data.sidoName)
+          setGugunNames(gugunNames)
+        }
+
+        if (data.gugunName) {
+          const dongNames = await fetchDongNames(data.sidoName, data.gugunName)
+          setDongNames(dongNames)
+        }
       } catch (error) {
         console.error('Error fetching user info:', error)
       }
@@ -81,15 +121,14 @@ const MyPage: React.FC = () => {
     const getHealthReports = async () => {
       try {
         const healthReports = await fetchHealthReports()
-        if (healthReports.length > 0) {
-          // 가장 최근의 보고서 선택 (마지막 항목)
-          const latestReport = healthReports[healthReports.length - 1]
-          setUserInfo((prevUserInfo) => ({
-            ...prevUserInfo,
-            checkupScore: latestReport.checkupScore,
-            checkupDate: latestReport.checkupDate,
-          }))
-        }
+        setHealthReports(healthReports)
+
+        // 차트 데이터 준비
+        const chartData = healthReports.map((report: any) => ({
+          date: report.checkupDate, // X축에 표시될 날짜
+          score: report.checkupScore, // Y축에 표시될 점수
+        }))
+        setChartData(chartData)
       } catch (error) {
         console.error('Error fetching health reports:', error)
       }
@@ -99,430 +138,363 @@ const MyPage: React.FC = () => {
     getHealthReports()
   }, [])
 
-  const openPhotoUpload = useCallback(() => {
-    setIsPhotoUploadOpen(true)
-  }, [])
+  const handleImageClick = () => {
+    if (isEditing) {
+      fileInputRef.current?.click() // 이미지 클릭 시 파일 입력 창 열기
+    }
+  }
+  const handleDeleteImage = () => {
+    setIsImageDeleted(true)
+    setPreviewUrl(null)
+    setUserInfo((prevUserInfo) => ({
+      ...prevUserInfo,
+      image: null,
+      profileUrl: 'null', // 서버로 "null" 값 전송
+    }))
+  }
+  const handleInputChange = async (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const target = e.target as HTMLInputElement
+    const { name, value, files } = target
 
-  const closePhotoUpload = useCallback(() => {
-    setIsPhotoUploadOpen(false)
-  }, [])
-
-  const openFrame = useCallback(() => {
-    setFrameOpen(true)
-  }, [])
-
-  const closeFrame = useCallback(() => {
-    setFrameOpen(false)
-  }, [])
-
-  const openFrame1 = useCallback(() => {
-    setFrame1Open(true)
-  }, [])
-
-  const closeFrame1 = useCallback(() => {
-    setFrame1Open(false)
-  }, [])
-
-  const onBItAMinTextClick = useCallback(() => {
-    // Add your code here
-  }, [])
-
-  // 수정 시 사용
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, files } = e.target
     if (name === 'image' && files && files[0]) {
       const imageFile = files[0]
       setUserInfo((prevUserInfo) => ({
         ...prevUserInfo,
         image: imageFile,
+        profileUrl: URL.createObjectURL(imageFile),
       }))
-      // 새로 업로드한 이미지의 미리보기 URL 생성
-      const previewUrl = URL.createObjectURL(imageFile)
-      setPreviewUrl(previewUrl) // 미리보기 URL을 상태에 저장
+      setPreviewUrl(URL.createObjectURL(imageFile))
+      setIsImageDeleted(false)
     } else {
       setUserInfo((prevUserInfo) => ({
         ...prevUserInfo,
         [name]: value,
       }))
+
+      if (name === 'email' && value) {
+        try {
+          const result = await checkEmail(value)
+          setemailValid(result === 0) // 0이면 사용 가능, 1이면 중복
+        } catch (error) {
+          setemailValid(null)
+          setError('이메일 중복 확인 중 오류가 발생했습니다.')
+        }
+      }
+
+      if (name === 'nickname' && value) {
+        try {
+          const result = await checkNickname(value)
+          setNicknameValid(result === 0) // 0이면 사용 가능, 1이면 중복
+        } catch (error) {
+          setNicknameValid(null)
+          setError('닉네임 중복 확인 중 오류가 발생했습니다.')
+        }
+      }
+
+      if (name === 'sidoName') {
+        // 시/도를 선택하면 구/군 목록을 로드
+        try {
+          const gugunNames = await fetchGugunNames(value)
+          setGugunNames(gugunNames)
+          setUserInfo((prevUserInfo) => ({
+            ...prevUserInfo,
+            sidoName: value,
+            gugunName: '',
+            dongName: '',
+          }))
+          setDongNames([]) // 구/군 선택 전 동 목록 초기화
+        } catch (error) {
+          console.error('구/군 목록을 가져오는 중 오류 발생:', error)
+        }
+      }
+
+      if (name === 'gugunName') {
+        try {
+          const dongNames = await fetchDongNames(userInfo.sidoName, value)
+          setDongNames(dongNames)
+          setUserInfo((prevUserInfo) => ({
+            ...prevUserInfo,
+            gugunName: value,
+            dongName: '',
+          }))
+        } catch (error) {
+          console.error('동 목록을 가져오는 중 오류 발생:', error)
+        }
+      }
     }
   }
 
-  // 사용자 정보 저장 시
   const handleUpdateUserInfo = async () => {
     try {
-      await updateUserInfo(userInfo)
+      const profileUrlToUpdate = isImageDeleted
+        ? 'null' // 이미지가 삭제된 경우
+        : userInfo.image // 새로운 이미지가 있는 경우
+          ? userInfo.profileUrl
+          : initialProfileUrl // 이미지 수정이 없으면 기존 프로필 URL 유지
+
+      const updatedUserInfo = {
+        ...userInfo,
+        profileUrl: profileUrlToUpdate,
+      }
+
+      await updateUserInfo(updatedUserInfo)
       alert('정보가 성공적으로 수정되었습니다.')
       setIsEditing(false)
-      // 서버에 저장된 최신 프로필 사진 불러오기
+
       const data = await fetchUserInfo()
-      setPreviewUrl(data.imageUrl)
+      setPreviewUrl(data.profileUrl)
       setUserInfo((prevUserInfo) => ({
         ...prevUserInfo,
         profileUrl: data.profileUrl,
-        image: null, // 업로드된 파일 초기화
+        image: null, // 이미지를 초기화
       }))
+      setInitialProfileUrl(data.profileUrl) // 최신 프로필 URL을 초기값으로 갱신
+      setIsImageDeleted(false) // 이미지 삭제 상태 초기화
     } catch (error) {
       console.error('Error updating user info:', error)
       alert('정보 수정에 실패했습니다.')
     }
   }
-  // 점수에 따른 설명을 가져옴
+
   const scoreDescription = getScoreMessage(userInfo.checkupScore)
+
+  const handleEditClick = async () => {
+    if (isEditing) {
+      await handleUpdateUserInfo() // 수정 모드에서 나올 때 정보 업데이트
+    }
+    setIsEditing(!isEditing)
+  }
+
+  const handleChartClick = (data: any) => {
+    if (data && data.activeLabel && data.activePayload) {
+      const selectedDate = data.activeLabel
+      const selectedScore = data.activePayload[0].value
+      setSelectedResult({ date: selectedDate, score: selectedScore })
+    }
+  }
 
   return (
     <>
-      <Button
-        label={isEditing ? '취소' : '정보 수정'}
-        type={'DEFAULT'}
-        onClick={() => {
-          if (isEditing) {
-            setIsEditing(false)
-            // 수정 취소 시 서버에서 최신 정보를 다시 불러옴
-            const getUserInfo = async () => {
-              try {
-                const data = await fetchUserInfo()
-                setPreviewUrl(data.profileUrl)
-                setUserInfo((prevUserInfo) => ({
-                  ...prevUserInfo,
-                  email: data.email,
-                  name: data.name,
-                  nickname: data.nickname,
-                  birthday: data.birthday,
-                  sidoName: data.sidoName,
-                  gugunName: data.gugunName,
-                  dongName: data.dongName,
-                  profileUrl: data.profileUrl,
-                  image: null,
-                }))
-              } catch (error) {
-                console.error('Error fetching user info on cancel:', error)
-              }
-            }
-
-            getUserInfo()
-          } else {
-            setIsEditing(true)
-          }
-        }}
-      />
       <div className={styles.div}>
-        {/* 화면 상단에 이미지 표시 */}
-        <div>
-          {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt="미리보기 이미지"
-              className={styles.image}
+        <div className={styles.InfoBox}>
+          <div className={styles.child}>
+            <div className={styles.item} onClick={handleImageClick}>
+              {previewUrl ? (
+                <div className={styles.imageWrapper}>
+                  <img src={previewUrl} alt="미리보기 이미지" />
+                  <button
+                    className={styles.deleteButton}
+                    onClick={handleDeleteImage}
+                  >
+                    X
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.placeholder}>이미지를 첨부하세요</div>
+              )}
+            </div>
+            <input
+              type="file"
+              name="image"
+              accept=".jpg,.jpeg,.png"
+              ref={fileInputRef}
+              onChange={handleInputChange}
+              style={{ display: 'none' }}
             />
-          ) : (
-            <div>이미지를 불러오는 중...</div>
-          )}
-        </div>
-        {/* 나머지 컴포넌트 */}
-        <div className={styles.child} />
-        <div className={styles.item} />
-        <div className={styles.frameParent}>
-          {isEditing ? (
-            <div>
-              <input
-                type="text"
-                name="email"
-                value={userInfo.email}
-                onChange={handleInputChange}
-              />
-              <input
-                type="text"
-                name="name"
-                value={userInfo.name}
-                onChange={handleInputChange}
-              />
-              <input
-                type="text"
-                name="nickname"
-                value={userInfo.nickname}
-                onChange={handleInputChange}
-              />
-              <input
-                type="date"
-                name="birthday"
-                value={userInfo.birthday}
-                onChange={handleInputChange}
-              />
-              <input
-                type="text"
-                name="sidoName"
-                value={userInfo.sidoName}
-                onChange={handleInputChange}
-              />
-              <input
-                type="text"
-                name="gugunName"
-                value={userInfo.gugunName}
-                onChange={handleInputChange}
-              />
-              <input
-                type="text"
-                name="dongName"
-                value={userInfo.dongName}
-                onChange={handleInputChange}
-              />
-              <input
-                type="file"
-                name="image"
-                accept=".jpg,.jpeg,.png"
-                onChange={handleInputChange}
-              />
-
-              <Button
-                label={'저장'}
-                type={'DEFAULT'}
-                onClick={handleUpdateUserInfo}
-              />
-            </div>
-          ) : (
-            <div>
-              <div>{userInfo.email}</div>
-              <div>{userInfo.name}</div>
-              <div>{userInfo.nickname}</div>
-              <div>{userInfo.birthday}</div>
-              <div>{userInfo.sidoName}</div>
-              <div>{userInfo.gugunName}</div>
-              <div>{userInfo.dongName}</div>
-              {/* {userInfo.image && (
-                <img
-                  src={URL.createObjectURL(userInfo.image)}
-                  alt="Profile"
-                  className={styles.image}
+          </div>
+          <div className={styles.frameParent}>
+            {isEditing ? (
+              <div>
+                <input
+                  type="email"
+                  name="email"
+                  value={userInfo.email}
+                  onChange={handleInputChange}
+                  className={`${styles.div11} ${emailValid === false ? styles.inputError : ''}`}
+                  placeholder="이메일"
                 />
-              )} */}
+                {emailValid === false && (
+                  <div className={styles.error}>이메일이 중복됩니다.</div>
+                )}
+
+                <input
+                  type="text"
+                  name="name"
+                  value={userInfo.name}
+                  onChange={handleInputChange}
+                  className={styles.div11}
+                  placeholder="이름"
+                />
+
+                <input
+                  type="text"
+                  name="nickname"
+                  value={userInfo.nickname}
+                  onChange={handleInputChange}
+                  className={styles.div11}
+                  placeholder="닉네임"
+                />
+                {nicknameValid === false && (
+                  <div className={styles.error}>닉네임이 중복됩니다.</div>
+                )}
+
+                <input
+                  type="date"
+                  name="birthday"
+                  value={userInfo.birthday}
+                  onChange={handleInputChange}
+                  className={styles.div11}
+                  placeholder="생년월일"
+                />
+
+                <select
+                  name="sidoName"
+                  value={userInfo.sidoName}
+                  onChange={handleInputChange}
+                  className={styles.div11}
+                >
+                  <option value="">시/도 선택</option>
+                  {sidoNames.map((sido) => (
+                    <option key={sido} value={sido}>
+                      {sido}
+                    </option>
+                  ))}
+                </select>
+
+                {userInfo.sidoName && (
+                  <select
+                    name="gugunName"
+                    value={userInfo.gugunName}
+                    onChange={handleInputChange}
+                    className={styles.div11}
+                  >
+                    <option value="">구/군 선택</option>
+                    {gugunNames.map((gugun) => (
+                      <option key={gugun} value={gugun}>
+                        {gugun}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {userInfo.gugunName && (
+                  <select
+                    name="dongName"
+                    value={userInfo.dongName}
+                    onChange={handleInputChange}
+                    className={styles.div11}
+                  >
+                    <option value="">동 선택</option>
+                    {dongNames.map((dong) => (
+                      <option key={dong} value={dong}>
+                        {dong}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            ) : (
+              <div>
+                <div className={styles.categoryContainer}>
+                  <div className={styles.categoryTitle}>Email</div>
+                  <div className={styles.categoryContent}>{userInfo.email}</div>
+                </div>
+                <div className={styles.categoryContainer}>
+                  <div className={styles.categoryTitle}>Name</div>
+                  <div className={styles.categoryContent}>{userInfo.name}</div>
+                </div>
+                <div className={styles.categoryContainer}>
+                  <div className={styles.categoryTitle}>Nickname</div>
+                  <div className={styles.categoryContent}>
+                    {userInfo.nickname}
+                  </div>
+                </div>
+                <div className={styles.categoryContainer}>
+                  <div className={styles.categoryTitle}>Birthday</div>
+                  <div className={styles.categoryContent}>
+                    {userInfo.birthday}
+                  </div>
+                </div>
+                <div className={styles.categoryContainer}>
+                  <div className={styles.categoryTitle}>Address</div>
+                  <div className={styles.categoryContent}>
+                    {userInfo.sidoName} {userInfo.gugunName} {userInfo.dongName}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className={styles.buttonContainer}>
+              <div
+                className={`${styles.container} ${styles.buttonStyle}`}
+                onClick={handleEditClick}
+              >
+                <div>{isEditing ? '저장' : '정보 수정'}</div>
+              </div>
+              <div
+                className={`${styles.container} ${styles.buttonStyle}`}
+                onClick={() => navigate('/change-password')}
+              >
+                <div className={styles.div6}>비밀번호 변경</div>
+              </div>
             </div>
-          )}
+          </div>
+          <div className={styles.inner} />
+          <div className={styles.div4}>마이페이지</div>
         </div>
-        <div className={styles.inner} />
-        <div className={styles.div4}>마이페이지</div>
-        <img
-          className={styles.imageAddIcon}
-          alt=""
-          src="image-add.svg"
-          onClick={openPhotoUpload}
-        />
-        <div className={styles.div5} onClick={openPhotoUpload}></div>
-        <div className={styles.wrapper} onClick={openFrame}>
-          {/* <Button
-            label={'정보 수정'}
-            type={'DEFAULT'}
-            onClick={() => {
-              console.log('정보수정 버튼 클릭')
-            }}
-          /> */}
+
+        {/* 결과 및 차트 */}
+        <div className={styles.rectangleDiv}>
+          <div className={styles.resultContainer}>
+            <div className={styles.div10}>검사 결과</div>
+            <div className={styles.div8}>
+              {selectedResult ? selectedResult.date : userInfo.checkupDate}의
+              점수
+            </div>
+            <div className={styles.div11}>
+              <span className={styles.span}>
+                {selectedResult ? selectedResult.score : userInfo.checkupScore}
+              </span>
+              <span className={styles.span1}>점</span>
+            </div>
+            <div className={styles.div12}>
+              검사 소견
+              <br />
+              {getScoreMessage(
+                selectedResult ? selectedResult.score : userInfo.checkupScore
+              )}
+            </div>
+          </div>
         </div>
-        <div
-          className={styles.container}
-          onClick={() => navigate('/change-password')}
-        >
-          <div className={styles.div6}>비밀번호 변경</div>
-        </div>
-        <div className={styles.rectangleDiv} />
-        <div className={styles.div8}>7월 21일의 점수</div>
+
         <div className={styles.div9}>내 주변 병원 찾기</div>
-        <div className={styles.div10}>검사 결과</div>
-        <div className={styles.div11}>
-          <span className={styles.span}>{userInfo.checkupScore}</span>
-          <span className={styles.span1}>점</span>
-        </div>
-        {/* <div className={styles.div12}>
-          중한 우울 중한 수준의 우울감이 시사됩니다. 이러한 높은 수준의 우울감은
-          흔히 신체적, 심리적 대처자원을 저하시키며 개인의 일상생활을 어렵게
-          만들기도 합니다. 가까운 지역센터나 전문기관을 방문하여 보다 상세한
-          평가와 도움을 받아보시기 바랍니다.
-        </div> */}
-        <div className={styles.div12}>{scoreDescription}</div>
         <div className={styles.child1} />
-        <script
-          type="text/javascript"
-          src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_APP_KAKAOMAP_KEY}&libraries=services"
-        ></script>
-        <div className={styles.mapWrapper}>
-          <HospitalMap lat={location.lat} lng={location.lng} />
-        </div>
-        <div className={styles.div37}>검사 소견</div>
-        <div className={styles.navbar}>
-          <div className={styles.bitamin} onClick={onBItAMinTextClick}>
-            BItAMin
-          </div>
-          <div className={styles.parent}>
-            <div className={styles.div38} onClick={onBItAMinTextClick}>
-              <div className={styles.frame}>
-                <div className={styles.div6}>상담</div>
-              </div>
-              <div className={styles.child9} />
-            </div>
-            <div className={styles.div38} onClick={onBItAMinTextClick}>
-              <div className={styles.frame}>
-                <div className={styles.div6}>미션</div>
-              </div>
-              <div className={styles.child9} />
-            </div>
-            <div className={styles.div38} onClick={onBItAMinTextClick}>
-              <div className={styles.group}>
-                <div className={styles.div6}>건강</div>
-                <div className={styles.upWrapper}>
-                  <div className={styles.up}>UP !</div>
-                </div>
-              </div>
-              <div className={styles.child9} />
-            </div>
-            <div className={styles.div38} onClick={onBItAMinTextClick}>
-              <div className={styles.frame}>
-                <div className={styles.div6}>관리자</div>
-              </div>
-              <div className={styles.child9} />
-            </div>
-          </div>
-          <div className={styles.div46}>
-            <div className={styles.frameParent3}>
-              <div className={styles.personcircleParent}>
-                <img
-                  className={styles.personcircleIcon}
-                  alt=""
-                  src="PersonCircle.svg"
-                />
-                <div className={styles.frameParent4}>
-                  <div className={styles.wrapper3}>
-                    <div className={styles.div47}>
-                      <span className={styles.txt}>
-                        <span>김싸피</span>
-                        <span className={styles.span2}>
-                          <span>{` `}</span>
-                          <span className={styles.span3}>님</span>
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-                  <div className={styles.vectorWrapper}>
-                    <img
-                      className={styles.vectorIcon}
-                      alt=""
-                      src="Vector.svg"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className={styles.wrapper4} onClick={onBItAMinTextClick}>
-                <img className={styles.icon} alt="" src="쪽지 버튼.svg" />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className={styles.rectangleParent}>
-          <div className={styles.groupChild} />
-
-          <div className={styles.div48}>나의 차트</div>
-        </div>
-        <div className={styles.groupParent}>
-          <div className={styles.chartParent}>
-            <div className={styles.chart}>
-              <img className={styles.groupIcon} alt="" src="Group.svg" />
-              <div className={styles.group1}>
-                <img className={styles.vectorIcon1} alt="" src="Vector.svg" />
-                <div className={styles.group2}>
-                  <div className={styles.group3}>
-                    <img
-                      className={styles.vectorIcon2}
-                      alt=""
-                      src="Vector.svg"
-                    />
-                    <div className={styles.div49}>0</div>
-                  </div>
-                  <div className={styles.group4}>
-                    <img
-                      className={styles.vectorIcon3}
-                      alt=""
-                      src="Vector.svg"
-                    />
-                    <div className={styles.div50}>15</div>
-                  </div>
-                  <div className={styles.group5}>
-                    <img
-                      className={styles.vectorIcon4}
-                      alt=""
-                      src="Vector.svg"
-                    />
-                    <div className={styles.div51}>30</div>
-                  </div>
-                  <div className={styles.group6}>
-                    <img
-                      className={styles.vectorIcon5}
-                      alt=""
-                      src="Vector.svg"
-                    />
-                    <div className={styles.div52}>45</div>
-                  </div>
-                  <div className={styles.group7}>
-                    <img
-                      className={styles.vectorIcon6}
-                      alt=""
-                      src="Vector.svg"
-                    />
-                    <div className={styles.div52}>60</div>
-                  </div>
-                </div>
-              </div>
-              <img className={styles.groupIcon1} alt="" src="Group.svg" />
-              <img className={styles.groupIcon2} alt="" src="Group.svg" />
-              <div className={styles.group8}>
-                <img className={styles.vectorIcon7} alt="" src="Vector.svg" />
-                <div className={styles.div54}>10</div>
-              </div>
-            </div>
-            <div className={styles.div55}>(주차)</div>
-            <div className={styles.div56}>(점수)</div>
-          </div>
-          <div className={styles.group9}>
-            <img className={styles.vectorIcon8} alt="" src="Vector.svg" />
-            <div className={styles.div57}>1</div>
-          </div>
-          <div className={styles.group10}>
-            <img className={styles.vectorIcon9} alt="" src="Vector.svg" />
-            <div className={styles.div57}>2</div>
-          </div>
-          <div className={styles.group11}>
-            <img className={styles.vectorIcon9} alt="" src="Vector.svg" />
-            <div className={styles.div57}>3</div>
-          </div>
-          <div className={styles.group12}>
-            <img className={styles.vectorIcon9} alt="" src="Vector.svg" />
-            <div className={styles.div57}>4</div>
-          </div>
-          <div className={styles.group13}>
-            <img className={styles.vectorIcon9} alt="" src="Vector.svg" />
-            <div className={styles.div57}>5</div>
-          </div>
-          <div className={styles.group14}>
-            <img className={styles.vectorIcon9} alt="" src="Vector.svg" />
-            <div className={styles.div57}>6</div>
-          </div>
-          <div className={styles.group15}>
-            <img className={styles.vectorIcon14} alt="" src="Vector.svg" />
-            <div className={styles.div57}>7</div>
-          </div>
-          <div className={styles.group16}>
-            <img className={styles.vectorIcon9} alt="" src="Vector.svg" />
-            <div className={styles.div57}>8</div>
-          </div>
-          <div className={styles.group17}>
-            <img className={styles.vectorIcon9} alt="" src="Vector.svg" />
-            <div className={styles.div57}>9</div>
-          </div>
-        </div>
         <div className={styles.div66}>
           <b>{userInfo.sidoName} </b>
           <b>{userInfo.gugunName}</b>
-          <span className={styles.span4}>
-            <span>에 있는</span>
-            <span className={styles.span5}>{` `}</span>
-          </span>
-          <b>정신과</b>
+          <span>에 있는 정신건강의학과</span>
+        </div>
+        <div className={styles.mapWrapper}>
+          <HospitalMap lat={location.lat} lng={location.lng} />
+        </div>
+
+        <div className={styles.chartContainer}>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              onClick={handleChartClick} // 차트 클릭 이벤트 추가
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis domain={[0, 60]} />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="score" stroke="#8884d8" />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </>

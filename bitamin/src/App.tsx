@@ -9,7 +9,7 @@ import Header from './stories/organisms/common/Header'
 const AppContent: React.FC = () => {
   const location = useLocation()
   const excludeHeaderPaths = ['/']
-  const excludeFooterPaths = ['/', '/modal'] // Footer를 제외할 경로들
+  const excludeFooterPaths = ['/', '/modal', '/consult', '/healthup'] // Footer를 제외할 경로들
 
   const isLoggedIn = false // 로그인 상태를 확인하는 로직이 필요
 
@@ -19,12 +19,8 @@ const AppContent: React.FC = () => {
       {/* <HeaderAfterLogin /> */}
       {/* {isLoggedIn ? <HeaderAfterLogin /> : <HeaderBeforeLogin />} */}
       <Header />
-      {!excludeHeaderPaths.includes(location.pathname) &&
-        (isLoggedIn ? (
-          <HeaderAfterLogin username="{username}" />
-        ) : (
-          <HeaderBeforeLogin />
-        ))}
+      {/* {!excludeHeaderPaths.includes(location.pathname) &&
+        (isLoggedIn ? <HeaderAfterLogin /> : <HeaderBeforeLogin />)} */}
       <AppRouter />
       {!excludeFooterPaths.includes(location.pathname) && <Footer />}
     </>

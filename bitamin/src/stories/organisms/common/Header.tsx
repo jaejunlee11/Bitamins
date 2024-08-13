@@ -5,7 +5,7 @@ import { useCookies } from 'react-cookie'
 
 const Header: FunctionComponent<{ username?: string }> = ({ username }) => {
   const navigate = useNavigate()
-  const { accessToken, refreshToken, clearAuth, userRole } = useAuthStore()
+  const { accessToken, refreshToken, clearAuth, role } = useAuthStore()
   const [, , removeCookie] = useCookies(['refreshToken'])
   const [dropdownVisible, setDropdownVisible] = useState(false)
 
@@ -94,7 +94,7 @@ const Header: FunctionComponent<{ username?: string }> = ({ username }) => {
             </div>
             <div className="w-[3.125rem] relative rounded-sm bg-brand-sub h-[0.125rem]" />
           </div>
-          {userRole === 'admin' && (
+          {role === 'admin' && (
             <div
               className="w-[3.75rem] h-[4.625rem] flex flex-col items-center justify-center p-[0.312rem] box-border gap-[0.312rem] cursor-pointer"
               onClick={onAdminClick}
