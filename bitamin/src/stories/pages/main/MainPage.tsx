@@ -12,8 +12,11 @@ import recordAgain from 'assets/image/recordAgain.png'
 import recordPlay from 'assets/image/recordPlay.png'
 import HeaderAfterLogin from '@/stories/organisms/common/HeaderAfterLogin'
 import { getPhrases, saveAudio } from '@/api/phraseAPI'
+import { useNavigate } from 'react-router-dom'
 
 const MainPage: React.FC = () => {
+  const navigate = useNavigate()  
+
   const [isRecording, setIsRecording] = useState(false)
   const [isEnded, setIsEnded] = useState(false)
   const [media, setMedia] = useState<MediaRecorder | null>(null)
@@ -170,6 +173,14 @@ const MainPage: React.FC = () => {
       ?.classList.remove(styles.glow)
   }
 
+  const onMissionClick = useCallback(() => {
+    navigate('/mission')
+  }, [navigate])
+
+  const onconsultationClick = useCallback(() => {
+    navigate('/consultationlist')
+  }, [navigate])
+
   return (
     <>
       {/* <HeaderAfterLogin username="{username}" /> */}
@@ -281,6 +292,7 @@ const MainPage: React.FC = () => {
           className={styles.tryConsultBtn}
           onMouseEnter={handleMouseEnterConsult}
           onMouseLeave={handleMouseLeaveConsult}
+          onClick={onconsultationClick}
         >
           <b className={styles.b}>상담하기</b>
         </div>
@@ -288,6 +300,7 @@ const MainPage: React.FC = () => {
           className={styles.tryQuestBtn}
           onMouseEnter={handleMouseEnterQuest}
           onMouseLeave={handleMouseLeaveQuest}
+          onClick={onMissionClick}
         >
           <b className={styles.b}>미션하기</b>
         </div>

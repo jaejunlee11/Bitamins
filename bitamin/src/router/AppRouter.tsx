@@ -56,7 +56,7 @@ const AppRouter: React.FC = () => {
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/change-password" element={<PasswordChangePage />} />
         <Route path="/consultationlist" element={<ConsultationListPage />} />
-        <Route path="/consult" element={<ConsultationPage />} />
+        <Route path="/consult" element={<VideoRoomComponent />} />
         <Route
           path="/counsultationsharing"
           element={<ConsultationSharingPage />}
