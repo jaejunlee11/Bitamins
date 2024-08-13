@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { fetchMessages, deleteMessage } from 'api/messageAPI'
 import { useNavigate } from 'react-router-dom'
 import Modal from '@/stories/organisms/Modal'
+import CheckModal from '@/stories/organisms/CheckModal';
 
 interface Message {
   id: number
@@ -15,6 +16,33 @@ const MessageListPage: React.FC = () => {
   const [hoveredMessageId, setHoveredMessageId] = useState<number | null>(null)
   const navigate = useNavigate()
   const [isModalOpen, setModalOpen] = useState<boolean>(false)
+  const [isCheckModalOpen, setCheckModalOpen] = useState(false);
+  const [toDeleteMessage,setToDeleteMessage] = useState<number>(0);
+
+  const closeCheckModal = () => {
+    setCheckModalOpen(false);
+  }
+
+  const handleConfirm = async () => {
+    // 확인 버튼 클릭 시의 로직
+    try {
+      await deleteMessage(toDeleteMessage)
+      setMessages((prevMessages) =>
+        prevMessages.filter((message) => message.id !== toDeleteMessage)
+      )
+      setMessages(messages.filter((message) => message.id !== toDeleteMessage))
+      setModalOpen(true)
+    } catch (error) {
+      console.error('Failed to delete message:', error)
+    }
+    finally{
+      closeCheckModal()
+    }
+  };
+
+  const handleSecondaryAction = () => {
+    closeCheckModal();
+  };
 
   useEffect(() => {
     const loadMessages = async () => {
@@ -30,16 +58,8 @@ const MessageListPage: React.FC = () => {
   }, [])
 
   const handleDelete = async (id: number) => {
-    try {
-      await deleteMessage(id)
-      setMessages((prevMessages) =>
-        prevMessages.filter((message) => message.id !== id)
-      )
-      setMessages(messages.filter((message) => message.id !== id))
-      setModalOpen(true)
-    } catch (error) {
-      console.error('Failed to delete message:', error)
-    }
+    setToDeleteMessage(id)
+    setCheckModalOpen(true)
   }
 
   const handleMouseEnter = (id: number) => {
@@ -116,6 +136,23 @@ const MessageListPage: React.FC = () => {
           buttonTextColor="#FF1B1B"
           imgColor="#333"
           imgSize={100}
+        />
+      )}
+      {isCheckModalOpen && (
+        <CheckModal
+          title="쪽지 삭제"
+          content="정말 삭제하시겠습니까?"
+          iconSrc="src.alert" 
+          confirmText="확인"
+          onConfirm={handleConfirm}
+          onClose={closeCheckModal}
+          width="400px"
+          height="300px"
+          headerBackgroundColor="#FF1B1B"
+          buttonBorderColor="#FF1B1B"
+          buttonTextColor="#FF1B1B"
+          secondaryButtonText="취소"
+          onSecondaryAction={handleSecondaryAction}
         />
       )}
     </div>

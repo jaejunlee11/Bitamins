@@ -7,6 +7,7 @@ import {
 } from 'api/messageAPI'
 import { useParams, useNavigate } from 'react-router-dom'
 import Modal from '@/stories/organisms/Modal'
+import CheckModal from '@/stories/organisms/CheckModal';
 
 
 const MessageDetailPage = () => {
@@ -19,6 +20,47 @@ const MessageDetailPage = () => {
   const [showReplyInput, setShowReplyInput] = useState(false)
   const [isModalOpen, setModalOpen] = useState<boolean>(false)
   const [isMessageModalOpen, setMessageModalOpen] = useState<boolean>(false)
+  const [isMessageSendModalOpen, setMessageSendModalOpen] = useState<boolean>(false)
+
+  const [isCheckReplyModalOpen, setCheckReplyModalOpen] = useState(false);
+  const [isCheckModalOpen, setCheckModalOpen] = useState(false);
+  const [replyModalId,setReplyModalId] = useState(0);
+
+  const closeCheckModal = () => {
+    setCheckModalOpen(false);
+  }
+
+  const handleConfirm = async () => {
+    // 확인 버튼 클릭 시의 로직
+    try {
+      await deleteMessage(Number(messageId))
+      setModalOpen(true)
+    } catch (err) {
+      alert('Failed to delete message')
+      console.error('Error deleting message:', err)
+    } finally{
+      closeCheckModal();
+    }
+  };
+
+  const handleSecondaryAction = () => {
+    closeCheckModal();
+  };
+
+  // 답장 삭제용 모달 함수
+
+  const closeReplyCheckModal = () => {
+    setCheckReplyModalOpen(false);
+  }
+
+  const handleReplyConfirm = async () => {
+    deleteToReply(replyModalId)
+    closeReplyCheckModal()
+  };
+
+  const handleReplySecondaryAction = () => {
+    closeReplyCheckModal();
+  };
 
   const closeModal = () => {
     setModalOpen(false)
@@ -27,6 +69,10 @@ const MessageDetailPage = () => {
 
   const closeMessageModal = () => {
     setMessageModalOpen(false)
+  }
+
+  const closeSendMessageModal = () => {
+    setMessageSendModalOpen(false)
   }
 
   useEffect(() => {
@@ -45,37 +91,32 @@ const MessageDetailPage = () => {
   }, [messageId])
 
   const handleDeleteMessage = async () => {
-    if (window.confirm('Are you sure you want to delete this message?')) {
-      try {
-        await deleteMessage(Number(messageId))
-        setModalOpen(true)
-      } catch (err) {
-        alert('Failed to delete message')
-        console.error('Error deleting message:', err)
-      }
-    }
+    setCheckModalOpen(true);
   }
 
   const handleDeleteReply = async (replyId) => {
-    if (window.confirm('Are you sure you want to delete this reply?')) {
-      try {
-        await deleteReply(replyId)
-        setMessage((prevMessage) => {
-          if (prevMessage) {
-            return {
-              ...prevMessage,
-              replies: prevMessage.replies.filter(
-                (reply) => reply.id !== replyId
-              ),
-            }
+    await setReplyModalId(replyId)
+    setCheckReplyModalOpen(true)
+  }
+
+  const deleteToReply = async (replyId) => {
+    try {
+      await deleteReply(replyId)
+      setMessage((prevMessage) => {
+        if (prevMessage) {
+          return {
+            ...prevMessage,
+            replies: prevMessage.replies.filter(
+              (reply) => reply.id !== replyId
+            ),
           }
-          return prevMessage
-        })
-        setMessageModalOpen(true)
-      } catch (err) {
-        alert('Failed to delete reply')
-        console.error('Error deleting reply:', err)
-      }
+        }
+        return prevMessage
+      })
+      setMessageModalOpen(true)
+    } catch (err) {
+      alert('Failed to delete reply')
+      console.error('Error deleting reply:', err)
     }
   }
 
@@ -90,13 +131,12 @@ const MessageDetailPage = () => {
         content: replyContent,
       })
 
-      alert('Reply added successfully')
-
       const updatedMessage = await fetchMessageDetail(Number(messageId))
       setMessage(updatedMessage)
 
       setReplyContent('')
       setShowReplyInput(false)
+      setMessageSendModalOpen(true)
     } catch (err) {
       alert('Failed to add reply')
       console.error('Error adding reply:', err)
@@ -220,6 +260,52 @@ const MessageDetailPage = () => {
           buttonTextColor="#FF1B1B"
           imgColor="#333"
           imgSize={100}
+        />
+      )}
+            {isMessageSendModalOpen && (
+        <Modal
+          title="답장이 전송되었습니다."
+          content="답장이 성공적으로 전송되었습니다."
+          iconSrc="ri.RiMailSendLine"
+          onClose={closeSendMessageModal}
+          headerBackgroundColor="#FF713C"
+          buttonBorderColor="#FF713C"
+          buttonTextColor="#FF713C"
+          imgColor="#333"
+        />
+      )}
+      {isCheckModalOpen && (
+        <CheckModal
+          title="쪽지 삭제"
+          content="정말 삭제하시겠습니까?"
+          iconSrc="src.alert" 
+          confirmText="확인"
+          onConfirm={handleConfirm}
+          onClose={closeCheckModal}
+          width="400px"
+          height="300px"
+          headerBackgroundColor="#FF1B1B"
+          buttonBorderColor="#FF1B1B"
+          buttonTextColor="#FF1B1B"
+          secondaryButtonText="취소"
+          onSecondaryAction={handleSecondaryAction}
+        />
+      )}
+            {isCheckReplyModalOpen && (
+        <CheckModal
+          title="답장 삭제"
+          content="정말 삭제하시겠습니까?"
+          iconSrc="src.alert" 
+          confirmText="확인"
+          onConfirm={handleReplyConfirm}
+          onClose={closeReplyCheckModal}
+          width="400px"
+          height="300px"
+          headerBackgroundColor="#FF1B1B"
+          buttonBorderColor="#FF1B1B"
+          buttonTextColor="#FF1B1B"
+          secondaryButtonText="취소"
+          onSecondaryAction={handleReplySecondaryAction}
         />
       )}
     </div>
