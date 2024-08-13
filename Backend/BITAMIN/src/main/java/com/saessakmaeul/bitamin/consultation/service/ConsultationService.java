@@ -1,6 +1,6 @@
 package com.saessakmaeul.bitamin.consultation.service;
 
-import git adcom.saessakmaeul.bitamin.consultation.Entity.ChatingLog;
+import com.saessakmaeul.bitamin.consultation.Entity.ChatingLog;
 import com.saessakmaeul.bitamin.consultation.Entity.Consultation;
 import com.saessakmaeul.bitamin.consultation.Entity.Participant;
 import com.saessakmaeul.bitamin.consultation.Entity.SearchCondition;

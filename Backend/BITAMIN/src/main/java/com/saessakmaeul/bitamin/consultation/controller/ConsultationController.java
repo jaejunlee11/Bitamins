@@ -269,7 +269,7 @@ public class ConsultationController {
         return ResponseEntity.status(200).body(gptResponses);
     }
 
-    @GetMapping("detail/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> ConsultationDetail(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                                 @PathVariable("id") Long id) {
 
