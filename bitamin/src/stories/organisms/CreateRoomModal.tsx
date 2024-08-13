@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { joinConsultation, useCreateRoom } from 'store/useConsultationStore'
 import { CreateConsultation, JoinData } from 'ts/consultationType'
+import Modal from '@/stories/organisms/Modal'
 
 interface CreateRoomPageProps {
   onClose: () => void // 모달을 닫기 위한 onClose prop
@@ -14,6 +15,8 @@ const CreateRoomPage: React.FC<CreateRoomPageProps> = ({ onClose }) => {
   const [password, setPassword] = useState<string>('')
   const [startTime, setStartTime] = useState<string>('')
   const [endTime, setEndTime] = useState<string>('')
+
+  const [isModalOpen, setModalOpen] = useState<boolean>(false) // 모달 상태 추가
 
   const navigate = useNavigate()
 
@@ -82,7 +85,9 @@ const CreateRoomPage: React.FC<CreateRoomPageProps> = ({ onClose }) => {
 
         if (consultation) {
           setJoinConsultation(consultation)
-          navigate('/consult') // 방 생성 후 /consult로 이동
+          setModalOpen(true) // 모달 열기
+        } else {
+          console.error('Failed to join the room.')
         }
       } else {
         console.error('Failed to create the room.')
@@ -90,6 +95,11 @@ const CreateRoomPage: React.FC<CreateRoomPageProps> = ({ onClose }) => {
     } catch (error) {
       console.error('Failed to create or join room:', error)
     }
+  }
+
+  const closeModal = () => {
+    setModalOpen(false)
+    navigate('/consult') // 모달을 닫은 후 /consult 페이지로 이동
   }
 
   return (
@@ -200,6 +210,19 @@ const CreateRoomPage: React.FC<CreateRoomPageProps> = ({ onClose }) => {
           </div>
         </form>
       </div>
+      {isModalOpen && (
+        <Modal
+          title="방이 생성되었습니다."
+          content="방이 성공적으로 생성되었습니다."
+          iconSrc="src.room"
+          onClose={closeModal}
+          headerBackgroundColor="#FF713C"
+          buttonBorderColor="#FF713C"
+          buttonTextColor="#FF713C"
+          imgColor="#333"
+          imgSize={200}
+        />
+      )}
     </div>
   )
 }
