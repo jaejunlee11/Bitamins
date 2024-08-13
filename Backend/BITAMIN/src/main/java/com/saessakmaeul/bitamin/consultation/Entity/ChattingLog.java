@@ -1,18 +1,19 @@
 package com.saessakmaeul.bitamin.consultation.Entity;
 
+import com.saessakmaeul.bitamin.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "chating_log")
+@Table(name = "chatting_log")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class ChatingLog {
+public class ChattingLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
@@ -24,11 +25,13 @@ public class ChatingLog {
     @Column(name = "send_time", insertable = false)
     private LocalDateTime sendTime;
 
-    @Column(name = "member_id")
-    private Long memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", referencedColumnName = "id")
+    private Member memberId;
 
-    @Column(name = "consultation_id")
-    private Long consultationId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "consultation_id", referencedColumnName = "id")
+    private Consultation consultationId;
 
     @Column(name = "member_nickname")
     private String memberNickname;
