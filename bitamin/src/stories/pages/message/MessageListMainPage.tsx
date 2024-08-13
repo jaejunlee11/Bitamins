@@ -15,7 +15,7 @@ const MessageListMainPage: React.FC = () => {
       <div className="p-4 mx-auto max-w-screen-lg">
         {' '}
         {/* 추가된 클래스 */}
-        <div className="flex space-x-4 mb-4">
+        <div className="p-4 mx-auto" style={{ maxWidth: '60%' }}>
           <button
             className={`px-4 py-2 rounded ${
               activeTab === 'messages' ? 'bg-gray-300' : 'bg-gray-100'

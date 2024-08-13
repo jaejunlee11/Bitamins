@@ -111,6 +111,10 @@ const MessageDetailPage = () => {
         >
           삭제
         </button>
+        {/* 신고 버튼 주석 처리 */}
+        {/* <button className="bg-yellow-500 text-white px-3 py-1 rounded">
+          신고
+        </button> */}
         <span className="text-gray-500">{message?.sendDate}</span>
       </div>
 
