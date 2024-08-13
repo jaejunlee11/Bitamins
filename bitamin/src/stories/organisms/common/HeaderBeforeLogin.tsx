@@ -139,10 +139,20 @@
 // export default HeaderBeforeLogin
 
 import { FunctionComponent, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const HeaderBeforeLogin: FunctionComponent = () => {
+  const navigate = useNavigate()
   const onBItAMinTextClick = useCallback(() => {
     // Add your code here
+  }, [])
+
+  const onLoginTextClick = useCallback(() => {
+    navigate('/login')
+  }, [])
+
+  const onSignupTextClick = useCallback(() => {
+    navigate('/signup')
   }, [])
 
   return (
@@ -189,13 +199,18 @@ const HeaderBeforeLogin: FunctionComponent = () => {
           </div>
         </div>
         <div className="w-[7.75rem] h-[6.125rem] flex flex-row items-center justify-center gap-[0.187rem] text-dimgray">
-          <div className="w-[3.125rem] relative flex items-center justify-center h-[2rem] shrink-0">
+          <div
+            className="w-[3.125rem] relative flex items-center justify-center h-[2rem] shrink-0"
+            onClick={onLoginTextClick}
+          >
             로그인
           </div>
           <div className="w-[1.25rem] relative text-black flex items-center justify-center h-[2rem] shrink-0">
             /
           </div>
-          <div className="relative">회원가입</div>
+          <div className="relative" onClick={onSignupTextClick}>
+            회원가입
+          </div>
         </div>
       </div>
     </div>

@@ -1,3 +1,20 @@
+@keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.fadeOutBox {
+  animation: fadeout 3s forwards;
+  -moz-animation: fadeout 3s forwards; /* Firefox */
+  -webkit-animation: fadeout 3s forwards; /* Safari and Chrome */
+  -o-animation: fadeout 3s forwards; /* Opera */
+  animation-fill-mode: forwards;
+}
+
 .div {
   width: 100%;
   height: 100vh;
@@ -14,7 +31,7 @@
   position: absolute;
   top: calc(50% + 63px); /* 기존 값 유지 */
   left: calc(50% - 110px);
-  font-size: 2rem; /* 필요시 폰트 크기 조정 */
+  font-size: 2.25rem; /* 필요시 폰트 크기 조정 */
   color: #fff;
 }
 
@@ -24,6 +41,37 @@
   left: calc(50% - 375px);
   font-size: 4.375rem; /* 기존 값 유지 */
   color: #fff;
+}
+
+.typingDemo {
+  width: 28ch; /* 텍스트 길이에 맞춘 너비 설정 */
+  animation:
+    typing 4s steps(28),
+    blink 0.65s step-end infinite alternate;
+  /* 글씨 나오는 속도 */
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 3px solid;
+  font-family: monospace;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 28ch;
+  }
+}
+
+@keyframes blink {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #fff;
+  }
 }
 
 .child {

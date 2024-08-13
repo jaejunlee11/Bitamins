@@ -5,13 +5,14 @@
   width: 1024px;
   height: 306px;
 }
+/* 뒤에 노란 배경 */
 .item {
   position: absolute;
-  top: 98px;
+  top: 0px;
   left: 0px;
   background-color: #f9ea9b;
-  width: 1024px;
-  height: 306px;
+  width: 100%;
+  height: 450px;
 }
 .inner {
   position: absolute;
@@ -20,31 +21,33 @@
   width: 144px;
   height: 56px;
 }
+/* 우울증 척도 */
 .cesD {
   position: absolute;
   top: 0%;
-  left: 13.4%;
+  left: 26%;
+  font-weight: bolder;
 }
 .b {
   position: absolute;
-  top: 82.14%;
-  left: 0%;
-  font-size: 10px;
+  top: 65px;
+  left: 4%;
+  font-size: 15px;
   color: #777;
   text-align: left;
 }
 .component79 {
   position: absolute;
   top: 0px;
-  left: 0px;
-  width: 388px;
+  left: 50%;
+  width: 100%;
   height: 56px;
 }
 .component79Wrapper {
   position: absolute;
   top: 0px;
   left: 178px;
-  width: 388px;
+  width: 100%;
   height: 56px;
 }
 .div2 {
@@ -59,11 +62,25 @@
   height: 28px;
   flex-shrink: 0;
 }
+/* 질문 박스 */
+.questionBox {
+  background-color: #fff;
+  padding: 26px;
+  border-radius: 10px;
+  box-shadow: 0.2px 5px 8px 4px rgba(48, 48, 48, 0.1); /* 그림자 효과 */
+  margin-bottom: 20px; /* 질문 박스 간 간격 */
+}
+.questionList {
+  font-weight: bold;
+  font-size: large;
+}
+
+/* 질문 번호 */
 .wrapper {
-  width: 28px;
+  width: 30px;
   border-radius: 7.5px;
   background-color: #ff713c;
-  height: 28px;
+  height: 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -83,15 +100,17 @@
   padding: 10px;
   color: #333;
 }
+/* 질문 */
 .div1 {
-  width: 515px;
+  width: 700px;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  text-align: left;
 }
 .div5 {
-  width: 110px;
+  width: 150px;
   position: relative;
   letter-spacing: -0.18px;
   line-height: 22px;
@@ -101,6 +120,10 @@
   justify-content: center;
   flex-shrink: 0;
 }
+.selected {
+  color: #ff713c; /* 글씨 색상을 원하는 색상으로 변경 */
+}
+
 .div4 {
   border-radius: 10px;
   border: 1px solid rgba(119, 119, 119, 0.6);
@@ -152,9 +175,10 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  gap: 5px;
-  font-size: 12px;
+  gap: 50px;
+  font-size: 15px;
   color: rgba(119, 119, 119, 0.6);
+  margin-top: 10px;
 }
 .parent {
   position: absolute;
@@ -437,33 +461,23 @@
   justify-content: center;
   padding: 15px 30px;
 }
-.parent36 {
-  position: absolute;
-  top: calc(50% + 1063px);
-  left: calc(50% - 297.5px);
-  box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  background-color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 15px 30px;
-}
+/* 질문박스 배치 */
 .frameParent {
-  width: 595px;
+  width: 720px;
   position: relative;
   height: 2320px;
+  left: -15px;
+  top: -80px;
 }
 .groupWrapper {
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: 50px;
+  left: 460px;
   box-shadow: 9px 9px 25px rgba(179, 175, 174, 0.24);
   border-radius: 10px;
   background-color: #fff;
-  width: 744px;
-  height: 2461px;
+  width: 844px;
+  height: 2600px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -483,7 +497,7 @@
 }
 .groupParent {
   position: absolute;
-  top: 0px;
+  top: -40px;
   left: 0px;
   width: 744px;
   height: 2533px;

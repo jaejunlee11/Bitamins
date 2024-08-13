@@ -2,6 +2,7 @@ import { useState } from 'react'
 import axiosInstance, { setAccessToken } from 'api/axiosInstance'
 import useAuthStore from 'store/useAuthStore'
 import { useCookies } from 'react-cookie'
+import useUserStore from 'store/useUserStore' // useUserStore 임포트
 
 const ExLogin: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -9,6 +10,7 @@ const ExLogin: React.FC = () => {
   const [, setCookie] = useCookies(['refreshToken']) // `cookies` 대신 `_`를 사용
   const setAuthAccessToken = useAuthStore((state) => state.setAccessToken)
   const setAuthRefreshToken = useAuthStore((state) => state.setRefreshToken)
+  const fetchUser = useUserStore((state) => state.fetchUser) // fetchUser 가져오기
 
   const handleLogin = async () => {
     try {
@@ -18,14 +20,18 @@ const ExLogin: React.FC = () => {
       })
 
       const { accessToken, refreshToken } = response.data
-      setAccessToken(accessToken) // axiosInstance에 accessToken 설정
-      setAuthAccessToken(accessToken) // zustand 상태 관리에 accessToken 설정
-      setAuthRefreshToken(refreshToken) // zustand 상태 관리에 refreshToken 설정
+      setAccessToken(accessToken)
+      setAuthAccessToken(accessToken)
+      setAuthRefreshToken(refreshToken)
       setCookie('refreshToken', refreshToken, {
         path: '/',
         secure: true,
-        sameSite: 'strict', // 또는 'lax' 또는 'none'으로 설정
+        sameSite: 'strict',
       })
+
+      console.log('Before fetchUser') // 여기까지 도달했는지 확인
+      const data = await fetchUser()
+      console.log('Fetched User Data:', data) // 유저 데이터가 제대로 출력되는지 확인
 
       alert('Login successful!')
     } catch (error: any) {

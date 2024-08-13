@@ -1,14 +1,18 @@
 import axios from 'axios'
-import useAuthStore from '../store/useAuthStore'
+import useAuthStore from 'store/useAuthStore'
+import { useNavigate } from 'react-router-dom'
+import React, { useEffect } from 'react'
 
 const axiosInstance = axios.create({
+  // localhost에서는 refreshToken은 발급되지 않음.
+  // accessToken
   baseURL: 'https://i11b105.p.ssafy.io/api', // API 기본 URL 설정
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true, // HTTP-only 쿠키를 전송하기 위해 설정
 })
-
+const { clearAuth } = useAuthStore.getState()
 const EXCLUDED_PATHS = ['/auth/login', '/members/register']
 
 // 요청 인터셉터
@@ -40,7 +44,10 @@ axiosInstance.interceptors.response.use(
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true
         try {
-          const { refreshToken } = useAuthStore.getState()
+          const { refreshToken, setAccessToken, setRefreshToken, clearAuth } =
+            useAuthStore.getState()
+          // console.log(clearAuth) // clearAuth가 올바르게 가져와졌는지 확인하는 로그
+          // 새로운 Access Token 요청
           const response = await axios.post(
             'https://i11b105.p.ssafy.io/api/refresh-token',
             {},
@@ -50,14 +57,16 @@ axiosInstance.interceptors.response.use(
           )
           const newAccessToken = response.data.accessToken
           const newRefreshToken = response.data.refreshToken
-          useAuthStore.getState().setAccessToken(newAccessToken) // 상태 업데이트
-          useAuthStore.getState().setRefreshToken(newRefreshToken) // 상태 업데이트
+          setAccessToken(newAccessToken) // 상태 업데이트
+          setRefreshToken(newRefreshToken) // 상태 업데이트
           axiosInstance.defaults.headers.common['Authorization'] =
             `Bearer ${newAccessToken}`
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`
           return axiosInstance(originalRequest)
         } catch (refreshError) {
-          useAuthStore.getState().clearAuth()
+          const navigate = useNavigate()
+          clearAuth() // 사용자 상태 초기화
+          navigate('/login') // 로그인 페이지로 리다이렉트
           return Promise.reject(refreshError)
         }
       }

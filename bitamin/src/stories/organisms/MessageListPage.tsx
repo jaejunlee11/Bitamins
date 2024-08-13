@@ -1,57 +1,83 @@
-import React, { useEffect, useState } from 'react'
-import { fetchMessages } from 'api/messageAPI'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { fetchMessages, deleteMessage } from 'api/messageAPI'
+import { useNavigate } from 'react-router-dom'
 
 interface Message {
   id: number
   nickname: string
-  category: string
   title: string
   sendDate: string
-  isRead: number
 }
 
 const MessageListPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [hoveredMessageId, setHoveredMessageId] = useState<number | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const loadMessages = async () => {
-      try {
-        const messageData = await fetchMessages()
-        setMessages(messageData)
-      } catch (err) {
-        setError('Failed to fetch messages')
-      } finally {
-        setLoading(false)
-      }
+      const data = await fetchMessages()
+      setMessages(data)
     }
 
     loadMessages()
   }, [])
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>{error}</div>
+  const handleDelete = async (id: number) => {
+    await deleteMessage(id)
+    setMessages(messages.filter((message) => message.id !== id))
+  }
+
+  const handleMouseEnter = (id: number) => {
+    setHoveredMessageId(id)
+  }
+
+  const handleMouseLeave = () => {
+    setHoveredMessageId(null)
+  }
 
   return (
-    <div>
-      <h1>Message List</h1>
-      <ul>
-        {messages.map((message) => (
-          <li key={message.id}>
-            <Link to={`/messages/${message.id}`}>
-              <p>
-                <strong>{message.nickname}:</strong> {message.title}
-              </p>
-              <p>Category: {message.category}</p>
-              <p>Send Date: {new Date(message.sendDate).toLocaleString()}</p>
-              <p>{message.isRead ? 'Read' : 'Unread'}</p>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <ul className="space-y-2">
+      {messages.map((message) => (
+        <li
+          key={message.id}
+          className={`flex justify-between items-center p-4 border rounded-lg cursor-pointer ${
+            hoveredMessageId === message.id
+              ? 'bg-green-500 text-white'
+              : 'bg-white'
+          }`}
+          onMouseEnter={() => handleMouseEnter(message.id)}
+          onMouseLeave={handleMouseLeave}
+          onClick={() => navigate(`/messages/${message.id}`)}
+        >
+          <div className="flex items-center space-x-4">
+            <img src="path/to/icon.png" alt="icon" className="w-6 h-6" />
+            <span
+              className={`font-semibold ${hoveredMessageId === message.id ? 'text-white' : 'text-red-500'}`}
+            >
+              {message.nickname}
+            </span>
+            <span
+              className={
+                hoveredMessageId === message.id ? 'text-white' : 'text-gray-800'
+              }
+            >
+              {message.title}
+            </span>
+          </div>
+          <div className="text-gray-500">{message.sendDate}</div>
+          <button
+            className="ml-4 px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleDelete(message.id)
+            }}
+          >
+            삭제
+          </button>
+        </li>
+      ))}
+    </ul>
   )
 }
 
