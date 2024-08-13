@@ -22,15 +22,15 @@
   position: relative;
   margin: 0 auto;
   padding: 20px;
-  width: 90%;
-  max-width: 400px;
+  width: 100%;
+  max-width: 500px;
   text-align: center;
   font-size: 0.5rem;
   color: #333;
 }
 
 .component63 {
-  margin-top: 100px;
+  margin-top: 140px;
   margin-bottom: 20px;
   font-size: 0.5rem;
 }
@@ -42,15 +42,19 @@
 }
 
 .bitamin1 {
-  font-size: 0.8rem;
+  font-size: 1.1rem;
+  color: rgb(98, 98, 98);
 }
-
+/* 로그인 박스 뒤 흰 배경 */
 .component65 {
   position: relative;
   background-color: #fff;
-  padding: 20px;
+  padding: 60px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+  width: 500px;
+  left: -18px;
+  height: 600px;
 }
 
 .component65Child,
@@ -67,7 +71,7 @@
   font-size: 1rem;
   box-sizing: border-box;
 }
-
+/* 로그인 회원가입 버튼 */
 .component55Child,
 .component56Child {
   background-color: #ff713c;
@@ -79,6 +83,7 @@
   font-size: 1rem;
   border-radius: 4px;
   cursor: pointer;
+  margin-top: 20 px;
 }
 
 .component56Child {

@@ -145,7 +145,7 @@ const MyPage: React.FC = () => {
   }
   const handleDeleteImage = () => {
     setIsImageDeleted(true)
-    setPreviewUrl(null)
+    setPreviewUrl(null) // previewUrl을 null로 설정하여 이미지 삭제
     setUserInfo((prevUserInfo) => ({
       ...prevUserInfo,
       image: null,
@@ -284,12 +284,14 @@ const MyPage: React.FC = () => {
               {previewUrl ? (
                 <div className={styles.imageWrapper}>
                   <img src={previewUrl} alt="미리보기 이미지" />
-                  <button
-                    className={styles.deleteButton}
-                    onClick={handleDeleteImage}
-                  >
-                    X
-                  </button>
+                  {isEditing && previewUrl && (
+                    <button
+                      className={styles.deleteButton}
+                      onClick={handleDeleteImage}
+                    >
+                      X
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className={styles.placeholder}>이미지를 첨부하세요</div>
@@ -312,7 +314,7 @@ const MyPage: React.FC = () => {
                   name="email"
                   value={userInfo.email}
                   onChange={handleInputChange}
-                  className={`${styles.div11} ${emailValid === false ? styles.inputError : ''}`}
+                  className={`${styles.div11} ${styles.inputField} ${emailValid === false ? styles.inputError : ''}`}
                   placeholder="이메일"
                 />
                 {emailValid === false && (
@@ -324,7 +326,7 @@ const MyPage: React.FC = () => {
                   name="name"
                   value={userInfo.name}
                   onChange={handleInputChange}
-                  className={styles.div11}
+                  className={`${styles.div11} ${styles.inputField}`}
                   placeholder="이름"
                 />
 
@@ -333,7 +335,7 @@ const MyPage: React.FC = () => {
                   name="nickname"
                   value={userInfo.nickname}
                   onChange={handleInputChange}
-                  className={styles.div11}
+                  className={`${styles.div11} ${styles.inputField}`}
                   placeholder="닉네임"
                 />
                 {nicknameValid === false && (
@@ -345,7 +347,7 @@ const MyPage: React.FC = () => {
                   name="birthday"
                   value={userInfo.birthday}
                   onChange={handleInputChange}
-                  className={styles.div11}
+                  className={`${styles.div11} ${styles.inputField}`}
                   placeholder="생년월일"
                 />
 
@@ -353,7 +355,7 @@ const MyPage: React.FC = () => {
                   name="sidoName"
                   value={userInfo.sidoName}
                   onChange={handleInputChange}
-                  className={styles.div11}
+                  className={`${styles.div11} ${styles.inputField}`}
                 >
                   <option value="">시/도 선택</option>
                   {sidoNames.map((sido) => (
@@ -469,7 +471,6 @@ const MyPage: React.FC = () => {
           </div>
         </div>
 
-        <div className={styles.div9}>내 주변 병원 찾기</div>
         <div className={styles.child1} />
         <div className={styles.div66}>
           <b>{userInfo.sidoName} </b>
@@ -492,7 +493,12 @@ const MyPage: React.FC = () => {
               <YAxis domain={[0, 60]} />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="score" stroke="#8884d8" />
+              <Line
+                type="monotone"
+                dataKey="score"
+                stroke="#8884d8"
+                strokeWidth={1.5}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>

@@ -123,7 +123,7 @@ const SurveyPage: React.FC = () => {
               <div className={styles.component79}>
                 <div className={styles.cesD}>우울증 척도 (CES-D)</div>
                 <b className={styles.b}>
-                  지난 1주동안 당신이 느끼고 행동한 것을 가장 잘 나타낸다고
+                  지난 1주 동안 당신이 느끼고 행동한 것을 가장 잘 나타낸다고
                   생각되는 답변에 체크해주세요.
                 </b>
               </div>
