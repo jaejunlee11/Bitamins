@@ -28,7 +28,7 @@ class VideoRoomComponent extends Component {
 
     this.state = {
       mySessionId: sessionId || 'SessionA',
-      myUserName: nickname || 'test5',
+      nickname: nickname || 'test5',
       session: undefined,
       localUser: undefined,
       subscribers: [], // remotes 대신 subscribers로 초기화
@@ -57,6 +57,9 @@ class VideoRoomComponent extends Component {
     this.checkSize = this.checkSize.bind(this)
     this.handleConfirmLeave = this.handleConfirmLeave.bind(this) // 모달 확인 버튼 핸들러
     this.handleCancelLeave = this.handleCancelLeave.bind(this) // 모달 취소 버튼 핸들러
+
+    this.recognition = null // STT 객체
+    this.isSttRunning = false // STT 실행 여부
   }
 
   componentDidMount() {
@@ -84,6 +87,9 @@ class VideoRoomComponent extends Component {
 
     console.log('Joining session with ID:', this.state.mySessionId)
     console.log('Using token:', this.state.token)
+
+    // 강제로 STT 시작
+    this.startStt()
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -134,7 +140,7 @@ class VideoRoomComponent extends Component {
 
   connect(token) {
     this.state.session
-      .connect(token, { clientData: this.state.myUserName })
+      .connect(token, { clientData: this.state.nickname })
       .then(() => {
         this.connectWebCam()
       })
@@ -142,7 +148,7 @@ class VideoRoomComponent extends Component {
         if (this.props.error) {
           this.props.error({
             error: error.error,
-            messgae: error.message,
+            message: error.message,
             code: error.code,
             status: error.status,
           })
@@ -186,7 +192,7 @@ class VideoRoomComponent extends Component {
         })
       })
     }
-    localUser.setNickname(this.state.myUserName)
+    localUser.setNickname(this.state.nickname)
     localUser.setConnectionId(this.state.session.connection.connectionId)
     localUser.setScreenShareActive(false)
     localUser.setStreamManager(publisher)
@@ -234,7 +240,7 @@ class VideoRoomComponent extends Component {
     this.leaveSession() // 세션 떠나기
     this.setState({ showModal: false }) // 모달 숨기기
     // 페이지 이동 (필요한 경우)
-    this.props.navigate('/consultationlist')
+    window.location.href = '/consultationlist'
   }
 
   handleCancelLeave() {
@@ -252,13 +258,20 @@ class VideoRoomComponent extends Component {
       this.removeParticipant(this.state.localUser.getConnectionId()) // 참여자 리스트에서 로컬 사용자 제거
     }
 
+    // STT를 중지하는 로직 추가
+    if (this.recognition && this.isSttRunning) {
+      this.recognition.stop()
+      this.isSttRunning = false
+      console.log('STT has been stopped.')
+    }
+
     this.OV = null
     this.setState({
       session: undefined,
       subscribers: [],
       participants: [], // 세션 떠날 때 참여자 리스트 초기화
-      mySessionId: 'SessionA',
-      myUserName: 'OpenVidu_User' + Math.floor(Math.random() * 100),
+      mySessionId: this.state.mySessionId,
+      myUserName: this.state.nickname,
       localUser: undefined,
     })
     if (this.props.leaveSession) {
@@ -298,6 +311,9 @@ class VideoRoomComponent extends Component {
     // STT를 통해 음성 인식 시작
     if (localUser.isAudioActive()) {
       this.startStt()
+    } else if (this.recognition) {
+      this.recognition.stop()
+      this.isSttRunning = false
     }
   }
 
@@ -412,29 +428,41 @@ class VideoRoomComponent extends Component {
 
   startStt() {
     // STT 초기화 및 시작
-    console.log('STT 시작')
-    const recognition = new window.webkitSpeechRecognition()
-    recognition.lang = 'ko-KR'
-    recognition.interimResults = false
-    recognition.maxAlternatives = 1
+    if (this.recognition && this.isSttRunning) {
+      console.log('STT is already running.')
+      return
+    }
 
-    recognition.onresult = (event) => {
+    console.log('STT 시작')
+    this.recognition = new window.webkitSpeechRecognition()
+    this.recognition.lang = 'ko-KR'
+    this.recognition.interimResults = false
+    this.recognition.maxAlternatives = 1
+    this.isSttRunning = true
+
+    this.recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript
       console.log('STT result:', transcript)
       // STT 결과를 store에 저장
-      useChatStore.getState().saveSttText(transcript)
+      useChatStore.getState().saveSttText('test', transcript)
+      // useChatStore.getState().saveSttText(`${this.state.nickname}`, transcript)
+      console.log(useChatStore.getState)
     }
 
-    recognition.onerror = (event) => {
+    this.recognition.onerror = (event) => {
       console.error('STT error:', event.error)
+      this.isSttRunning = false
     }
 
-    recognition.onend = () => {
+    this.recognition.onend = () => {
       console.log('STT ended, restarting...')
-      recognition.start() // STT 재시작
+      this.isSttRunning = false
+      if (localUser.isAudioActive()) {
+        this.startStt() // STT 재시작
+      }
     }
 
-    recognition.start()
+    this.recognition.start()
   }
 
   toggleFullscreen() {

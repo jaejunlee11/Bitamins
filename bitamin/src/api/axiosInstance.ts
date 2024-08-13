@@ -1,5 +1,5 @@
 import axios from 'axios'
-import useAuthStore from 'store/useAuthStore'
+import useAuthStore from '../store/useAuthStore'
 
 const axiosInstance = axios.create({
   baseURL: 'https://i11b105.p.ssafy.io/api', // API 기본 URL 설정
@@ -40,9 +40,7 @@ axiosInstance.interceptors.response.use(
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true
         try {
-          const { refreshToken, setAccessToken, setRefreshToken, clearAuth } =
-            useAuthStore.getState()
-          console.log(clearAuth) // clearAuth가 올바르게 가져와졌는지 확인하는 로그
+          const { refreshToken } = useAuthStore.getState()
           const response = await axios.post(
             'https://i11b105.p.ssafy.io/api/refresh-token',
             {},
@@ -52,14 +50,14 @@ axiosInstance.interceptors.response.use(
           )
           const newAccessToken = response.data.accessToken
           const newRefreshToken = response.data.refreshToken
-          setAccessToken(newAccessToken) // 상태 업데이트
-          setRefreshToken(newRefreshToken) // 상태 업데이트
+          useAuthStore.getState().setAccessToken(newAccessToken) // 상태 업데이트
+          useAuthStore.getState().setRefreshToken(newRefreshToken) // 상태 업데이트
           axiosInstance.defaults.headers.common['Authorization'] =
             `Bearer ${newAccessToken}`
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`
           return axiosInstance(originalRequest)
         } catch (refreshError) {
-          // clearAuth()
+          useAuthStore.getState().clearAuth()
           return Promise.reject(refreshError)
         }
       }

@@ -80,7 +80,7 @@ class ToolbarComponent extends Component {
     }
 
     // 페이지 이동
-    this.props.navigate('/consultationlist')
+    window.location.href = '/consultationlist'
   }
 
   toggleChat() {
