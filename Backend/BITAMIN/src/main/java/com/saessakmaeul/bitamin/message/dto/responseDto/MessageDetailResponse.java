@@ -18,5 +18,6 @@ public class MessageDetailResponse {
     private LocalDateTime sendDate;
     private LocalDateTime counselingDate;
     private Boolean isRead;
+    private String url;
     private List<Replies> replies;
 }
