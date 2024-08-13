@@ -12,6 +12,8 @@ import recordPlay from 'assets/image/recordPlay.png'
 import ModalExample from 'stories/organisms/ModalExample'
 
 const MainPage: React.FC = () => {
+  const navigate = useNavigate()
+
   const [isRecording, setIsRecording] = useState(false)
   const [isEnded, setIsEnded] = useState(false)
   const [media, setMedia] = useState<MediaRecorder | null>(null)
