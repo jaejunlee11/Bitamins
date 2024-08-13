@@ -412,8 +412,9 @@ class VideoRoomComponent extends Component {
 
   startStt() {
     // STT 초기화 및 시작
+    console.log('STT 시작')
     const recognition = new window.webkitSpeechRecognition()
-    recognition.lang = 'en-US'
+    recognition.lang = 'ko-KR'
     recognition.interimResults = false
     recognition.maxAlternatives = 1
 
@@ -426,6 +427,11 @@ class VideoRoomComponent extends Component {
 
     recognition.onerror = (event) => {
       console.error('STT error:', event.error)
+    }
+
+    recognition.onend = () => {
+      console.log('STT ended, restarting...')
+      recognition.start() // STT 재시작
     }
 
     recognition.start()

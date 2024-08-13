@@ -61,6 +61,7 @@ export const useChatStore = create<ChatState>()(
             const utterance = new SpeechSynthesisUtterance(
               assistantMessage.content
             )
+            utterance.lang = 'ko-KR' // 한국어 설정
             speechSynthesis.speak(utterance)
           } else {
             console.error('TTS를 지원하지 않는 브라우저입니다.')
@@ -76,12 +77,21 @@ export const useChatStore = create<ChatState>()(
       },
 
       saveSttText: (user: string, text: string) => {
-        set((state) => ({
-          sttTexts: {
-            ...state.sttTexts,
-            [user]: [...(state.sttTexts[user] || []), text],
-          },
-        }))
+        set((state) => {
+          const existingTexts = state.sttTexts[user] || []
+          const updatedTexts = [...existingTexts, text]
+
+          console.log(`STT Texts before update for ${user}:`, existingTexts) // 추가 로그
+          console.log(`STT Text to add for ${user}:`, text) // 추가 로그
+          console.log(`STT Texts after update for ${user}:`, updatedTexts) // 추가 로그
+
+          return {
+            sttTexts: {
+              ...state.sttTexts,
+              [user]: updatedTexts,
+            },
+          }
+        })
 
         // 텍스트가 저장될 때마다 콘솔에 출력
         console.log(`STT Text saved for ${user}: ${text}`)
