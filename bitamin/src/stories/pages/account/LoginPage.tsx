@@ -75,8 +75,6 @@ const LoginPage: React.FC = () => {
             <div className={styles.component64}>
               <div className={styles.component61}>
                 <div className={styles.component61Child} />
-                {/* <p>이메일</p> */}
-                <br />
                 <br />
                 <input
                   type="text"

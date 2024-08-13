@@ -84,11 +84,33 @@
   align-items: center;
   flex-shrink: 0;
 }
+/* 공통 입력 필드 스타일 */
+.inputField {
+  font-size: 14px; /* 일반 텍스트와 동일한 크기 */
+  font-family: NanumGothic; /* 동일한 폰트 */
+  color: #555; /* 동일한 텍스트 색상 */
+  padding: 5px; /* 적절한 패딩 */
+  border: 1px solid #ddd; /* 경계선 추가 */
+  border-radius: 4px; /* 부드러운 모서리 */
+  box-sizing: border-box; /* 박스 크기 조절 */
+}
+.categoryContent {
+  font-size: 14px; /* 동일한 글씨 크기 */
+  color: #555; /* 동일한 색상 */
+  /* 다른 스타일들 */
+}
+
+.inputField {
+  font-size: 14px; /* 동일한 글씨 크기 */
+  color: #555; /* 동일한 색상 */
+  /* 다른 스타일들 */
+}
+
 /* 유저 정보 */
 .frameParent {
   position: absolute;
-  top: 135px;
-  left: 952px;
+  top: 16.8%;
+  left: 53%;
   width: 403px;
   display: flex;
   flex-direction: column;
@@ -102,8 +124,8 @@
 /* 밑줄 */
 .inner {
   position: absolute;
-  top: 115px;
-  left: 952px;
+  top: 13.5%;
+  left: 53%;
   border-radius: 2px;
   background-color: rgba(252, 124, 76, 0.72);
   width: 98px;
@@ -112,8 +134,8 @@
 /* 마이페이지 글씨 */
 .div4 {
   position: absolute;
-  top: 104px;
-  left: 952px;
+  top: 12%;
+  left: 53%;
   font-size: 20px;
   letter-spacing: -0.18px;
   line-height: 16px;
@@ -143,8 +165,8 @@
 /* 이미지 컨테이너 스타일 */
 .item {
   position: absolute;
-  top: 80px;
-  left: 340px;
+  top: 20%;
+  left: 20%;
   box-shadow: 4px 4px 25px rgba(92, 92, 92, 0.25);
   border-radius: 8px;
   background-color: #f1f1f5;
@@ -215,17 +237,17 @@ button {
 /* 검진 결과 */
 .rectangleDiv {
   position: absolute;
-  top: 499px;
-  left: 1200px;
+  top: 62%;
+  left: 59%;
   background-color: #f1f1f5;
-  width: 465px;
+  width: 540px;
   height: auto; /* 내용에 따라 자동으로 높이 조절 */
   padding: 20px; /* 내부 여백 추가 */
   border-radius: 8px; /* 모서리 둥글게 */
 }
 /* 점수 텍스트 */
 .div8 {
-  font-size: 20px;
+  font-size: 18px;
   letter-spacing: 0.5px;
   line-height: 16px;
   font-weight: 500;
@@ -236,7 +258,7 @@ button {
 }
 .div9 {
   position: absolute;
-  top: 901px;
+  top: 62%;
   left: calc(50% - 46px);
   font-size: 18px;
   letter-spacing: 0.5px;
@@ -257,7 +279,7 @@ button {
 
 /* 검사 결과 제목 */
 .div10 {
-  font-size: 22px;
+  font-size: 20px;
   letter-spacing: 0.5px;
   line-height: 24px;
   font-family: Roboto;
@@ -297,21 +319,23 @@ button {
   height: auto;
   line-height: 2.1;
 }
+/* 지도 감싸는 박스 */
 .child1 {
   position: absolute;
-  top: 924px;
-  left: calc(50% - 435px);
+  top: 1224px;
+  left: calc(50% - 525px);
   box-shadow: 0px 1px 50px rgba(119, 119, 119, 0.16);
   border-radius: 10px;
   background-color: #fff;
-  width: 869px;
+  width: 1069px;
   height: 1405px;
 }
+/* 지도 */
 .mapWrapper {
   position: absolute;
-  top: 972px;
-  left: calc(50% - 435px);
-  width: 869px;
+  top: 1272px;
+  left: calc(50% - 525px);
+  width: 1069px;
   height: 304px;
   object-fit: cover;
 }
@@ -1068,15 +1092,15 @@ button {
   left: 97.21%;
   text-align: center;
 }
-.chart {
+/* .chart {
   position: absolute;
-  top: 17.35px;
+  top: 62%;
   left: 0px;
-  width: 457.2px;
+  width: 80%;
   height: 241.7px;
   overflow: hidden;
   text-align: right;
-}
+} */
 .div55 {
   position: absolute;
   height: 7.18%;
@@ -1096,7 +1120,7 @@ button {
 /* 차트 */
 .chartParent {
   position: absolute;
-  top: 500px; /* 이미지와 같은 수평선상에 배치 */
+  top: 62%; /* 이미지와 같은 수평선상에 배치 */
   left: 560px; /* 원하는 위치로 조정 */
   width: 490px;
   height: 259px;
@@ -1246,8 +1270,8 @@ button {
 /* 정신건강의학과 글씨 */
 .div66 {
   position: absolute;
-  top: 935px;
-  left: 500px;
+  top: 1235px;
+  left: 610px;
   font-size: 18px;
   text-align: center;
   color: #333;
@@ -1318,12 +1342,12 @@ button {
   padding: 10px; /* 내부 여백 추가 */
   width: 100%; /* 차트가 전체 너비를 차지하도록 설정 */
   max-width: 800px; /* 최대 너비 설정 */
-  height: 490px; /* 차트 높이 설정 */
+  height: 465px; /* 차트 높이 설정 */
   display: flex;
   justify-content: center;
   align-items: center;
-  top: 500px;
-  left: 350px;
+  top: 560px;
+  left: 8%;
 }
 
 /* 차트 제목 */
@@ -1406,7 +1430,7 @@ button {
   stroke-width: 2;
 }
 
-/* 전체 레이아웃과 색상 조정 */
+/* 중간 네모 */
 .div {
   width: 100%;
   position: relative;

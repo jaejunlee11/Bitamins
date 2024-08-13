@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import * as tmPose from '@teachablemachine/pose'
 import exerciseAPI from '@/api/exerciseAPI'
 
@@ -21,6 +22,8 @@ interface exerciseDescriptionInterface {
 const HealthUP: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [labelContainer, setLabelContainer] = useState<string[]>([])
+  const location = useLocation()
+  const { level } = location.state
   const [execrciseModel, setExecrciseModel] = useState<execrciseModelInterface>(
     {
       id: 3,
@@ -54,8 +57,9 @@ const HealthUP: React.FC = () => {
       const modelURL = URL + 'model.json'
       const metadataURL = URL + 'metadata.json'
 
-      // 모델 url 가져오기
-      const response = await exerciseAPI.fetchExcerciseModel(1)
+      // 모델 url 가져오기 -> level 1만 가지고 온 거 맞나?
+      // const response = await exerciseAPI.fetchExerciseModel(1)
+      const response = await exerciseAPI.fetchExerciseModel(level)
       setExecrciseModel(response)
 
       // 모델 세팅하기
