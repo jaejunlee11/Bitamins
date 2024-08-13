@@ -37,7 +37,6 @@ export interface JoinConsultation {
   memberId: number
   nickname: string
   profileKey: string | null
-  profileUrl: string | null
 }
 
 export interface CreateConsultation {

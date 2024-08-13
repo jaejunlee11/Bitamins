@@ -1,13 +1,21 @@
-import { FunctionComponent, useCallback, useState } from 'react'
+import { FunctionComponent, useCallback, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAuthStore from '@/store/useAuthStore'
 import { useCookies } from 'react-cookie'
+import useUserStore from '@/store/useUserStore'
 
 const Header: FunctionComponent<{ username?: string }> = ({ username }) => {
   const navigate = useNavigate()
   const { accessToken, refreshToken, clearAuth, role } = useAuthStore()
   const [, , removeCookie] = useCookies(['refreshToken'])
   const [dropdownVisible, setDropdownVisible] = useState(false)
+  const { user, fetchUser } = useUserStore()
+
+  useEffect(() => {
+    if (!user) {
+      fetchUser()
+    }
+  }, [user, fetchUser])
 
   const onBItAMinTextClick = useCallback(() => {
     navigate('/home')

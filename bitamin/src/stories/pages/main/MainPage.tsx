@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
-import usePhraseStore from '@/store/usePhraseStore'
+import { useState, useCallback } from 'react'
 import styles from 'styles/main/MainPage.module.css'
 import mainConsultImg from 'assets/image/mainConsultImg.png'
 import mainQuestImg from 'assets/image/mainQuestImg.png'
@@ -10,48 +9,22 @@ import recordSave from 'assets/image/recordSave.png'
 import recordStop from 'assets/image/recordEnd.png'
 import recordAgain from 'assets/image/recordAgain.png'
 import recordPlay from 'assets/image/recordPlay.png'
-import HeaderAfterLogin from '@/stories/organisms/common/HeaderAfterLogin'
-import { getPhrases, saveAudio } from '@/api/phraseAPI'
-import { useNavigate } from 'react-router-dom'
+import ModalExample from 'stories/organisms/ModalExample'
 
 const MainPage: React.FC = () => {
-  const navigate = useNavigate()  
+  const navigate = useNavigate()
 
   const [isRecording, setIsRecording] = useState(false)
   const [isEnded, setIsEnded] = useState(false)
   const [media, setMedia] = useState<MediaRecorder | null>(null)
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
+  const [audioUrl, setAudioUrl] = useState<Blob | null>(null)
+  // const [isSaved, setIsSaved] = useState(false);
+  // const [isRecorded, setIsRecorded] = useState(false);
   const [consultOpacityClass, setConsultOpacityClass] = useState(
     styles.transparent
   )
   const [questOpacityClass, setQuestOpacityClass] = useState(styles.transparent)
-  const { phraseContent, phraseId, setPhrase } = usePhraseStore()
 
-  useEffect(() => {
-    const savedPhrase = localStorage.getItem('phraseContent')
-    const savedPhraseId = localStorage.getItem('phraseId')
-    const savedDate = localStorage.getItem('phraseDate')
-    const todayDate = new Date().toISOString().split('T')[0]
-
-    if (savedPhrase && savedPhraseId && savedDate === todayDate) {
-      setPhrase(savedPhrase, savedPhraseId)
-    } else {
-      getPhrases()
-        .then((data) => {
-          if (data && data.phraseContent && data.id) {
-            setPhrase(data.phraseContent, data.id)
-            localStorage.setItem('phraseContent', data.phraseContent)
-            localStorage.setItem('phraseId', data.id)
-            localStorage.setItem('phraseDate', todayDate) // 현재 날짜를 저장
-          }
-        })
-        .catch((error) => {
-          console.error('Error fetching the phrase:', error)
-        })
-    }
-  }, [setPhrase])
-
-  // 나머지 코드들은 이전과 동일합니다.
   const onRecAudio = () => {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -59,8 +32,8 @@ const MainPage: React.FC = () => {
         const mediaRecorder = new MediaRecorder(stream)
 
         mediaRecorder.addEventListener('dataavailable', (e) => {
-          const blob = e.data
-          setAudioBlob(blob)
+          setAudioUrl(e.data)
+          // setIsRecorded(true);
           setIsRecording(false)
         })
 
@@ -85,46 +58,21 @@ const MainPage: React.FC = () => {
   }
 
   const onPlayAudio = useCallback(() => {
-    if (audioBlob) {
-      const audio = new Audio(URL.createObjectURL(audioBlob))
+    if (audioUrl) {
+      const audio = new Audio(URL.createObjectURL(audioUrl))
       audio.play()
     }
-  }, [audioBlob])
+  }, [audioUrl])
 
   const onSaveAudio = () => {
     // 여기에 서버로 업로드하는 로직을 추가할 수 있습니다.
     // setIsSaved(true);
-    if (phraseId && audioBlob) {
-      const formData = new FormData()
-      formData.append(
-        'memberPhraseRequest',
-        new Blob(
-          [
-            JSON.stringify({
-              phraseId: phraseId,
-              saveDate: new Date().toISOString().split('T')[0],
-            }),
-          ],
-          { type: 'application/json' }
-        )
-      )
-      formData.append('phraseRecord', audioBlob)
-
-      saveAudio(formData)
-        .then((response) => {
-          alert('녹음이 성공적으로 저장되었습니다.')
-        })
-        .catch((error) => {
-          console.error('Error saving the audio:', error)
-          alert('녹음 저장에 실패했습니다.')
-        })
-    } else {
-      alert('녹음 파일이 없거나 문구 ID를 찾을 수 없습니다.')
-    }
   }
 
   const onResetAudio = () => {
-    setAudioBlob(null)
+    setAudioUrl(null)
+    // setIsSaved(false);
+    // setIsRecorded(false);
     setIsRecording(false)
     setIsEnded(false)
   }
@@ -145,48 +93,45 @@ const MainPage: React.FC = () => {
     onPlayAudio()
   }, [onPlayAudio])
 
-  const onRectangleClick = useCallback(() => {}, [])
+  const onRectangleClick = useCallback(() => {
+    // Add your code here
+  }, [])
 
   const handleMouseEnterConsult = () => {
     setConsultOpacityClass(styles.opaque)
+    // @ts-ignore
     document
       .querySelector(`.${styles.consultBorder}`)
-      ?.classList.add(styles.glow)
+      .classList.add(styles.glow)
   }
 
   const handleMouseLeaveConsult = () => {
     setConsultOpacityClass(styles.transparent)
+    // @ts-ignore
     document
       .querySelector(`.${styles.consultBorder}`)
-      ?.classList.remove(styles.glow)
+      .classList.remove(styles.glow)
   }
 
   const handleMouseEnterQuest = () => {
     setQuestOpacityClass(styles.opaque)
-    document.querySelector(`.${styles.questBorder}`)?.classList.add(styles.glow)
+    // @ts-ignore
+    document.querySelector(`.${styles.questBorder}`).classList.add(styles.glow)
   }
 
   const handleMouseLeaveQuest = () => {
     setQuestOpacityClass(styles.transparent)
+    // @ts-ignore
     document
       .querySelector(`.${styles.questBorder}`)
-      ?.classList.remove(styles.glow)
+      .classList.remove(styles.glow)
   }
-
-  const onMissionClick = useCallback(() => {
-    navigate('/mission')
-  }, [navigate])
-
-  const onconsultationClick = useCallback(() => {
-    navigate('/consultationlist')
-  }, [navigate])
 
   return (
     <>
-      {/* <HeaderAfterLogin username="{username}" /> */}
-      {/* <ModalExample /> */}
+      <ModalExample />
       <div className={styles.div}>
-        {/* <div className={styles.navbar}>
+        <div className={styles.navbar}>
           <div className={styles.bitamin}>BItAMin</div>
           <div className={styles.parent}>
             <div className={styles.div4} onClick={onRectangleClick}>
@@ -251,10 +196,11 @@ const MainPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
         <div className={styles.inner}>
           <div className={styles.div3}>
-            <p className={styles.p}>{phraseContent}</p>
+            <p className={styles.p}>오늘 하루도 최선을 다한 당신,</p>
+            <p className={styles.p}>멋져요!</p>
           </div>
         </div>
         <div className={styles.recordBtns}>
@@ -292,7 +238,6 @@ const MainPage: React.FC = () => {
           className={styles.tryConsultBtn}
           onMouseEnter={handleMouseEnterConsult}
           onMouseLeave={handleMouseLeaveConsult}
-          onClick={onconsultationClick}
         >
           <b className={styles.b}>상담하기</b>
         </div>
@@ -300,7 +245,6 @@ const MainPage: React.FC = () => {
           className={styles.tryQuestBtn}
           onMouseEnter={handleMouseEnterQuest}
           onMouseLeave={handleMouseLeaveQuest}
-          onClick={onMissionClick}
         >
           <b className={styles.b}>미션하기</b>
         </div>

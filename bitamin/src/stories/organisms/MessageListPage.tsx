@@ -37,7 +37,6 @@ const MessageListPage: React.FC = () => {
   return (
     <div>
       <h1>Message List</h1>
-      <br />
       <ul>
         {messages.map((message) => (
           <li key={message.id}>
@@ -48,12 +47,10 @@ const MessageListPage: React.FC = () => {
               <p>Category: {message.category}</p>
               <p>Send Date: {new Date(message.sendDate).toLocaleString()}</p>
               <p>{message.isRead ? 'Read' : 'Unread'}</p>
-              <br />
             </Link>
           </li>
         ))}
       </ul>
-      <br />
     </div>
   )
 }
