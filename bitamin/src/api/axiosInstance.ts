@@ -1,7 +1,6 @@
 import axios from 'axios'
 import useAuthStore from 'store/useAuthStore'
 import { useNavigate } from 'react-router-dom'
-import React, { useEffect } from 'react'
 
 const axiosInstance = axios.create({
   // localhost에서는 refreshToken은 발급되지 않음.
