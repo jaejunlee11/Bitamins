@@ -1,6 +1,7 @@
 import { useState, useEffect, ChangeEvent, useRef } from 'react'
 import styles from 'styles/account/MyPage.module.css'
 import HospitalMap from 'stories/organisms/HospitalMap'
+import Modal from '@/stories/organisms/Modal'
 import {
   fetchUserInfo,
   updateUserInfo,
@@ -63,6 +64,7 @@ const MyPage: React.FC = () => {
 
   const [isEditing, setIsEditing] = useState(false)
   const [isImageDeleted, setIsImageDeleted] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false) 
 
   const [healthReports, setHealthReports] = useState<any[]>([])
   const [chartData, setChartData] = useState<any[]>([]) // 차트 데이터 상태 추가
@@ -240,7 +242,8 @@ const MyPage: React.FC = () => {
       }
 
       await updateUserInfo(updatedUserInfo)
-      alert('정보가 성공적으로 수정되었습니다.')
+      // alert('정보가 성공적으로 수정되었습니다.')
+      setIsModalOpen(true)
       setIsEditing(false)
 
       const data = await fetchUserInfo()
@@ -274,6 +277,11 @@ const MyPage: React.FC = () => {
       setSelectedResult({ date: selectedDate, score: selectedScore })
     }
   }
+  
+  const closeModal = () => {
+    setIsModalOpen(false)
+  }
+
   return (
     <>
       <div className={styles.div}>
@@ -501,6 +509,18 @@ const MyPage: React.FC = () => {
           </ResponsiveContainer>
         </div>
       </div>
+      {isModalOpen && (
+        <Modal
+          title="개인정보 수정"
+          content="개인정보가 성공적으로 수정되었습니다."
+          iconSrc="fi.FiEdit"
+          onClose={closeModal}
+          headerBackgroundColor="#FF713C"
+          buttonBorderColor="#FF713C"
+          buttonTextColor="#FF713C"
+          imgColor="#333"
+        />
+      )}
     </>
   )
 }
