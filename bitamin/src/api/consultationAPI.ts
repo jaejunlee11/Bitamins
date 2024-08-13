@@ -8,8 +8,12 @@ import {
   ChatGPTRequest,
   ChatGPTResponse,
   Message,
-  JoinData,
 } from 'ts/consultationType'
+
+type JoinData = Pick<
+  Consultation,
+  'id' | 'isPrivated' | 'password' | 'startTime' | 'sessionId'
+>
 
 // 상담 목록을 가져오는 함수
 export const fetchConsultations = async (roomSearch: RoomSearch) => {
@@ -75,7 +79,7 @@ export const joinRandomRoom = async (type: string) => {
 
 // ChatGPT 메시지를 보내는 함수
 export const sendChatGPTMessage = async (
-  userId: string,
+  user: string,
   content: string,
   category: string,
   previousMessages: Message[]
@@ -83,7 +87,7 @@ export const sendChatGPTMessage = async (
   try {
     const requestData: ChatGPTRequest = {
       gptCompletions: {
-        [userId]: {
+        [user]: {
           messages: [...previousMessages, { role: 'user', content }],
         },
       },
@@ -101,7 +105,6 @@ export const sendChatGPTMessage = async (
   }
 }
 
-// 상담을 떠나는 함수
 export const leaveConsultation = async (consultationId: number) => {
   try {
     const response = await axiosInstance.delete(
