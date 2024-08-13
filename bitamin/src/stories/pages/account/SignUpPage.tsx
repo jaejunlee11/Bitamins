@@ -12,6 +12,7 @@ import { useCookies } from 'react-cookie'
 import { useNavigate } from 'react-router-dom'
 import styles from 'styles/account/SignUpPage.module.css'
 import HeaderBeforeLogin from '@/stories/organisms/common/HeaderBeforeLogin'
+import Modal from '@/stories/organisms/Modal'
 
 const SignUpPage: React.FC = () => {
   const [signupForm, setSignupForm] = useState({
@@ -38,6 +39,14 @@ const SignUpPage: React.FC = () => {
   const [gugunNames, setGugunNames] = useState<string[]>([])
   const [dongNames, setDongNames] = useState<string[]>([])
 
+  // 모달 창
+  const [isModalOpen, setModalOpen] = useState<string | null>(null)
+
+  const openModal = (type: string) => () => setModalOpen(type)
+  const closeModal = () => {
+    setModalOpen(null)
+    navigate('/login')
+  }
   const {
     setAccessToken: setAuthAccessToken,
     setRefreshToken: setAuthRefreshToken,
@@ -128,6 +137,7 @@ const SignUpPage: React.FC = () => {
     }
   }
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -152,7 +162,7 @@ const SignUpPage: React.FC = () => {
       })
 
       setSuccess('회원가입이 성공적으로 완료되었습니다.')
-      navigate('/login') // 회원가입 성공 시 login 페이지로 이동
+      openModal('signupComplete')()
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || error.message || '회원가입 실패'
@@ -344,6 +354,18 @@ const SignUpPage: React.FC = () => {
           </div>
         </div>
       </div>
+      {isModalOpen === 'signupComplete' && (
+        <Modal
+          title="회원가입 완료"
+          content="회원가입이 성공적으로 완료되었습니다."
+          iconSrc="fi.FiEdit"
+          onClose={closeModal}
+          headerBackgroundColor="#FF713C"
+          buttonBorderColor="#FF713C"
+          buttonTextColor="#FF713C"
+          imgColor="#333"
+        />
+      )}
     </>
   )
 }
