@@ -5,27 +5,31 @@ import { ChatLog, Message } from 'ts/consultationType'
 
 interface ChatState {
   chatLog: ChatLog
-  sttTexts: { [user: string]: string[] } // STT 텍스트를 저장할 상태 추가
+  sttTexts: { [userId: string]: string[] } // STT 텍스트를 저장할 상태 추가
   sendMessage: (
-    user: string,
+    userId: string,
     content: string,
     category: string
   ) => Promise<void>
   resetChatLog: () => void
-  saveSttText: (user: string, text: string) => void // STT 텍스트 저장 메서드 추가
+  saveSttText: (userId: string, text: string) => void // STT 텍스트 저장 메서드 추가
+  processSttAndSendMessage: (userId: string, category: string) => Promise<void>
 }
 
 export const useChatStore = create<ChatState>()(
   persist(
     (set, get) => ({
       chatLog: {},
-      sttTexts: {}, // 초기 STT 텍스트 상태
+      sttTexts: {},
 
-      sendMessage: async (user: string, content: string, category: string) => {
+      sendMessage: async (
+        userId: string,
+        content: string,
+        category: string
+      ) => {
         try {
           const currentChatLog = get().chatLog
-
-          const userMessages: Message[] = currentChatLog[user]?.messages || []
+          const userMessages: Message[] = currentChatLog[userId]?.messages || []
 
           const userMessage: Message = {
             role: 'user',
@@ -34,7 +38,7 @@ export const useChatStore = create<ChatState>()(
 
           // GPT API로 메시지 전송
           const response = await sendChatGPTMessage(
-            user,
+            userId,
             content,
             category,
             userMessages
@@ -42,15 +46,15 @@ export const useChatStore = create<ChatState>()(
 
           const assistantMessage: Message = {
             role: 'assistant',
-            content: response.gptResponses[user].content,
+            content: response.gptResponses[userId].content,
           }
 
           // 채팅 로그 업데이트
           set((state) => ({
             chatLog: {
               ...state.chatLog,
-              [user]: {
-                userId: user,
+              [userId]: {
+                userId: userId,
                 messages: [...userMessages, userMessage, assistantMessage],
               },
             },
@@ -76,25 +80,44 @@ export const useChatStore = create<ChatState>()(
         set({ chatLog: {} })
       },
 
-      saveSttText: (user: string, text: string) => {
+      saveSttText: (userId: string, text: string) => {
+        if (!text || typeof text !== 'string') {
+          console.error('Invalid STT text received:', text)
+          return
+        }
+
         set((state) => {
-          const existingTexts = state.sttTexts[user] || []
+          const existingTexts = state.sttTexts[userId] || []
           const updatedTexts = [...existingTexts, text]
 
-          console.log(`STT Texts before update for ${user}:`, existingTexts) // 추가 로그
-          console.log(`STT Text to add for ${user}:`, text) // 추가 로그
-          console.log(`STT Texts after update for ${user}:`, updatedTexts) // 추가 로그
+          console.log(`Updating STT Texts for ${userId}:`, updatedTexts)
 
           return {
             sttTexts: {
               ...state.sttTexts,
-              [user]: updatedTexts,
+              [userId]: updatedTexts,
             },
           }
         })
 
-        // 텍스트가 저장될 때마다 콘솔에 출력
-        console.log(`STT Text saved for ${user}: ${text}`)
+        console.log(`STT Text saved for ${userId}: ${text}`)
+      },
+
+      // STT 텍스트를 처리하고 메시지를 전송하는 함수
+      processSttAndSendMessage: async (userId: string, category: string) => {
+        const sttTexts = get().sttTexts[userId] || []
+        const content = sttTexts.join(' ')
+
+        // STT 텍스트를 기반으로 메시지 전송
+        await get().sendMessage(userId, content, category)
+
+        // STT 텍스트 초기화
+        set((state) => ({
+          sttTexts: {
+            ...state.sttTexts,
+            [userId]: [],
+          },
+        }))
       },
     }),
     {
