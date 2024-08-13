@@ -1,3 +1,4 @@
+// 인터페이스 및 타입 선언
 export interface RoomSearch {
   page: number | null
   size: number | null
