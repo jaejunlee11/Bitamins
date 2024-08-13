@@ -32,7 +32,7 @@ const RandomConsultationModal: React.FC<RandomConsultationModalProps> = ({
         </div>
 
         <div className="flex justify-center space-x-2 mb-4">
-          {['전체', '독서', '영화', '그림', '음악', '대화'].map((type) => (
+          {['전체', '독서', '영화', '미술', '음악', '대화'].map((type) => (
             <button
               key={type}
               onClick={() => setSelectedType(type)}

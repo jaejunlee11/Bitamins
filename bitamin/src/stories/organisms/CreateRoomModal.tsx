@@ -107,7 +107,7 @@ const CreateRoomPage: React.FC<CreateRoomPageProps> = ({ onClose }) => {
           <div className="mb-4">
             <label className="block font-medium mb-2">상담 카테고리</label>
             <div className="flex space-x-2">
-              {['독서', '영화', '그림', '음악', '대화'].map((type) => (
+              {['독서', '영화', '미술', '음악', '대화'].map((type) => (
                 <button
                   key={type}
                   type="button"
