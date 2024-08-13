@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { fetchMessages, deleteMessage } from 'api/messageAPI'
 import { useNavigate } from 'react-router-dom'
+import Modal from '@/stories/organisms/Modal'
 
 interface Message {
   id: number
@@ -13,6 +14,7 @@ const MessageListPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [hoveredMessageId, setHoveredMessageId] = useState<number | null>(null)
   const navigate = useNavigate()
+  const [isModalOpen, setModalOpen] = useState<boolean>(false)
 
   useEffect(() => {
     const loadMessages = async () => {
@@ -33,6 +35,8 @@ const MessageListPage: React.FC = () => {
       setMessages((prevMessages) =>
         prevMessages.filter((message) => message.id !== id)
       )
+      setMessages(messages.filter((message) => message.id !== id))
+      setModalOpen(true)
     } catch (error) {
       console.error('Failed to delete message:', error)
     }
@@ -44,6 +48,10 @@ const MessageListPage: React.FC = () => {
 
   const handleMouseLeave = () => {
     setHoveredMessageId(null)
+  }
+
+  const closeModal = () => {
+    setModalOpen(false)
   }
 
   return (
@@ -97,6 +105,19 @@ const MessageListPage: React.FC = () => {
           </li>
         ))}
       </ul>
+            {isModalOpen && (
+        <Modal
+          title="쪽지가 삭제되었습니다."
+          content="쪽지가 성공적으로 삭제되었습니다."
+          iconSrc="src.alert"
+          onClose={closeModal}
+          headerBackgroundColor="#FF1B1B"
+          buttonBorderColor="#FF1B1B"
+          buttonTextColor="#FF1B1B"
+          imgColor="#333"
+          imgSize={100}
+        />
+      )}
     </div>
   )
 }

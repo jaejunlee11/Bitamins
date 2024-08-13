@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { createMessage } from 'api/messageAPI'
+import Modal from '@/stories/organisms/Modal'
 
 interface MessageModalProps {
   participant: {
@@ -16,6 +17,12 @@ const MessageModal: React.FC<MessageModalProps> = ({
   const [category, setCategory] = useState('')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [isModalOpen, setModalOpen] = useState<boolean>(false)
+
+  const closeModal = () => {
+    setModalOpen(false)
+    onClose()
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,7 +33,7 @@ const MessageModal: React.FC<MessageModalProps> = ({
       content,
       counselingDate: new Date().toISOString(),
     })
-    onClose()
+    setModalOpen(true)
   }
 
   return (
@@ -82,6 +89,18 @@ const MessageModal: React.FC<MessageModalProps> = ({
           </div>
         </form>
       </div>
+      {isModalOpen && (
+        <Modal
+          title="쪽지가 전송되었습니다."
+          content="쪽지가 성공적으로 전송되었습니다."
+          iconSrc="ri.RiMailSendLine"
+          onClose={closeModal}
+          headerBackgroundColor="#FF713C"
+          buttonBorderColor="#FF713C"
+          buttonTextColor="#FF713C"
+          imgColor="#333"
+        />
+      )}
     </div>
   )
 }
