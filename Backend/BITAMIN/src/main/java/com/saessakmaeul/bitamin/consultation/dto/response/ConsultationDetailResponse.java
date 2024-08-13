@@ -1,9 +1,6 @@
 package com.saessakmaeul.bitamin.consultation.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,6 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@EqualsAndHashCode
 public class ConsultationDetailResponse {
     private Long id;
     private String category;

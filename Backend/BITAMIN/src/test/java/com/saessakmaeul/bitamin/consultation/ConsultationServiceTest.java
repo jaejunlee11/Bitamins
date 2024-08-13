@@ -82,6 +82,7 @@ public class ConsultationServiceTest {
                 .dongCode("1111010200")
                 .birthday(LocalDate.of(1999, 3, 27))
                 .role(Role.ROLE_MEMBER)
+                .profileUrl("asdas")
                 .build();
 
         member2 = Member.builder()
@@ -93,6 +94,7 @@ public class ConsultationServiceTest {
                 .dongCode("1111010200")
                 .birthday(LocalDate.of(2000, 8, 7))
                 .role(Role.ROLE_MEMBER)
+                .profileUrl("asdasss")
                 .build();
 
         music = Consultation.builder()
@@ -387,7 +389,6 @@ public class ConsultationServiceTest {
         Member member = Member.builder()
                 .id(member1.getId())
                 .nickname(member1.getNickname())
-                .profileKey(member1.getProfileKey())
                 .profileUrl(member1.getProfileUrl())
                 .build();
 
@@ -407,7 +408,6 @@ public class ConsultationServiceTest {
                 .consultationId(music.getId())
                 .memberId(member1.getId())
                 .memberNickname(member1.getNickname())
-                .profileKey(member1.getProfileKey())
                 .profileUrl(member1.getProfileUrl())
                 .build();
 
@@ -494,7 +494,6 @@ public class ConsultationServiceTest {
         Member member = Member.builder()
                 .id(member1.getId())
                 .nickname(member1.getNickname())
-                .profileKey(member1.getProfileKey())
                 .profileUrl(member1.getProfileUrl())
                 .build();
 
@@ -514,7 +513,6 @@ public class ConsultationServiceTest {
                 .id(participant.getId())
                 .memberId(member.getId())
                 .memberNickname(member.getNickname())
-                .profileKey(member.getProfileKey())
                 .profileUrl(member.getProfileUrl())
                 .build();
 
@@ -768,5 +766,115 @@ public class ConsultationServiceTest {
 
         assertEquals(expected, actual);
         System.out.println("최근 참여자 조회 성공");
+    }
+
+    @Test
+    @DisplayName("상담 방 상세 조회 테스트")
+    public void findConsultationDetail() throws Exception {
+        // Given
+        Consultation consultation = Consultation.builder()
+                .id(conversation.getId())
+                .category(conversation.getCategory())
+                .title(conversation.getTitle())
+                .isPrivated(conversation.getIsPrivated())
+                .password(conversation.getPassword())
+                .startTime(conversation.getStartTime())
+                .endTime(conversation.getEndTime())
+                .currentParticipants(conversation.getCurrentParticipants())
+                .sessionId(conversation.getSessionId())
+                .build();
+
+        Participant p1 = Participant.builder()
+                .id(conversationParticipant1.getId())
+                .memberId(member1)
+                .memberNickname(conversationParticipant1.getMemberNickname())
+                .consultationId(conversationParticipant1.getConsultationId())
+                .consultationDate(conversationParticipant1.getConsultationDate())
+                .build();
+
+        Participant p2 = Participant.builder()
+                .id(conversationParticipant2.getId())
+                .memberId(member2)
+                .memberNickname(conversationParticipant2.getMemberNickname())
+                .consultationId(conversationParticipant2.getConsultationId())
+                .consultationDate(conversationParticipant2.getConsultationDate())
+                .build();
+
+        List<Participant> list = Arrays.asList(p1, p2);
+
+        Member member1D = Member.builder()
+                .id(member1.getId())
+                .email(member1.getEmail())
+                .password(member1.getPassword())
+                .name(member1.getName())
+                .nickname(member1.getNickname())
+                .dongCode(member1.getDongCode())
+                .birthday(member1.getBirthday())
+                .role(member1.getRole())
+                .profileUrl(member1.getProfileUrl())
+                .build();
+
+        Member member2D = Member.builder()
+                .id(member2.getId())
+                .email(member2.getEmail())
+                .password(member2.getPassword())
+                .name(member2.getName())
+                .nickname(member2.getNickname())
+                .dongCode(member2.getDongCode())
+                .birthday(member2.getBirthday())
+                .role(member2.getRole())
+                .profileUrl(member2.getProfileUrl())
+                .build();
+
+        ParticipantResponse pR1 = ParticipantResponse.builder()
+                .id(p1.getId())
+                .consultationId(p1.getConsultationId().getId())
+                .consultationDate(p1.getConsultationDate())
+                .memberId(p1.getMemberId().getId())
+                .memberNickname(p1.getMemberNickname())
+                .profileUrl(member1D.getProfileUrl())
+                .build();
+
+        ParticipantResponse pR2 = ParticipantResponse.builder()
+                .id(p2.getId())
+                .consultationId(p2.getConsultationId().getId())
+                .consultationDate(p2.getConsultationDate())
+                .memberId(p2.getMemberId().getId())
+                .memberNickname(p2.getMemberNickname())
+                .profileUrl(member2D.getProfileUrl())
+                .build();
+
+        List<ParticipantResponse> pList = Arrays.asList(pR1, pR2);
+
+        Member m = Member.builder().id(member1.getId()).build();
+
+        // When
+        when(consultationRepository.findById(conversation.getId())).thenReturn(Optional.of(consultation));
+
+        when(participantRepository.findByMemberIdAndConsultationId(any(Member.class), any(Consultation.class))).thenReturn(Optional.of(p1));
+
+        when(participantRepository.findByConsultationId(any(Consultation.class))).thenReturn(list);
+
+        when(memberRepository.findById(list.get(0).getMemberId().getId())).thenReturn(Optional.of(member1D));
+
+        when(memberRepository.findById(list.get(1).getMemberId().getId())).thenReturn(Optional.of(member2D));
+
+        ConsultationDetailResponse expect = ConsultationDetailResponse.builder()
+                .id(consultation.getId())
+                .category(consultation.getCategory())
+                .title(consultation.getTitle())
+                .isPrivated(consultation.getIsPrivated())
+                .password(consultation.getPassword())
+                .startTime(consultation.getStartTime())
+                .endTime(consultation.getEndTime())
+                .currentParticipants(consultation.getCurrentParticipants())
+                .participants(pList)
+                .build();
+
+        // Then
+        ConsultationDetailResponse actual = consultationService.consultationDetail(consultation.getId(), member1.getId());
+
+        assertEquals(expect, actual);
+        System.out.println("상세 조회 성공");
     }
 }
