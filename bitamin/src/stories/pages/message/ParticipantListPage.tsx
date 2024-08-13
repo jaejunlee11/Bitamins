@@ -1,7 +1,6 @@
-import MessageListPage from 'stories/organisms/MessageListPage'
 import { useState, useCallback } from 'react'
 import styles from 'styles/message/ParticipantListPage.module.css'
-import ParticipantsListWithMessageCreate from 'stories/organisms/ParticipantsListWithMessageCreate'
+import ParticipantsListWithMessageCreate from 'stories/organisms/ParticipantListPage'
 
 const ParticipantListPage: React.FC = () => {
   const [isFrameOpen, setFrameOpen] = useState(false)
