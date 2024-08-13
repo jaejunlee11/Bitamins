@@ -141,7 +141,7 @@ public class MessageService {
 
     @Transactional
     public Reply registReply(ReplyRegistRequest reply, Long id, Long userId) throws Exception{
-        messageRepository.findById(id).orElseThrow(()->new Exception("해당 id의 메시지가 없습니다."));
+        Message message = messageRepository.findById(id).orElseThrow(()->new Exception("해당 id의 메시지가 없습니다."));
         Reply registReply = new Reply();
         registReply.setMessageId(id);
         registReply.setMemberId(userId);
@@ -149,6 +149,8 @@ public class MessageService {
         registReply.setIsDeleted(0);
         registReply.setIsRead(false);
         registReply.setSendDate(LocalDateTime.now());
+        message.setSendDate(registReply.getSendDate());
+        messageRepository.save(message);
         return replyRepository.save(registReply);
     }
 
