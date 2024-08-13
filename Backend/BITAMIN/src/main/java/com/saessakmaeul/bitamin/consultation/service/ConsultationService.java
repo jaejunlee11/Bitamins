@@ -175,7 +175,6 @@ public class ConsultationService {
                 .id(participant.getId())
                 .memberId(member.get().getId())
                 .memberNickname(member.get().getNickname())
-                .profileKey(member.get().getProfileKey())
                 .profileUrl(member.get().getProfileUrl())
                 .build();
     }
@@ -257,7 +256,6 @@ public class ConsultationService {
                 .id(participant.getId())
                 .memberId(member.get().getId())
                 .memberNickname(member.get().getNickname())
-                .profileKey(member.get().getProfileKey())
                 .profileUrl(member.get().getProfileUrl())
                 .build();
     }
@@ -424,7 +422,6 @@ public class ConsultationService {
                 .id(p.get().getId())
                 .memberId(p.get().getMemberId().getId())
                 .memberNickname(p.get().getMemberNickname())
-                .profileKey(member.get().getProfileKey())
                 .profileUrl(member.get().getProfileUrl())
                 .build();
 
@@ -457,7 +454,6 @@ public class ConsultationService {
                     .memberNickname(participant.getMemberNickname())
                     .consultationId(participant.getConsultationId().getId())
                     .consultationDate(participant.getConsultationDate())
-                    .profileKey(member.getProfileKey())
                     .profileUrl(member.getProfileUrl())
                     .build();
         }).collect(Collectors.toList());
