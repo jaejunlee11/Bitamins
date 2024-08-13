@@ -41,7 +41,7 @@ const HeaderAfterLogin: FunctionComponent = () => {
     console.log('Access Token:', accessToken)
     console.log('Refresh Token:', refreshToken)
     alert('Logged out successfully!')
-    navigate('/loginex')
+    navigate('/home')
   }, [navigate, clearAuth, removeCookie, accessToken, refreshToken])
 
   // 이름 누르면 토글 뜨도록

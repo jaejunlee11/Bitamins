@@ -1,423 +1,184 @@
-.pose-detector {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 20px;
-  padding: 20px;
+/* 화면 뒤뒤 배경 */
+.up {
+  width: 100%;
+  position: relative;
+  background-color: #fffbfa;
+  height: 768px;
+  overflow: hidden;
+  text-align: center;
+  font-size: 14px;
+  color: #000;
+  font-family: Lato, sans-serif;
 }
-
-.left {
-  flex: 1;
-  max-width: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-
-.right {
-  flex: 1;
-  max-width: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.counting {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.label-container {
-  margin-top: 10px;
-  font-size: 24px;
-  font-weight: bold;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-canvas {
-  border: 2px solid #ff713c;
-  width: 400px;
-  height: 400px;
-}
-
-button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #ff713c;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 18px;
-}
-
-button:hover {
-  background-color: #ff5722;
-}
-
+/* 운동 뜨는 뒤의 배경 */
 .upChild {
   position: absolute;
-  top: 74px;
-  left: 0px;
-  background-color: #f9ea9b;
+  /* top: 75px; */
+  /* left: calc(50% - 512px); */
+  background-color: rgba(252, 210, 179, 0.25);
   width: 100%;
-  height: 694px;
+  height: 714px;
 }
-.groupChild {
-  position: absolute;
-  top: 49px;
-  left: 0px;
-  border-radius: 8px;
-  background-color: #f5f5ff;
-  width: 250px;
-  height: 244px;
-  cursor: pointer;
-}
-.groupItem {
-  position: absolute;
-  top: 72px;
-  left: 32px;
-  border-radius: 0.8px;
-  width: 13px;
-  height: 12px;
-}
-.groupInner {
-  position: absolute;
-  top: 70px;
-  left: 221px;
-  border-radius: 0.8px;
-  width: 13px;
-  height: 12px;
-}
-.starIcon {
-  position: absolute;
-  top: 55px;
-  left: 84px;
-  border-radius: 0.8px;
-  width: 13px;
-  height: 12px;
-}
-.groupChild1 {
-  position: absolute;
-  top: 112px;
-  left: 17px;
-  border-radius: 0.8px;
-  width: 13px;
-  height: 12px;
-}
-.groupChild2 {
-  position: absolute;
-  top: 77px;
-  left: 168px;
-  border-radius: 0.8px;
-  width: 13px;
-  height: 12px;
-}
-.div {
-  position: absolute;
-  top: 0px;
-  left: 79px;
-}
-.rectangleParent {
-  position: absolute;
-  top: 254px;
-  left: 581px;
-  width: 250px;
-  height: 293px;
-}
-.rectangleDiv {
-  position: absolute;
-  top: 49px;
-  left: 0px;
-  box-shadow: 3px 3px 25px 8px #ffeacb;
-  border-radius: 8px;
-  background-color: #ffefc0;
-  width: 250px;
-  height: 244px;
-  cursor: pointer;
-}
-.groupChild3 {
-  position: absolute;
-  top: 61px;
-  left: 11px;
-  border-radius: 8px;
-  background-color: rgba(253, 245, 243, 0);
-  border: 7px solid #fff;
-  box-sizing: border-box;
-  width: 228px;
-  height: 221px;
-}
-.ellipseDiv {
-  position: absolute;
-  top: 85.03px;
-  left: 44.55px;
-  border-radius: 50%;
-  background-color: #ffb72c;
-  width: 173.8px;
-  height: 156.2px;
-  transform: rotate(7.8deg);
-  transform-origin: 0 0;
-}
-.groupChild4 {
-  position: absolute;
-  top: 155.19px;
-  left: 107.38px;
-  border-radius: 50%;
-  background-color: #000;
-  width: 3.8px;
-  height: 10px;
-  transform: rotate(11.6deg);
-  transform-origin: 0 0;
-}
-.groupChild5 {
-  position: absolute;
-  top: 159.77px;
-  left: 129.71px;
-  border-radius: 50%;
-  background-color: #000;
-  width: 3.8px;
-  height: 10px;
-  transform: rotate(11.6deg);
-  transform-origin: 0 0;
-}
-.groupChild6 {
-  position: absolute;
-  top: 172.86px;
-  left: 100.36px;
-  border-radius: 50%;
-  background-color: #333;
-  width: 34.9px;
-  height: 13px;
-  transform: rotate(5.8deg);
-  transform-origin: 0 0;
-}
-.groupChild7 {
-  position: absolute;
-  top: 88.38px;
-  left: 138.24px;
-  border-radius: 5px;
-  background-color: #06b395;
-  width: 3.1px;
-  height: 11.2px;
-  transform: rotate(18deg);
-  transform-origin: 0 0;
-}
-.groupChild8 {
-  position: absolute;
-  top: 79px;
-  left: 127.32px;
-  border-radius: 50%;
-  background-color: #6bb16b;
-  width: 15.3px;
-  height: 9.1px;
-  transform: rotate(20.7deg);
-  transform-origin: 0 0;
-}
-.groupChild9 {
-  position: absolute;
-  top: 83.96px;
-  left: 138.59px;
-  border-radius: 50%;
-  background-color: #6bb16b;
-  width: 15.3px;
-  height: 9.1px;
-  transform: rotate(-3.7deg);
-  transform-origin: 0 0;
-}
-.groupChild10 {
-  position: absolute;
-  top: 165.59px;
-  left: 205.51px;
-  border-radius: 5px;
-  background-color: #06b395;
-  width: 21.9px;
-  height: 3.3px;
-  transform: rotate(-19.5deg);
-  transform-origin: 0 0;
-}
-.groupChild11 {
-  position: absolute;
-  top: 158.27px;
-  left: 14.11px;
-  border-radius: 5px;
-  background-color: #06b395;
-  width: 21.9px;
-  height: 3.3px;
-  transform: rotate(19.5deg);
-  transform-origin: 0 0;
-}
-.groupChild12 {
-  position: absolute;
-  top: 133.13px;
-  left: 40.65px;
-  border-radius: 5px;
-  background-color: #06b395;
-  width: 38.6px;
-  height: 3.3px;
-  transform: rotate(130.6deg);
-  transform-origin: 0 0;
-}
-.groupChild13 {
-  position: absolute;
-  top: 247.09px;
-  left: 151.27px;
-  border-radius: 5px;
-  background-color: #06b395;
-  width: 12.6px;
-  height: 3.3px;
-  transform: rotate(75.4deg);
-  transform-origin: 0 0;
-}
-.groupChild14 {
-  position: absolute;
-  top: 242.09px;
-  left: 531.99px;
-  border-radius: 5px;
-  background-color: rgba(6, 179, 149, 0.5);
-  width: 12.6px;
-  height: 3.3px;
-  transform: rotate(75.4deg);
-  transform-origin: 0 0;
-}
-.groupChild15 {
-  position: absolute;
-  top: 259.79px;
-  left: 87.28px;
-  border-radius: 5px;
-  background-color: #06b395;
-  width: 12.6px;
-  height: 3.3px;
-  transform: rotate(-75.4deg);
-  transform-origin: 0 0;
-}
-.groupChild16 {
-  position: absolute;
-  top: 254.79px;
-  left: 468px;
-  border-radius: 5px;
-  background-color: rgba(6, 179, 149, 0.5);
-  width: 12.6px;
-  height: 3.3px;
-  transform: rotate(-75.4deg);
-  transform-origin: 0 0;
-}
-.component49Icon {
-  position: absolute;
-  top: 69px;
-  left: 52px;
-  width: 13.8px;
-  height: 13.9px;
-  object-fit: contain;
-}
-.component50Icon {
-  position: absolute;
-  top: 80px;
-  left: 222px;
-  width: 13.8px;
-  height: 13.9px;
-  object-fit: contain;
-}
-.component51Icon {
-  position: absolute;
-  top: 131px;
-  left: 206px;
-  width: 13.8px;
-  height: 13.9px;
-  object-fit: contain;
-}
-.component53Icon {
-  position: absolute;
-  top: 219px;
-  left: 227px;
-  width: 13.8px;
-  height: 13.9px;
-  object-fit: contain;
-}
-.component52Icon {
-  position: absolute;
-  top: 233px;
-  left: 24px;
-  width: 13.8px;
-  height: 13.9px;
-  object-fit: contain;
-}
-.div1 {
-  position: absolute;
-  top: 0px;
-  left: 87px;
-}
-.rectangleGroup {
-  position: absolute;
-  top: 254px;
-  left: 204px;
-  width: 535.2px;
-  height: 293px;
-}
+/* 운동 url 뜨는 네모 */
 .upItem {
   position: absolute;
-  top: 410px;
-  left: 593.19px;
-  border-radius: 5px;
-  background-color: rgba(6, 179, 149, 0.5);
-  width: 23.4px;
-  height: 3.6px;
-  transform: rotate(19.5deg);
-  transform-origin: 0 0;
+  top: 155px;
+  left: 957px;
+  width: 497px;
+  height: 457px;
+  object-fit: cover;
 }
+/* 내 화면 들어오는 뒤 박스 */
+.rectangleParent {
+  position: absolute;
+  top: 155px;
+  left: 208px;
+  width: 503px;
+  height: 457px;
+  font-size: 30px;
+  font-family: NanumBarunpen, sans-serif;
+  background-color: #000;
+}
+/* 숫자 */
+.div {
+  position: absolute;
+  top: -70px;
+  left: 50px;
+  line-height: 82.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 182px;
+  height: 40px;
+}
+
 .upInner {
   position: absolute;
-  top: 420.27px;
-  left: 794px;
+  top: 707px;
+  left: calc(50% - 18px);
   border-radius: 5px;
-  background-color: rgba(6, 179, 149, 0.5);
-  width: 23.4px;
-  height: 3.6px;
-  transform: rotate(-37.5deg);
-  transform-origin: 0 0;
+  width: 38px;
+  height: 32px;
 }
-.component53Icon1 {
+
+.rectangleDiv {
   position: absolute;
-  top: 326px;
-  left: 613px;
-  width: 184px;
-  height: 175px;
+  top: 720px;
+  /* left: calc(50% - 512px); */
+  background-color: #fff;
+  width: 100%;
+  height: 114px;
 }
-.bitamin {
-  width: 136px;
-  position: relative;
-  font-size: 32px;
-  font-family: 'Bagel Fat One';
-  text-align: left;
-  display: inline-block;
-  flex-shrink: 0;
+
+.vectorIcon {
+  position: absolute;
+  top: 716px;
+  left: 494px;
+  max-width: 100%;
+  overflow: hidden;
+  height: 32px;
+  object-fit: contain;
+  opacity: 0.5;
+}
+
+.upChild1 {
+  position: absolute;
+  top: 716px;
+  left: 530px;
+  max-width: 100%;
+  overflow: hidden;
+  height: 32px;
+  object-fit: contain;
+  opacity: 0.5;
+}
+/* 시작하기, 운동중 글씨 */
+.rectangleGroup {
+  position: absolute;
+  top: 738px;
+  left: 1409px;
+  width: 95px;
+  height: 25px;
+  cursor: pointer;
+  color: #fff;
+}
+/* 시작하기, 운동중 버튼  */
+.groupItem {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  border-radius: 5px;
+  background-color: #ff713c;
+  width: 95px;
+  height: 28px;
+}
+
+.b {
+  position: absolute;
+  top: calc(50% - 12px);
+  left: calc(50% - 22.5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 23.3px;
+}
+/* 운동 이름 */
+.b1 {
+  position: absolute;
+  top: 80px;
+  left: 1150px;
+  font-size: 28px;
+  color: #ff713c;
+  font-family: NanumBarunpen, sans-serif;
+}
+
+.div1 {
+  position: absolute;
+  top: 723px;
+  left: 552px;
+  font-weight: 500;
+  color: #777;
+  background-color: #000;
+}
+/* 첫번째 운동 버튼 */
+.div2 {
+  position: absolute;
+  top: 738px;
+  left: 332px;
+  font-weight: 700;
+  font-size: large;
+  color: #ff713c;
+  /* background-color: #ff713c; */
   cursor: pointer;
 }
+.div22 {
+  position: absolute;
+  top: 738px;
+  left: 732px;
+  font-weight: 700;
+  font-size: large;
+  color: #ff713c;
+  cursor: pointer;
+}
+.div222 {
+  position: absolute;
+  top: 738px;
+  left: 1132px;
+  font-weight: 700;
+  font-size: large;
+  color: #ff713c;
+  cursor: pointer;
+}
+
 .div3 {
-  position: relative;
+  position: absolute;
+  top: 35px;
+  left: 0px;
+  display: inline-block;
+  width: 40px;
 }
-.wrapper {
-  width: 73px;
-  height: 23px;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: center;
-}
-.child {
-  width: 50px;
-  position: relative;
-  border-radius: 2px;
-  background-color: rgba(252, 124, 76, 0.74);
-  height: 2px;
-  opacity: 0;
-}
-.div2 {
+
+.div5 {
   width: 60px;
   height: 74px;
   display: flex;
@@ -429,6 +190,60 @@ button:hover {
   gap: 5px;
   cursor: pointer;
 }
+
+.wrapper {
+  width: 73px;
+  height: 23px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.child {
+  width: 50px;
+  position: relative;
+  border-radius: 2px;
+  background-color: rgba(252, 124, 76, 0.74);
+  height: 2px;
+  opacity: 0;
+}
+
+.div6 {
+  position: relative;
+}
+
+.div9 {
+  width: 60px;
+  height: 74px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  box-sizing: border-box;
+  gap: 5px;
+  cursor: pointer;
+  color: #000;
+}
+
+.group {
+  width: 73px;
+  height: 23px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.inner {
+  width: 50px;
+  position: relative;
+  border-radius: 2px;
+  background-color: rgba(252, 124, 76, 0.74);
+  height: 2px;
+}
+
 .up1 {
   width: 22px;
   position: relative;
@@ -438,6 +253,7 @@ button:hover {
   height: 33px;
   flex-shrink: 0;
 }
+
 .upWrapper {
   width: 27px;
   height: 36px;
@@ -447,36 +263,9 @@ button:hover {
   justify-content: center;
   margin-left: -4px;
   color: #ff713c;
-  font-family: 'Ownglyph ryuttung';
+  font-family: 'Ownglyph ryuttung', sans-serif;
 }
-.group {
-  width: 73px;
-  height: 23px;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: flex-end;
-}
-.inner {
-  width: 50px;
-  position: relative;
-  border-radius: 2px;
-  background-color: rgba(252, 124, 76, 0.74);
-  height: 2px;
-}
-.div6 {
-  width: 60px;
-  height: 74px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  box-sizing: border-box;
-  gap: 5px;
-  cursor: pointer;
-  color: #000;
-}
+
 .parent {
   flex: 1;
   display: flex;
@@ -486,53 +275,34 @@ button:hover {
   gap: 80px;
   color: #777;
 }
-.personcircleIcon {
-  width: 19px;
-  position: relative;
-  height: 19px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.span1 {
-  font-size: 12px;
-}
-.span {
-  font-family: NanumBarunpen;
-  font-size: 17px;
-}
-.txt {
-  width: 100%;
-}
-.div9 {
-  width: 53px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 24px;
-  flex-shrink: 0;
-}
-.frame {
-  height: 25px;
+
+.personcircleParent {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 7px;
 }
-.vectorIcon {
-  width: 9px;
-  position: relative;
-  height: 6px;
-}
-.vectorWrapper {
-  width: 9px;
-  height: 19px;
+
+.div11 {
+  width: 124px;
+  height: 98px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding: 5px 0px;
-  box-sizing: border-box;
+  justify-content: center;
+  color: #999;
 }
+
+.frameParent {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
 .frameGroup {
   width: 72px;
   height: 19px;
@@ -542,67 +312,66 @@ button:hover {
   justify-content: flex-start;
   gap: 4px;
 }
-.personcircleParent {
+
+.frame {
+  height: 25px;
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 7px;
-}
-.icon {
-  width: 19px;
-  position: relative;
-  height: 19.7px;
-}
-.frameDiv {
-  height: 24px;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-end;
-  cursor: pointer;
-}
-.frameParent {
-  align-self: stretch;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 6px;
-}
-.div8 {
-  width: 124px;
-  height: 98px;
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #999;
 }
-.navbar {
-  position: absolute;
-  top: -1px;
-  left: 39px;
-  background-color: #fff;
-  width: 944px;
-  height: 74px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 94px;
-  font-size: 14px;
-  color: #ff713c;
-  font-family: NanumGothic;
-}
-.up {
-  width: 100%;
+
+.div12 {
+  width: 53px;
   position: relative;
-  background-color: #fffbfa;
-  height: 768px;
-  overflow: hidden;
-  text-align: center;
-  font-size: 28px;
-  color: #000;
-  font-family: 'Ownglyph ryuttung';
+  display: flex;
+  align-items: center;
+  height: 24px;
+  flex-shrink: 0;
+}
+/* 운동 설명 */
+.div13 {
+  position: absolute;
+  top: 634px;
+  left: 942px;
+  font-family: NanumBarunpen, sans-serif;
+  text-align: left;
+}
+
+.p {
+  margin: 0;
+}
+/* 하루홈트 글씨 */
+.div14 {
+  position: absolute;
+  /* top: 77px; */
+  left: 38px;
+  font-size: 20px;
+  font-family: NanumBarunpen, sans-serif;
+}
+.canvasContainer {
+  top: 800px;
+  width: 497px;
+  height: 457px;
+}
+/* 하루홈트 글씨 박스 */
+.upChild2 {
+  position: absolute;
+  /* top: 25px; */
+  left: 0px;
+  background-color: #fff;
+  border-top: 0.5px solid #ff713c;
+  box-sizing: border-box;
+  width: 100%;
+  height: 29px;
+}
+/* 하루홈트 밑줄 */
+.upChild3 {
+  position: absolute;
+  top: 20px;
+  left: 34px;
+  border-radius: 2px;
+  background-color: rgba(252, 124, 76, 0.72);
+  width: 77px;
+  height: 7px;
 }

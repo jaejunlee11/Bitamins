@@ -60,15 +60,19 @@ const SignUpPage: React.FC = () => {
   const handleChange = async (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value, files } = e.target
-    if (name === 'image' && files && files[0]) {
-      const imageFile = files[0]
-      setSignupForm({
-        ...signupForm,
-        image: imageFile,
-      })
-      const previewUrl = URL.createObjectURL(imageFile)
-      setPreviewUrl(previewUrl) // 미리보기 URL을 상태에 저장
+    const { name, value } = e.target
+
+    if (e.target instanceof HTMLInputElement && e.target.files) {
+      const files = e.target.files
+      if (name === 'image' && files && files[0]) {
+        const imageFile = files[0]
+        setSignupForm({
+          ...signupForm,
+          image: imageFile,
+        })
+        const previewUrl = URL.createObjectURL(imageFile)
+        setPreviewUrl(previewUrl) // 미리보기 URL을 상태에 저장
+      }
     } else {
       setSignupForm({
         ...signupForm,
@@ -84,6 +88,7 @@ const SignUpPage: React.FC = () => {
           setError('이메일 중복 확인 중 오류가 발생했습니다.')
         }
       }
+
       if (name === 'nickname' && value) {
         try {
           const result = await checkNickname(value)
@@ -193,7 +198,9 @@ const SignUpPage: React.FC = () => {
                   name="email"
                   value={signupForm.email}
                   onChange={handleChange}
-                  className={`${styles.div11} ${emailValid === false ? styles.inputError : ''}`}
+                  className={`${styles.div11} ${
+                    emailValid === false ? styles.inputError : ''
+                  }`}
                   placeholder="이메일을 입력하세요"
                   required
                 />
@@ -233,7 +240,7 @@ const SignUpPage: React.FC = () => {
               <div className={styles.component70}>
                 {signupForm.password !== signupForm.passwordConfirm && (
                   <div className={styles.error}>
-                    비밀번호가 일치하지 않습니댜
+                    비밀번호가 일치하지 않습니다
                   </div>
                 )}
                 <input

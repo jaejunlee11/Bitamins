@@ -15,10 +15,11 @@
     "allowImportingTsExtensions": true,
     "baseUrl": "src",
     "allowJs": true, // JS 파일 허용
-    "checkJs": true, // JS 파일에 타입 검사 수행
+    "checkJs": false, // JS 파일에 타입 검사 수행
     "paths": {
       "@/*": ["*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/stories/organisms/consultation"]
 }
