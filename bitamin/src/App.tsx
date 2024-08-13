@@ -17,7 +17,7 @@ const AppContent: React.FC = () => {
       {/* <HeaderAfterLogin /> */}
       {/* {isLoggedIn ? <HeaderAfterLogin /> : <HeaderBeforeLogin />} */}
       <AppRouter />
-      {!excludeFooterPaths.includes(location.pathname) && <Footer />}
+      {/*{!excludeFooterPaths.includes(location.pathname) && <Footer />}*/}
     </>
   )
 }

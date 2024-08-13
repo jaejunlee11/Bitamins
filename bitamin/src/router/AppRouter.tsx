@@ -3,6 +3,7 @@ import MainPage from 'stories/pages/main/MainPage'
 import LoginPage from 'stories/pages/account/LoginPage'
 import SignUpPage from 'stories/pages/account/SignUpPage'
 import SurveyPage from 'stories/pages/account/SurveyPage'
+import MissionPage from 'stories/pages/mission/MissionPage'
 import ConsultationListPage from 'stories/pages/counsultation/ConsultationListPage'
 import ConsultationPage from 'stories/pages/counsultation/ConsultationPage'
 import VideoRoomComponent from 'stories/organisms/consultation/components/VideoRoomComponent'
@@ -47,6 +48,7 @@ const AppRouter: React.FC = () => {
       <Route path="/participantlist" element={<ParticipantListPage />} />
       <Route path="/reply" element={<ReplyPage />} />
       <Route path="/admin" element={<AdiminPage />} />
+        <Route path="/mission" element={<MissionPage />} />
     </Routes>
   )
 }

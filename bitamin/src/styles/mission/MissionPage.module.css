@@ -1,0 +1,213 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.plant {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    flex: 1;
+}
+
+.mainContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex: 2;
+    padding: 20px;
+    box-sizing: border-box;
+    gap: 30px; /* 컴포넌트 간의 여백 */
+    max-width: 1200px; /* .plantBox와 동일한 최대 너비 */
+    width: 100%; /* 가로로 꽉 채움 */
+    margin: 0 auto; /* 가운데 정렬 */
+}
+
+.calendar {
+    flex: 0.5; /* .calendar가 더 적은 비율을 차지하도록 설정 */
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 40px; /* 캘린더를 왼쪽으로 이동시키기 위해 오른쪽 여백을 늘림 */
+}
+
+.missionSection {
+    flex: 1.5; /* .missionSection이 더 넓은 비율을 차지하도록 설정 */
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+/*plant*/
+.plantBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(117, 202, 117, 0.42);
+    border-radius: 10px; /* 모서리 둥글게 */
+    padding: 20px;
+    box-sizing: border-box;
+    width: 100%; /* 가로로 꽉 채움 */
+    max-width: 1150px; /* 최대 너비 */
+    height: 50vh; /* 세로로 페이지의 반을 채움 */
+    margin: 20px auto; /* 가운데 정렬 */
+    text-align: center;
+}
+
+/*completeMission*/
+.missionContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    background-color: #F8F5DD;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.missionTitle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 80%;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.missionDate {
+    flex: 1;
+    display: flex; /* 중앙 정렬을 위해 flexbox 사용 */
+    justify-content: center; /* 가로 중앙 정렬 */
+    align-items: center; /* 세로 중앙 정렬 */
+    border-radius: 10px 0px 0px 10px;
+    background: rgba(244, 136, 87, 0.9);
+    padding: 10px; /* 박스를 더 크게 보이게 함 */
+    color: white;
+}
+
+.missionName {
+    flex: 3;
+    display: flex; /* 중앙 정렬을 위해 flexbox 사용 */
+    justify-content: center; /* 가로 중앙 정렬 */
+    align-items: center; /* 세로 중앙 정렬 */
+    border-radius: 0px 10px 10px 0px;
+    background: #FFF;
+    padding: 10px; /* 박스를 더 크게 보이게 함 */
+}
+
+.missionContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.missionImage {
+    max-width: 250px;
+    height: auto;
+    margin-right: 20px;
+}
+
+.missionDetails {
+    flex: 1;
+    text-align: left;
+}
+
+.missionDetails p {
+    position: relative;
+    padding: 0 0 5px 0; /* 텍스트 아래 여백 추가 */
+    margin: 0;
+    line-height: 1.5; /* 줄 높이 설정 */
+}
+
+.missionDetails p::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background-color: #ccc; /* 선의 색상 */
+    transform: translateY(100%); /* 선을 텍스트 아래로 이동 */
+}
+
+.phraseContainer {
+    width: 100%;
+    margin-top: 20px;
+    text-align: left;
+}
+
+.audioPlayer {
+    width: 100%;
+    max-width: 250px;
+    height: 30px;
+}
+
+@media (max-width: 768px) {
+    .mainContent {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .calendar, .missionSection {
+        width: 100%;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .missionSection {
+        align-items: center;
+    }
+
+    .missionContainer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .missionImage {
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .audioPlayer {
+        width: 100%;
+        max-width: 300px; /* 오디오 플레이어 크기를 줄임 */
+    }
+}
+
+@media (max-width: 480px) {
+    .weather {
+        margin-top: 10px;
+    }
+
+    .calendar, .missionSection {
+        margin-top: 10px;
+    }
+
+    .missionContainer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .missionImage {
+        margin-right: 0;
+        margin-bottom: 10px; /* 이미지와 텍스트 사이에 추가 여백 */
+    }
+
+    .missionDetails {
+        width: 100%; /* 텍스트가 화면에 꽉 차도록 조정 */
+        text-align: left;
+    }
+
+    .audioPlayer {
+        width: 100%;
+        max-width: 300px; /* 오디오 플레이어 크기를 줄임 */
+    }
+}
