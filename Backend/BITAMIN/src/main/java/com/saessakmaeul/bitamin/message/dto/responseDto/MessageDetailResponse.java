@@ -12,6 +12,7 @@ import java.util.List;
 public class MessageDetailResponse {
     private long id;
     private String nickname;
+    private long opponentId;
     private String category;
     private String title;
     private String content;
