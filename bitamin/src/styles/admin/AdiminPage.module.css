@@ -1,0 +1,382 @@
+.child {
+  position: absolute;
+  top: 78px;
+  left: 0px;
+  background-color: rgba(0, 70, 255, 0.02);
+  width: 1024px;
+  height: 690px;
+}
+.item {
+  position: absolute;
+  top: 73px;
+  left: 0px;
+  background-color: rgba(249, 234, 155, 0.84);
+  width: 1024px;
+  height: 5px;
+}
+.wrapper {
+  align-self: stretch;
+  height: 30px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.inner {
+  position: absolute;
+  top: 98px;
+  left: 90px;
+  background-color: #ffb72c;
+  width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.text {
+  position: relative;
+}
+.textWrapper {
+  align-self: stretch;
+  border-radius: 5px 5px 0px 0px;
+  background-color: #f9ea9b;
+  border-bottom: 1px solid #333;
+  box-sizing: border-box;
+  height: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0px 10px;
+  text-align: left;
+  font-size: 18px;
+}
+.textContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+.column0Inner {
+  align-self: stretch;
+  border-bottom: 1px solid #333;
+  box-sizing: border-box;
+  height: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0px 10px;
+}
+.column0 {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: right;
+}
+.textWrapper15 {
+  align-self: stretch;
+  border-radius: 5px 5px 0px 0px;
+  background-color: #f9ea9b;
+  border-bottom: 1px solid #333;
+  box-sizing: border-box;
+  height: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0px 10px;
+  font-size: 18px;
+}
+.textWrapper16 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.column1Inner {
+  align-self: stretch;
+  border-bottom: 1px solid #333;
+  box-sizing: border-box;
+  height: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0px 10px;
+}
+.column1 {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.column2 {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.table {
+  position: absolute;
+  top: 178px;
+  left: 140px;
+  width: 744px;
+  height: 420px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  cursor: pointer;
+  text-align: left;
+  color: #333;
+  font-family: NanumBarunpen;
+}
+.bitamin {
+  width: 136px;
+  position: relative;
+  font-size: 32px;
+  font-family: 'Bagel Fat One';
+  text-align: left;
+  display: inline-block;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.container {
+  width: 73px;
+  height: 23px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center;
+}
+.rectangleDiv {
+  width: 50px;
+  position: relative;
+  border-radius: 2px;
+  background-color: rgba(252, 124, 76, 0.74);
+  height: 2px;
+  opacity: 0;
+}
+.div2 {
+  width: 60px;
+  height: 74px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  box-sizing: border-box;
+  gap: 5px;
+  cursor: pointer;
+}
+.up {
+  width: 22px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 33px;
+  flex-shrink: 0;
+}
+.upWrapper {
+  width: 27px;
+  height: 36px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  margin-left: -4px;
+  color: #ff713c;
+  font-family: 'Ownglyph ryuttung';
+}
+.group {
+  width: 73px;
+  height: 23px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+.parent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 50px;
+  color: #777;
+}
+.personcircleIcon {
+  width: 19px;
+  position: relative;
+  height: 19px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.span1 {
+  font-size: 12px;
+}
+.span {
+  font-family: NanumBarunpen;
+  font-size: 17px;
+}
+.txt {
+  width: 100%;
+}
+.div11 {
+  width: 53px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  flex-shrink: 0;
+}
+.wrapper2 {
+  height: 25px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.vectorIcon {
+  width: 9px;
+  position: relative;
+  height: 6px;
+}
+.vectorWrapper {
+  width: 9px;
+  height: 19px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 5px 0px;
+  box-sizing: border-box;
+}
+.frameGroup {
+  width: 72px;
+  height: 19px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+}
+.personcircleParent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+}
+.icon {
+  width: 19px;
+  position: relative;
+  height: 19.7px;
+}
+.wrapper3 {
+  height: 24px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-end;
+  cursor: pointer;
+}
+.frameParent {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+}
+.wrapper4 {
+  width: 43px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.frameWrapper {
+  align-self: stretch;
+  background-color: #fff;
+  height: 19px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6px 24px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+.div13 {
+  align-self: stretch;
+  position: relative;
+}
+.frameWrapper1 {
+  align-self: stretch;
+  border-radius: 0px 0px 5px 5px;
+  background-color: #fff;
+  height: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6px 24px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+.frameContainer {
+  width: 92px;
+  box-shadow: 4px 4px 25px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-top: -2px;
+  font-size: 9px;
+  color: #777;
+}
+.div10 {
+  width: 124px;
+  height: 98px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  color: #999;
+}
+.navbar {
+  position: absolute;
+  top: -1px;
+  left: 39px;
+  background-color: #fff;
+  width: 944px;
+  height: 74px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #ff713c;
+  font-family: NanumGothic;
+}
+.div {
+  width: 100%;
+  position: relative;
+  background-color: #fff;
+  height: 768px;
+  overflow: hidden;
+  text-align: center;
+  font-size: 16px;
+  color: #000;
+  font-family: 'Bagel Fat One';
+}
