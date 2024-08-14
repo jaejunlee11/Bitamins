@@ -47,7 +47,8 @@ public class JwtFilter extends OncePerRequestFilter {
                  requestURI.startsWith("/api/members/register") ||
                  requestURI.startsWith("/api/members/sidoNames") ||
                  requestURI.startsWith("/api/members/gugunNames") ||
-                 requestURI.startsWith("/api/members/dongNames")) {
+                 requestURI.startsWith("/api/members/dongNames") ||
+                 requestURI.startsWith("/api/ws")) {
              chain.doFilter(request, response);
              return;
          }
@@ -60,9 +61,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
          jwt = authorizationHeader.substring(7);
          userEmail = jwtUtil.extractEmail(jwt);
-
-         System.out.println(userEmail);
-
 
          if (userEmail == null) {
              response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
