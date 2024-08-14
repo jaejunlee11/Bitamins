@@ -10,13 +10,11 @@ const Header: FunctionComponent = () => {
   const { accessToken, clearAuth, role } = useAuthStore()
   const [, , removeCookie] = useCookies(['refreshToken'])
   const [dropdownVisible, setDropdownVisible] = useState(false)
-  const { user, fetchUser } = useUserStore()
+  const { user, fetchUser, loading, clearUserData } = useUserStore()
 
   useEffect(() => {
-    if (!user) {
-      fetchUser()
-    }
-  }, [user, fetchUser])
+    fetchUser() // 항상 최신 유저 데이터를 불러오도록 수정
+  }, [fetchUser])
 
   const onBItAMinTextClick = useCallback(() => {
     navigate('/home')
@@ -52,10 +50,11 @@ const Header: FunctionComponent = () => {
 
   const onLogoutClick = useCallback(() => {
     clearAuth()
+    clearUserData() // 유저 데이터를 초기화
     removeCookie('refreshToken', { path: '/' })
     alert('Logged out successfully!')
     navigate('/home')
-  }, [navigate, clearAuth, removeCookie])
+  }, [navigate, clearAuth, removeCookie, clearUserData])
 
   const toggleDropdown = useCallback(() => {
     setDropdownVisible((prev) => !prev)
@@ -159,12 +158,16 @@ const Header: FunctionComponent = () => {
               >
                 <div className="h-[1.563rem] flex flex-row items-center justify-center">
                   <div className="w-[5rem] relative flex items-center h-[1.5rem] shrink-0">
-                    <span className="w-full">
-                      <span className="text-[1.2rem]">{user?.name}</span>
-                      <span className="font-nanumbarunpen text-[1rem]">
-                        <span className="text-[1rem]">님</span>
+                    {loading ? (
+                      <div>로딩 중...</div>
+                    ) : (
+                      <span className="w-full">
+                        <span className="text-[1.2rem]">{user?.name}</span>
+                        <span className="font-nanumbarunpen text-[1rem]">
+                          <span className="text-[1rem]">님</span>
+                        </span>
                       </span>
-                    </span>
+                    )}
                   </div>
                 </div>
                 <div className="w-[0.563rem] h-[1.188rem] flex flex-col items-center justify-end py-[0.312rem] px-[0rem] box-border">

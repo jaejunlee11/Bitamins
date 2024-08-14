@@ -83,7 +83,6 @@ const MyPage: React.FC = () => {
     }
   }
 
-
   const openPasswordModal = () => setIsPasswordModalOpen(true)
   const closePasswordModal = () => setIsPasswordModalOpen(false)
   const closeModal = () => setIsModalOpen(false)
@@ -288,7 +287,7 @@ const MyPage: React.FC = () => {
       setSelectedResult({ date: selectedDate, score: selectedScore })
     }
   }
-  
+
   return (
     <>
       <div className={styles.div}>
@@ -516,7 +515,11 @@ const MyPage: React.FC = () => {
           </ResponsiveContainer>
         </div>
       </div>
-      <PasswordChangeModal isOpen={isPasswordModalOpen} onRequestClose={closePasswordModal} onSuccess={handlePasswordChangeSuccess} />
+      <PasswordChangeModal
+        isOpen={isPasswordModalOpen}
+        onRequestClose={closePasswordModal}
+        onSuccess={handlePasswordChangeSuccess}
+      />
       {isModalOpen && (
         <Modal
           title="비밀번호 변경"

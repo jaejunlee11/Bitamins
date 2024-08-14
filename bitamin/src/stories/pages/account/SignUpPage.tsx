@@ -38,7 +38,7 @@ const SignUpPage: React.FC = () => {
   const [sidoNames, setSidoNames] = useState<string[]>([])
   const [gugunNames, setGugunNames] = useState<string[]>([])
   const [dongNames, setDongNames] = useState<string[]>([])
-  const [isQueryPrefilled,setIsQueryPrefilled] = useState<Boolean>(false)
+  const [isQueryPrefilled, setIsQueryPrefilled] = useState<boolean>(false)
 
   // 모달 창
   const [isModalOpen, setModalOpen] = useState<string | null>(null)
@@ -138,7 +138,6 @@ const SignUpPage: React.FC = () => {
     }
   }
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -190,7 +189,6 @@ const SignUpPage: React.FC = () => {
 
   return (
     <>
-      <HeaderBeforeLogin />
       <div className={styles.div}>
         <div className={styles.backred}></div>
         <div className={styles.component66}>
