@@ -12,7 +12,7 @@ const axiosInstance = axios.create({
   withCredentials: true, // HTTP-only 쿠키를 전송하기 위해 설정
 })
 const { clearAuth } = useAuthStore.getState()
-const EXCLUDED_PATHS = ['/auth/login', '/members/register']
+const EXCLUDED_PATHS = ['/auth/login', '/members/register','/auth']
 
 // 요청 인터셉터
 axiosInstance.interceptors.request.use(

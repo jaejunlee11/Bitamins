@@ -199,3 +199,11 @@ export const HealthReportCheck = async () => {
     throw error
   }
 }
+
+export const kakaoLogin = async () => {
+  window.location.href = "https://i11b105.p.ssafy.io/api/auth/kakao/login";
+}
+
+export const googleLogin = async () => {
+  window.location.href = "https://i11b105.p.ssafy.io/api/auth/google/login";
+}

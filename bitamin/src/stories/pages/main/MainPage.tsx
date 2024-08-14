@@ -13,6 +13,8 @@ import recordPlay from 'assets/image/recordPlay.png'
 import HeaderAfterLogin from '@/stories/organisms/common/HeaderAfterLogin'
 import { getPhrases, saveAudio } from '@/api/phraseAPI'
 import { useNavigate } from 'react-router-dom'
+import { HealthReportCheck } from 'api/userAPI'
+import CheckModal from '@/stories/organisms/CheckModal'
 
 const MainPage: React.FC = () => {
   const navigate = useNavigate()
@@ -26,6 +28,21 @@ const MainPage: React.FC = () => {
   )
   const [questOpacityClass, setQuestOpacityClass] = useState(styles.transparent)
   const { phraseContent, phraseId, setPhrase } = usePhraseStore()
+  const [isCheckModalOpen, setCheckModalOpen] = useState(false)
+
+  const closeCheckModal = () => {
+    setCheckModalOpen(false)
+  }
+
+  const handleConfirm = async () => {
+    // 확인 버튼 클릭 시의 로직
+    closeCheckModal()
+    navigate('/survey')
+  }
+
+  const handleSecondaryAction = () => {
+    closeCheckModal()
+  }
 
   useEffect(() => {
     const savedPhrase = localStorage.getItem('phraseContent')
@@ -49,6 +66,14 @@ const MainPage: React.FC = () => {
           console.error('Error fetching the phrase:', error)
         })
     }
+    const init = async()=> {
+      const result = await HealthReportCheck()
+      if(result.result==0){
+        setCheckModalOpen(true)
+      }
+    }
+  
+    init();
   }, [setPhrase])
 
   // 나머지 코드들은 이전과 동일합니다.
@@ -180,7 +205,6 @@ const MainPage: React.FC = () => {
   const onconsultationClick = useCallback(() => {
     navigate('/consultationlist')
   }, [navigate])
-
   return (
     <>
       <div className={styles.div}>
@@ -250,6 +274,23 @@ const MainPage: React.FC = () => {
           src={mainQuestImg}
         />
       </div>
+      {isCheckModalOpen && (
+        <CheckModal
+          title="검사지 도착"
+          content="이번 주 검사지 작성을 완료해주세요."
+          iconSrc="fi.FiEdit"
+          confirmText="바로 가기"
+          onConfirm={handleConfirm}
+          onClose={closeCheckModal}
+          width="400px"
+          height="300px"
+          headerBackgroundColor="#FF713C"
+          buttonBorderColor="#FF713C"
+          buttonTextColor="#FF713C"
+          secondaryButtonText="취소"
+          onSecondaryAction={handleSecondaryAction}
+        />
+      )}
     </>
   )
 }

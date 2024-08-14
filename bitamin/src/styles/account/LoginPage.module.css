@@ -103,6 +103,8 @@
 .component57 {
   flex: 1;
   margin: 5px;
+  display: flex;
+  justify-content: center;
 }
 
 .reactIconssisinaver,
@@ -157,4 +159,11 @@
   .div15 {
     font-size: 0.75rem;
   }
+}
+
+.loginIcon {
+  max-width: 100%;
+  max-height: 40px;
+  height: auto;
+  width: auto;
 }

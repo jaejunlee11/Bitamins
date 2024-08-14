@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axiosInstance, { setAccessToken } from 'api/axiosInstance' // 경로 수정
 import useAuthStore from 'store/useAuthStore' // 경로 수정
 import { useCookies } from 'react-cookie'
@@ -51,6 +51,16 @@ const AuthPage: React.FC = () => {
       console.error('Failed to fetch messages:', error)
     }
   }
+
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search)
+    const emailQuery = query.get('email')
+    const passwordQuery = query.get('password')
+    console.log('Email Query:', emailQuery) // 추가
+    console.log('Password Query:', passwordQuery) // 추가
+    if (emailQuery) setEmail(emailQuery)
+    if (passwordQuery) setPassword(passwordQuery)
+  }, [window.location.search])
 
   return (
     <div>

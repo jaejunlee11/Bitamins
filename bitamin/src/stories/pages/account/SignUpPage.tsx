@@ -38,6 +38,7 @@ const SignUpPage: React.FC = () => {
   const [sidoNames, setSidoNames] = useState<string[]>([])
   const [gugunNames, setGugunNames] = useState<string[]>([])
   const [dongNames, setDongNames] = useState<string[]>([])
+  const [isQueryPrefilled,setIsQueryPrefilled] = useState<Boolean>(false)
 
   // 모달 창
   const [isModalOpen, setModalOpen] = useState<string | null>(null)
@@ -172,6 +173,21 @@ const SignUpPage: React.FC = () => {
     }
   }
 
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search)
+    const emailQuery = query.get('email')
+    const passwordQuery = query.get('password')
+    if (emailQuery && passwordQuery) {
+      setSignupForm((prevForm) => ({
+        ...prevForm,
+        email: emailQuery,
+        password: passwordQuery,
+        passwordConfirm: passwordQuery,
+      }))
+      setIsQueryPrefilled(true)
+    }
+  }, [window.location.search])
+
   return (
     <>
       <HeaderBeforeLogin />
@@ -213,6 +229,7 @@ const SignUpPage: React.FC = () => {
                   }`}
                   placeholder="이메일을 입력하세요"
                   required
+                  disabled={isQueryPrefilled}
                 />
               </div>
               <div className={styles.component70}>
@@ -264,6 +281,7 @@ const SignUpPage: React.FC = () => {
                       : ''
                   }`}
                   placeholder="비밀번호"
+                  disabled={isQueryPrefilled}
                   required
                 />
               </div>
@@ -279,6 +297,7 @@ const SignUpPage: React.FC = () => {
                       : ''
                   }`}
                   placeholder="비밀번호 확인"
+                  disabled={isQueryPrefilled}
                   required
                 />
               </div>
