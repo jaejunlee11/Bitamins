@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import * as tmPose from '@teachablemachine/pose'
 import exerciseAPI from '@/api/exerciseAPI'
-import styles from 'styles/healthUp/HealthUpPage.module.css'
+import styles from '@/styles/healthup/HealthUpPage.module.css'
 
 interface execrciseModelInterface {
   id: number

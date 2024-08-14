@@ -30,7 +30,7 @@ const ConsultationListPage: React.FC = () => {
     <>
       <ConsultationListPa />
       {/* <CreateRoomPage /> */}
-      <div className={styles.div}>
+      {/*<div className={styles.div}>
         <div className={styles.child} />
         <div className={styles.item} />
         <div className={styles.inner} />
@@ -151,7 +151,7 @@ const ConsultationListPage: React.FC = () => {
           </div>
         </div>
         <div className={styles.div21}>제재 사용자의 모달</div>
-      </div>
+      </div>*/}
       {/* {isFrameOpen && (
         <PortalPopup
           overlayColor="rgba(113, 113, 113, 0.3)"
