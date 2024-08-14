@@ -13,8 +13,14 @@ import clickme from 'assets/image/clickme.png'
 import RecordModal from '@/stories/pages/main/RecordModal'
 import { saveAudio } from '@/api/phraseAPI'
 import { usePhraseStore } from '@/store/usePhraseStore'
+import HeaderAfterLogin from '@/stories/organisms/common/HeaderAfterLogin'
+import { useNavigate } from 'react-router-dom'
+import { HealthReportCheck } from 'api/userAPI'
+import CheckModal from '@/stories/organisms/CheckModal'
 
 const MainPage: React.FC = () => {
+  const navigate = useNavigate()
+
   const [isRecording, setIsRecording] = useState(false)
   const [isEnded, setIsEnded] = useState(false)
   const [media, setMedia] = useState<MediaRecorder | null>(null)
@@ -28,7 +34,32 @@ const MainPage: React.FC = () => {
   useEffect(() => {
     fetchPhrase()
   }, [fetchPhrase])
+  const [isCheckModalOpen, setCheckModalOpen] = useState(false)
 
+  const closeCheckModal = () => {
+    setCheckModalOpen(false)
+  }
+
+  const handleConfirm = async () => {
+    // 확인 버튼 클릭 시의 로직
+    closeCheckModal()
+    navigate('/survey')
+  }
+
+  const handleSecondaryAction = () => {
+    closeCheckModal()
+  }
+
+  useEffect(() => {
+    const init = async()=> {
+      const result = await HealthReportCheck()
+      if(result.result==0){
+        setCheckModalOpen(true)
+      }
+    }
+
+    init();
+  }, [])
   const onRecAudio = () => {
     if (isSaved) return // 녹음이 저장되었을 경우 녹음 불가
     navigator.mediaDevices
@@ -152,6 +183,13 @@ const MainPage: React.FC = () => {
     setIsModalOpen(false)
   }
 
+  const onMissionClick = useCallback(() => {
+    navigate('/mission')
+  }, [navigate])
+
+  const onconsultationClick = useCallback(() => {
+    navigate('/consultationlist')
+  }, [navigate])
   return (
     <>
       {isModalOpen && <RecordModal onClose={closeModal} />}
@@ -213,6 +251,7 @@ const MainPage: React.FC = () => {
             className={styles.tryConsultBtn}
             onMouseEnter={handleMouseEnterConsult}
             onMouseLeave={handleMouseLeaveConsult}
+            onClick={onconsultationClick}
           >
             <b className={styles.b}>상담하기</b>
           </div>
@@ -231,6 +270,7 @@ const MainPage: React.FC = () => {
             className={styles.tryQuestBtn}
             onMouseEnter={handleMouseEnterQuest}
             onMouseLeave={handleMouseLeaveQuest}
+            onClick={onMissionClick}
           >
             <b className={styles.b}>미션하기</b>
           </div>
@@ -242,6 +282,23 @@ const MainPage: React.FC = () => {
           />
         </div>
       </div>
+      {isCheckModalOpen && (
+        <CheckModal
+          title="검사지 도착"
+          content="이번 주 검사지 작성을 완료해주세요."
+          iconSrc="fi.FiEdit"
+          confirmText="바로 가기"
+          onConfirm={handleConfirm}
+          onClose={closeCheckModal}
+          width="400px"
+          height="300px"
+          headerBackgroundColor="#FF713C"
+          buttonBorderColor="#FF713C"
+          buttonTextColor="#FF713C"
+          secondaryButtonText="취소"
+          onSecondaryAction={handleSecondaryAction}
+        />
+      )}
     </>
   )
 }

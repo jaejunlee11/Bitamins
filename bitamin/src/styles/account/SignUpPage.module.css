@@ -1,595 +1,179 @@
-.b {
-  position: relative;
-}
-.div1 {
-  position: absolute;
-  top: 502px;
-  left: 652px;
-  border-radius: 20px;
-  background-color: #fc7c4c;
-  width: 50px;
-  height: 18px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 0px 10px;
-  box-sizing: border-box;
-  color: #fff;
-  font-family: NanumGothicCoding;
-}
-.b1 {
-  position: absolute;
-  top: 629px;
-  left: 596px;
-  font-size: 10px;
-}
-.instanceChild {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  background-color: #f9ea9b;
-}
-.rectangleWrapper {
-  position: absolute;
-  height: 30.24%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 69.76%;
-  left: 0%;
-}
-.div2 {
-  align-self: stretch;
-  position: relative;
-}
-.bitamin {
-  align-self: stretch;
-  position: relative;
-  font-size: 15px;
-  color: #777;
-  text-align: left;
-}
-.parent {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 215px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 16px;
-}
-.frameContainer {
-  width: 215px;
-  position: relative;
-  height: 63px;
-}
-.component78Child {
-  position: absolute;
-  height: 98.53%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 1.47%;
-  left: 0%;
-  border-radius: 50%;
-  background-color: #d9d9d9;
-}
-.frameChild {
-  width: 31px;
-  position: relative;
-  border-radius: 50%;
-  background-color: #fff;
-  height: 31px;
-}
-.intersectIcon {
-  align-self: stretch;
-  position: relative;
-  max-width: 100%;
-  overflow: hidden;
-  height: 40.3px;
-  flex-shrink: 0;
-}
-.ellipseParent {
-  position: absolute;
-  height: 86.41%;
-  width: 79.2%;
-  top: 13.59%;
-  right: 10.57%;
-  bottom: 0%;
-  left: 10.23%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 5px;
-}
-.component78 {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 88px;
-  height: 88.3px;
-}
-.icon {
-  width: 19.2px;
-  position: relative;
-  height: 16.1px;
-}
-.iconWrapper {
-  position: absolute;
-  top: 56px;
-  left: 53px;
-  width: 39.2px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 10px;
-  box-sizing: border-box;
-}
-.component78Parent {
-  position: absolute;
-  top: 0px;
-  left: 153.9px;
-  width: 92.2px;
-  height: 92.1px;
-}
-.instanceItem {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  border-radius: 2px;
-  background-color: #fff;
-  border: 1.5px solid rgba(255, 113, 60, 0.9);
-  box-sizing: border-box;
-}
-.rectangleContainer {
-  position: absolute;
-  height: 56.9%;
-  width: 100%;
-  top: 43.1%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-}
-.checkBrokenIcon {
-  position: absolute;
-  height: 100%;
-  width: 28.81%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 71.19%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.b2 {
-  position: absolute;
-  top: 17.65%;
-  left: 0%;
-}
-.component69 {
-  position: absolute;
-  height: 29.31%;
-  width: 14.75%;
-  top: 0%;
-  right: 85.25%;
-  bottom: 70.69%;
-  left: 0%;
-}
-.instanceGroup {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-}
-.component70 {
-  width: 400px;
-  position: relative;
-  height: 58px;
-}
-.instanceInner {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  border-radius: 2px;
-  background-color: #fff;
-  border: 1px solid rgba(119, 119, 119, 0.6);
-  box-sizing: border-box;
-}
-.checkBrokenIcon1 {
-  width: 17px;
-  position: relative;
-  height: 17px;
-}
-.group {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: flex-start;
-  gap: 2px;
-}
-.frameWrapper4 {
-  position: absolute;
-  height: 29.31%;
-  width: 11.5%;
-  top: 0%;
-  right: 88.5%;
-  bottom: 70.69%;
-  left: 0%;
-}
-.frameWrapper6 {
-  position: absolute;
-  height: 29.31%;
-  width: 18%;
-  top: 0%;
-  right: 82%;
-  bottom: 70.69%;
-  left: 0%;
-}
-.frameWrapper7 {
-  position: absolute;
-  height: 29.31%;
-  width: 25.5%;
-  top: 0%;
-  right: 74.5%;
-  bottom: 70.69%;
-  left: 0%;
-}
-.component74 {
-  width: 400px;
-  position: relative;
-  height: 58px;
-  text-align: left;
-}
-.calendarCheckIcon {
-  position: absolute;
-  height: 100%;
-  width: 4.59%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 95.41%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.component67 {
-  position: absolute;
-  height: 51.52%;
-  width: 92.5%;
-  top: 24.24%;
-  right: 3.5%;
-  bottom: 24.24%;
-  left: 4%;
-}
-.component68 {
-  position: absolute;
-  height: 56.9%;
-  width: 100%;
-  top: 43.1%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  font-size: 10px;
-  color: #777;
-}
-.parent4 {
-  position: absolute;
-  height: 29.31%;
-  width: 11.5%;
-  top: 0%;
-  right: 88.5%;
-  bottom: 70.69%;
-  left: 0%;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: flex-start;
-  gap: 2px;
-}
-.component70Parent {
-  width: 400px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 17px;
-}
-.frameWrapper3 {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 400px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-}
-.frameWrapper2 {
-  position: absolute;
-  top: 135.08px;
-  left: 0px;
-  width: 400px;
-  height: 508px;
-}
-.groupParent1 {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 400px;
-  height: 643.1px;
-}
-.frameWrapper1 {
-  align-self: stretch;
-  position: relative;
-  height: 643.1px;
-}
-.wrapper {
-  position: absolute;
-  height: 100%;
-  width: 45.45%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 54.55%;
-  border-radius: 3px;
-  background-color: #fff;
-  border: 1px solid #ff713c;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 30px;
-}
-.div3 {
-  position: absolute;
-  height: 100%;
-  width: 45.45%;
-  top: 0%;
-  right: 54.55%;
-  bottom: 0%;
-  left: 0%;
-  border-radius: 3px;
-  background-color: #fc7c4c;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  box-sizing: border-box;
-  cursor: pointer;
-  color: #fff;
-  font-family: NanumGothicCoding;
-}
-.component77 {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 220px;
-  height: 34px;
-}
-.component77Wrapper {
-  width: 220px;
-  position: relative;
-  height: 34px;
-  color: #ff713c;
-}
-.groupContainer {
-  width: 400px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 42px;
-}
-.frameDiv {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  box-shadow: 13px 13px 19.5px 6.5px rgba(249, 234, 155, 0.1);
-  border-radius: 8px;
-  background-color: #fff;
-  width: 544px;
-  height: 774px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 24px 72px;
-  box-sizing: border-box;
-}
-.groupDiv {
-  align-self: stretch;
-  position: relative;
-  height: 774px;
-  font-size: 14px;
-  color: #333;
-}
-.groupParent {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 46px;
-}
-.frameWrapper {
-  position: absolute;
-  height: 87.25%;
-  width: 53.13%;
-  top: 12.75%;
-  right: 23.44%;
-  bottom: 0%;
-  left: 23.44%;
-}
-.instanceParent {
-  position: absolute;
-  top: 73px;
-  left: 0px;
-  width: 1024px;
-  height: 1012px;
-  font-size: 32px;
-  color: #000;
-}
-.bitamin1 {
-  width: 136px;
-  position: relative;
-  font-size: 32px;
-  font-family: 'Bagel Fat One';
-  text-align: left;
-  display: inline-block;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-.frame {
-  width: 73px;
-  height: 23px;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: center;
-}
-.child {
-  width: 50px;
-  position: relative;
-  border-radius: 2px;
-  background-color: rgba(252, 124, 76, 0.74);
-  height: 2px;
-  opacity: 0;
-}
-.div4 {
-  width: 60px;
-  height: 74px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  box-sizing: border-box;
-  gap: 5px;
-}
-.up {
-  width: 22px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 33px;
-  flex-shrink: 0;
-}
-.upWrapper {
-  width: 27px;
-  height: 36px;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: center;
-  margin-left: -4px;
-  color: #ff713c;
-  font-family: 'Ownglyph ryuttung';
-}
-.parent6 {
-  width: 73px;
-  height: 23px;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: flex-end;
-}
-.parent5 {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 80px;
-  color: #777;
-}
-.div11 {
-  width: 50px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  flex-shrink: 0;
-}
-.div12 {
-  width: 20px;
-  position: relative;
-  color: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  flex-shrink: 0;
-}
-.div10 {
-  width: 124px;
-  height: 98px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  color: #555;
-}
-.navbar {
-  position: absolute;
-  top: -1px;
-  left: 39px;
-  background-color: #fff;
-  width: 944px;
-  height: 74px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 94px;
-  font-size: 14px;
-}
 .div {
   width: 100%;
+  height: 100vh;
   position: relative;
-  background-color: #f9f9f9;
-  height: 1119px;
+  background-color: #fffbfa;
   overflow: hidden;
   text-align: center;
-  font-size: 8px;
+  font-size: 14px;
   color: #ff713c;
   font-family: NanumGothic;
+}
+
+.backred {
+  position: absolute;
+  height: 50%;
+  width: 100%;
+  top: 0;
+  background-color: #f9ea9b;
+}
+
+.component66 {
+  position: relative;
+  margin: 0 auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 600px; /* 전체 너비를 조금 더 넓게 설정 */
+  text-align: center;
+  font-size: 0.5rem;
+  color: #333;
+}
+
+.component63 {
+  margin-top: 100px;
+  margin-bottom: 20px;
+  font-size: 0.5rem;
+}
+
+.b {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.bitamin1 {
+  font-size: 0.8rem;
+}
+
+.component65 {
+  position: relative;
+  background-color: #fff;
+  margin: 0 auto;
+  padding: 40px; /* 상하 padding은 그대로 두고 좌우 여백 확보 */
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  width: calc(100% - 80px); /* 좌우 각각 40px의 여백을 추가 */
+  max-width: 500px; /* 입력칸 너비를 유지하기 위한 최대 너비 설정 */
+}
+
+.component65Child,
+.component61Child {
+  display: none;
+}
+
+.div11 {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.component55Child,
+.component56Child {
+  background-color: #ff713c;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.component56Child {
+  background-color: #fff;
+  border: 1px solid #ff713c;
+  color: #ff713c;
+}
+
+/* 반응형 미디어 쿼리 */
+@media (max-width: 768px) {
+  .component66 {
+    width: 95%;
+    font-size: 1.2rem;
+  }
+
+  .b {
+    font-size: 1.5rem;
+  }
+
+  .bitamin1 {
+    font-size: 0.875rem;
+  }
+
+  .component55Child,
+  .component56Child {
+    font-size: 0.875rem;
+    padding: 8px;
+  }
+
+  .component60 {
+    flex-direction: column;
+  }
+
+  .component58,
+  .component59,
+  .component57 {
+    margin: 10px 0;
+  }
+
+  .div13,
+  .div15 {
+    font-size: 0.75rem;
+  }
+}
+
+.component78 {
+  margin-bottom: 20px;
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #d9d9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.component78 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.inputFile {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+/* 오류 메시지 스타일 수정 */
+.error {
+  color: red;
+  font-size: 11px;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+}
+
+/* 오류가 있는 입력칸 스타일 */
+.inputError {
+  border-color: #ff713c;
+  box-shadow: 0 0 0 2px rgba(255, 113, 60, 0.5);
+}
+/* 클릭된 필드에 적용되는 스타일 */
+.div11:focus,
+select:focus {
+  border-color: #58a1ff;
+  box-shadow: 0 0 0 2px rgba(132, 130, 255, 0.3); /* 이 부분에서 색상 효과 조정 */
+  outline: none; /* 기본 브라우저 outline 제거 */
 }

@@ -1,5 +1,6 @@
 import { OpenVidu } from 'openvidu-browser'
 import React, { Component } from 'react'
+import { withNavigate } from './withNavigate' // withNavigate 사용
 import ChatComponent from './chat/ChatComponent'
 import DialogExtensionComponent from './dialog-extension/DialogExtension'
 import StreamComponent from './stream/StreamComponent'
@@ -8,17 +9,20 @@ import OpenViduLayout from '../layout/openvidu-layout'
 import UserModel from '../models/user-model'
 import ToolbarComponent from './toolbar/ToolbarComponent'
 import useUserStore from '../../../../store/useUserStore'
-import { joinConsultation } from '../../../../store/useConsultationStore' // useConsultationStore 임포트
+import { joinConsultation } from '../../../../store/useConsultationStore'
+import ConfirmLeaveModal from './ConfirmLeaveModal' // 모달 컴포넌트
+import { useChatStore } from '../../../../store/useChatStore' // ChatStore 추가
 
 var localUser = new UserModel()
 
 class VideoRoomComponent extends Component {
   constructor(props) {
     super(props)
+
     this.hasBeenUpdated = false
     this.layout = new OpenViduLayout()
 
-    const { sessionId, token } =
+    const { sessionId, token, consultationId } =
       joinConsultation.getState().joinconsultation || {} // zustand에서 sessionId와 token 상태 가져오기
     const { nickname } = useUserStore.getState().user || {} // zustand에서 nickname 상태 가져오기
 
@@ -31,6 +35,9 @@ class VideoRoomComponent extends Component {
       chatDisplay: 'none',
       currentVideoDevice: undefined,
       token: token,
+      showModal: false, // 모달 표시 여부 상태
+      consultationId: consultationId,
+      participants: [], // 참여자 리스트 상태 추가
     }
 
     this.joinSession = this.joinSession.bind(this)
@@ -48,6 +55,8 @@ class VideoRoomComponent extends Component {
     this.toggleChat = this.toggleChat.bind(this)
     this.checkNotification = this.checkNotification.bind(this)
     this.checkSize = this.checkSize.bind(this)
+    this.handleConfirmLeave = this.handleConfirmLeave.bind(this) // 모달 확인 버튼 핸들러
+    this.handleCancelLeave = this.handleCancelLeave.bind(this) // 모달 취소 버튼 핸들러
   }
 
   componentDidMount() {
@@ -75,6 +84,14 @@ class VideoRoomComponent extends Component {
 
     console.log('Joining session with ID:', this.state.mySessionId)
     console.log('Using token:', this.state.token)
+    this.startStt()
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // participants 상태가 업데이트될 때마다 로그 출력
+    if (prevState.participants !== this.state.participants) {
+      console.log('Participants updated:', this.state.participants)
+    }
   }
 
   componentWillUnmount() {
@@ -85,11 +102,12 @@ class VideoRoomComponent extends Component {
   }
 
   onbeforeunload(event) {
-    this.leaveSession()
+    this.setState({ showModal: true }) // 페이지 떠나기 전 모달 표시
+    event.preventDefault() // 브라우저의 기본 동작 막기
+    event.returnValue = '' // 브라우저의 기본 경고 메시지 표시
   }
 
   joinSession() {
-    console.log()
     this.OV = new OpenVidu()
 
     this.setState(
@@ -173,6 +191,7 @@ class VideoRoomComponent extends Component {
     localUser.setConnectionId(this.state.session.connection.connectionId)
     localUser.setScreenShareActive(false)
     localUser.setStreamManager(publisher)
+    this.addParticipant(localUser) // 참여자 리스트에 로컬 유저 추가
     this.subscribeToUserChanged()
     this.subscribeToStreamDestroyed()
     this.sendSignalUserChanged({
@@ -188,6 +207,7 @@ class VideoRoomComponent extends Component {
             'custom-class'
           )
         })
+        this.addParticipant(localUser) // 로컬 사용자 참여자 리스트에 추가
       }
     )
   }
@@ -211,6 +231,17 @@ class VideoRoomComponent extends Component {
     )
   }
 
+  async handleConfirmLeave() {
+    this.leaveSession() // 세션 떠나기
+    this.setState({ showModal: false }) // 모달 숨기기
+    // 페이지 이동 (필요한 경우)
+    this.props.navigate('/consultationlist')
+  }
+
+  handleCancelLeave() {
+    this.setState({ showModal: false }) // 모달 숨기기
+  }
+
   leaveSession() {
     const mySession = this.state.session
 
@@ -218,10 +249,15 @@ class VideoRoomComponent extends Component {
       mySession.disconnect()
     }
 
+    if (this.state.localUser) {
+      this.removeParticipant(this.state.localUser.getConnectionId()) // 참여자 리스트에서 로컬 사용자 제거
+    }
+
     this.OV = null
     this.setState({
       session: undefined,
       subscribers: [],
+      participants: [], // 세션 떠날 때 참여자 리스트 초기화
       mySessionId: 'SessionA',
       myUserName: 'OpenVidu_User' + Math.floor(Math.random() * 100),
       localUser: undefined,
@@ -229,6 +265,22 @@ class VideoRoomComponent extends Component {
     if (this.props.leaveSession) {
       this.props.leaveSession()
     }
+    // 페이지 이동 처리 추가
+    this.props.navigate('/consultationlist')
+  }
+
+  addParticipant(user) {
+    this.setState((prevState) => ({
+      participants: [...prevState.participants, user],
+    }))
+  }
+
+  removeParticipant(connectionId) {
+    this.setState((prevState) => ({
+      participants: prevState.participants.filter(
+        (user) => user.getConnectionId() !== connectionId
+      ),
+    }))
   }
 
   camStatusChanged() {
@@ -243,6 +295,11 @@ class VideoRoomComponent extends Component {
     localUser.getStreamManager().publishAudio(localUser.isAudioActive())
     this.sendSignalUserChanged({ isAudioActive: localUser.isAudioActive() })
     this.setState({ localUser: localUser })
+
+    // STT를 통해 음성 인식 시작
+    if (localUser.isAudioActive()) {
+      this.startStt()
+    }
   }
 
   nicknameChanged(nickname) {
@@ -265,6 +322,7 @@ class VideoRoomComponent extends Component {
       this.setState({
         subscribers: remoteUsers,
       })
+      this.removeParticipant(userStream.getConnectionId()) // 참여자 리스트에서 제거
     }
   }
 
@@ -288,6 +346,7 @@ class VideoRoomComponent extends Component {
           subscribers: [...prevState.subscribers, newUser],
         }),
         () => {
+          this.addParticipant(newUser) // 참여자 리스트에 추가
           if (this.localUserAccessAllowed) {
             this.updateSubscribers()
           }
@@ -304,6 +363,7 @@ class VideoRoomComponent extends Component {
       }, 20)
       event.preventDefault()
       this.updateLayout()
+      this.removeParticipant(event.stream.connection.connectionId) // 참여자 리스트에서 제거
     })
   }
 
@@ -349,6 +409,28 @@ class VideoRoomComponent extends Component {
       type: 'userChanged',
     }
     this.state.session.signal(signalOptions)
+  }
+
+  startStt() {
+    // STT 초기화 및 시작
+    const recognition = new window.webkitSpeechRecognition()
+    recognition.lang = 'ko-KR'
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+    console.log('stt 시작')
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      console.log('STT result:', transcript)
+      // STT 결과를 store에 저장
+      useChatStore.getState().saveSttText(transcript)
+    }
+
+    recognition.onerror = (event) => {
+      console.error('STT error:', event.error)
+    }
+
+    recognition.start()
   }
 
   toggleFullscreen() {
@@ -527,72 +609,120 @@ class VideoRoomComponent extends Component {
     }
   }
 
+  handleParticipantAction(participant) {
+    console.log('Action button clicked for:', participant.nickname)
+    // 여기서 participant에 대한 작업을 수행합니다. 예: 참가자 제거, 권한 변경 등
+  }
+
   render() {
     const mySessionId = this.state.mySessionId
     const localUser = this.state.localUser
-    var chatDisplay = { display: this.state.chatDisplay }
+    const chatDisplay = { display: this.state.chatDisplay }
 
     return (
-      <div className="container" id="container">
-        <ToolbarComponent
-          sessionId={mySessionId}
-          user={localUser}
-          showNotification={this.state.messageReceived}
-          camStatusChanged={this.camStatusChanged}
-          micStatusChanged={this.micStatusChanged}
-          screenShare={this.screenShare}
-          stopScreenShare={this.stopScreenShare}
-          toggleFullscreen={this.toggleFullscreen}
-          switchCamera={this.switchCamera}
-          leaveSession={this.leaveSession}
-          toggleChat={this.toggleChat}
-        />
+      <>
+        {this.state.showModal && (
+          <ConfirmLeaveModal
+            onConfirm={() => this.handleConfirmLeave(this.state.consultationId)}
+            onCancel={this.handleCancelLeave}
+          />
+        )}
+        <div className="container" id="container">
+          <ToolbarComponent
+            sessionId={mySessionId}
+            user={localUser}
+            showNotification={this.state.messageReceived}
+            camStatusChanged={this.camStatusChanged}
+            micStatusChanged={this.micStatusChanged}
+            screenShare={this.screenShare}
+            stopScreenShare={this.stopScreenShare}
+            toggleFullscreen={this.toggleFullscreen}
+            switchCamera={this.switchCamera}
+            leaveSession={() => this.setState({ showModal: true })}
+            toggleChat={this.toggleChat}
+          />
 
-        <DialogExtensionComponent
-          showDialog={this.state.showExtensionDialog}
-          cancelClicked={this.closeDialogExtension}
-        />
+          <DialogExtensionComponent
+            showDialog={this.state.showExtensionDialog}
+            cancelClicked={this.closeDialogExtension}
+          />
 
-        <div id="layout" className="bounds">
-          {localUser !== undefined &&
-            localUser.getStreamManager() !== undefined && (
-              <div className="OT_root OT_publisher custom-class" id="localUser">
-                <StreamComponent
-                  user={localUser}
-                  handleNickname={this.nicknameChanged}
-                />
-              </div>
-            )}
-          {this.state.subscribers.map((sub, i) => (
-            <div
-              key={i}
-              className="OT_root OT_publisher custom-class"
-              id="remoteUsers"
-            >
-              <StreamComponent
-                user={sub}
-                streamId={sub.streamManager.stream.streamId}
-              />
-            </div>
-          ))}
-          {localUser !== undefined &&
-            localUser.getStreamManager() !== undefined && (
+          <div id="layout" className="bounds">
+            {localUser !== undefined &&
+              localUser.getStreamManager() !== undefined && (
+                <div
+                  className="OT_root OT_publisher custom-class"
+                  id="localUser"
+                >
+                  <StreamComponent
+                    user={localUser}
+                    handleNickname={this.nicknameChanged}
+                  />
+                </div>
+              )}
+            {this.state.subscribers.map((sub, i) => (
               <div
+                key={i}
                 className="OT_root OT_publisher custom-class"
-                style={chatDisplay}
+                id="remoteUsers"
               >
-                <ChatComponent
-                  user={localUser}
-                  chatDisplay={this.state.chatDisplay}
-                  close={this.toggleChat}
-                  messageReceived={this.checkNotification}
+                <StreamComponent
+                  user={sub}
+                  streamId={sub.streamManager.stream.streamId}
                 />
               </div>
-            )}
+            ))}
+            {localUser !== undefined &&
+              localUser.getStreamManager() !== undefined && (
+                <div
+                  className="OT_root OT_publisher custom-class"
+                  style={chatDisplay}
+                >
+                  <ChatComponent
+                    user={localUser}
+                    chatDisplay={this.state.chatDisplay}
+                    close={this.toggleChat}
+                    messageReceived={this.checkNotification}
+                  />
+                </div>
+              )}
+
+            {/* Participants List */}
+            <div className="participants-list">
+              <h3>Participants:</h3>
+              <ul>
+                {this.state.participants.map((participant, index) => (
+                  <li key={index}>
+                    {participant.nickname}
+                    <button
+                      onClick={() => this.handleParticipantAction(participant)}
+                    >
+                      Action
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* GPT 버튼 주석 처리됨 */}
+          {/*
+          <button
+            onClick={() =>
+              useChatStore.getState().sendMessage(
+                this.state.myUserName,
+                useChatStore.getState().sttText,
+                'general' // 카테고리 설정
+              )
+            }
+          >
+            Send to GPT
+          </button>
+          */}
         </div>
-      </div>
+      </>
     )
   }
 }
 
-export default VideoRoomComponent
+export default withNavigate(VideoRoomComponent)
