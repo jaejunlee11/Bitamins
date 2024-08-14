@@ -1,104 +1,114 @@
-import React, { useState, useEffect } from 'react'
-import DatePicker, { registerLocale, setDefaultLocale } from 'react-datepicker'
-import { format, Locale } from 'date-fns' // Locale 타입을 date-fns에서 가져옴
-import ko from 'date-fns/locale/ko'
-import styles from '/src/styles/mission/quest2.module.css'
-import 'react-datepicker/dist/react-datepicker.css'
-import '/src/styles/mission/custom-datepicker.css'
-import {
-  fetchMonthMissionAndPhrase,
-  fetchMissionsByDate,
-} from '@/api/missionAPI'
+import React, { useState, useEffect } from 'react';
+import DatePicker, { registerLocale, setDefaultLocale } from 'react-datepicker';
+import { format } from 'date-fns';
+import ko from 'date-fns/locale/ko';
+import styles from '/src/styles/mission/quest2.module.css';
+import 'react-datepicker/dist/react-datepicker.css';
+import '/src/styles/mission/custom-datepicker.css';
+import { fetchMonthMissionAndPhrase, fetchMissionsByDate } from '@/api/missionAPI';
 
-registerLocale('ko', ko as unknown as Locale)
-setDefaultLocale('ko')
+// @ts-ignore
+registerLocale('ko', ko);
+setDefaultLocale('ko');
 
 interface CalendarProps {
-  onDateChange: (date: Date | null, missionData: any) => void
-  onMissionDataChange?: (data: any) => void // 선택적 prop으로 추가
+  onDateChange: (date: Date | null) => void;
 }
 
-const Calendar: React.FC<CalendarProps> = ({
-  onDateChange,
-  onMissionDataChange,
-}) => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
-  const [missionDate, setMissionDate] = useState<Date | null>(null)
-  const [todayMissionExists, setTodayMissionExists] = useState<boolean>(true)
-  const [loading, setLoading] = useState<boolean>(false)
-  const [monthMissions, setMonthMissions] = useState<any[]>([])
+const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [loading, setLoading] = useState<boolean>(false);
+  const [monthMissions, setMonthMissions] = useState<any[]>([]);
 
   const fetchMissionDate = async (date: Date) => {
-    const formattedDate = format(date, 'yyyy-MM-dd')
+    const formattedDate = format(date, 'yyyy-MM-dd');
     try {
-      setLoading(true)
-      const data = await fetchMissionsByDate(formattedDate)
-      const missionDate = new Date(data.completeDate)
-      setMissionDate(missionDate)
-      const today = new Date().toISOString().split('T')[0]
-      setTodayMissionExists(missionDate.toISOString().split('T')[0] === today)
+      setLoading(true);
+      const data = await fetchMissionsByDate(formattedDate);
+      const missionDate = new Date(data.completeDate);
 
-      const monthData = await fetchMonthMissionAndPhrase(formattedDate)
-      setMonthMissions(monthData)
+      const response = await fetchMonthMissionAndPhrase(formattedDate);
+      const monthData = response.data;
+      setMonthMissions(Array.isArray(monthData) ? monthData : []);
 
-      onDateChange(missionDate, data)
-      if (onMissionDataChange) {
-        onMissionDataChange(data)
-      }
+      setSelectedDate(date);
     } catch (error) {
-      console.error('Error fetching mission date:', error)
+      console.error('Error fetching mission date:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    const today = new Date()
-    setSelectedDate(today)
-    fetchMissionDate(today)
-  }, [])
+    const today = new Date();
+    fetchMissionDate(today);
+    onDateChange(today);
+    return () => {
+      setLoading(false);
+    };
+  }, []);
 
   const handleDateChange = (date: Date | null) => {
     if (date) {
-      const correctedDate = new Date(
-        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-      )
-      setSelectedDate(correctedDate)
-      setMissionDate(null)
-      fetchMissionDate(correctedDate)
+      const correctedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      setSelectedDate(correctedDate);
+      onDateChange(correctedDate);
+      fetchMissionDate(correctedDate);
     }
-  }
+  };
+  const findEarliestMissionDate = (missions: any[]) => {
+    const completedMissions = missions.filter(mission => mission.memberMissionId);
+
+    if (completedMissions.length > 0) {
+      // complete한 미션이 있는 가장 빠른 날짜를 찾음
+      const earliestMissionDate = completedMissions.reduce((earliest, mission) => {
+        const missionDate = new Date(mission.activityDate);
+        return missionDate < earliest ? missionDate : earliest;
+      }, new Date(completedMissions[0].activityDate));
+
+      return earliestMissionDate;
+    } else {
+      // complete한 미션이 없다면 1일로 설정
+      return null;
+    }
+  };
 
   const handleMonthChange = async (date: Date) => {
-    fetchMissionDate(date)
+    const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
 
     try {
-      setLoading(true)
-      const formattedDate = format(date, 'yyyy-MM-dd')
-      const monthData = await fetchMonthMissionAndPhrase(formattedDate)
-      setMonthMissions(monthData)
+      setLoading(true);
+      const response = await fetchMonthMissionAndPhrase(format(firstDayOfMonth, 'yyyy-MM-dd'));
+      const monthData = response.data;
+      setMonthMissions(Array.isArray(monthData) ? monthData : []);
+
+      const earliestMissionDate = findEarliestMissionDate(monthData) || firstDayOfMonth;
+
+      setSelectedDate(earliestMissionDate);
+      onDateChange(earliestMissionDate);
     } catch (error) {
-      console.error('Error fetching month missions:', error)
+      console.error('Error fetching month missions:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
 
   const renderCustomHeader = ({
-    date,
-    decreaseMonth,
-    increaseMonth,
-  }: {
-    date: Date
-    decreaseMonth: () => void
-    increaseMonth: () => void
+                                date,
+                                decreaseMonth,
+                                increaseMonth,
+                              }: {
+    date: Date;
+    decreaseMonth: () => void;
+    increaseMonth: () => void;
   }) => (
     <div className={styles.header}>
       <button
         className={styles.prevButton}
         onClick={() => {
-          decreaseMonth()
-          handleMonthChange(new Date(date.getFullYear(), date.getMonth() - 1))
+          decreaseMonth();
+          handleMonthChange(new Date(date.getFullYear(), date.getMonth() - 1));
         }}
       >
         {'<'}
@@ -107,63 +117,72 @@ const Calendar: React.FC<CalendarProps> = ({
       <button
         className={styles.nextButton}
         onClick={() => {
-          increaseMonth()
-          handleMonthChange(new Date(date.getFullYear(), date.getMonth() + 1))
+          increaseMonth();
+          handleMonthChange(new Date(date.getFullYear(), date.getMonth() + 1));
         }}
       >
         {'>'}
       </button>
     </div>
-  )
+  );
 
   const getDayClassName = (date: Date) => {
-    const today = new Date()
-    const isFutureDate = date > today
+    let classNames = '';
 
-    const hasMission = monthMissions.some(
-      (mission) =>
-        new Date(mission.activityDate).toDateString() === date.toDateString() &&
-        mission.memberMissionId
-    )
-    const hasPhrase = monthMissions.some(
-      (mission) =>
-        new Date(mission.activityDate).toDateString() === date.toDateString() &&
-        mission.memberPhraseId
-    )
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 오늘 날짜의 시간을 00:00:00으로 설정
+    date.setHours(0, 0, 0, 0); // 입력받은 날짜의 시간을 00:00:00으로 설정
 
-    let classNames = ''
+    const isToday = date.getTime() === today.getTime();
 
-    if (isFutureDate) {
-      classNames += ' react-datepicker__day--disabled'
-    } else {
+    const hasMission = monthMissions.some(mission =>
+      new Date(mission.activityDate).toDateString() === date.toDateString() && mission.memberMissionId
+    );
+    const hasPhrase = monthMissions.some(mission =>
+      new Date(mission.activityDate).toDateString() === date.toDateString() && mission.memberPhraseId
+    );
+
+    // 오늘 날짜에 대해서도 CSS 클래스를 적용
+    if (isToday) {
       if (hasMission && !hasPhrase) {
-        classNames += ' react-datepicker__day--mission'
+        classNames += ' react-datepicker__day--mission';
       }
       if (hasPhrase && !hasMission) {
-        classNames += ' react-datepicker__day--phrase'
+        classNames += ' react-datepicker__day--phrase';
       }
       if (hasPhrase && hasMission) {
-        classNames += ' react-datepicker__day--phrase--mission'
+        classNames += ' react-datepicker__day--phrase--mission';
+      }
+    } else {
+      if (hasMission && !hasPhrase) {
+        classNames += ' react-datepicker__day--mission';
+      }
+      if (hasPhrase && !hasMission) {
+        classNames += ' react-datepicker__day--phrase';
+      }
+      if (hasPhrase && hasMission) {
+        classNames += ' react-datepicker__day--phrase--mission';
+      }
+
+      if (!hasMission && !hasPhrase) {
+        classNames += ' react-datepicker__day--disabled';
       }
     }
 
-    return classNames
-  }
+    return classNames.trim();
+  };
+
+
 
   const getWeekDayClassName = (date: Date) => {
-    const day = date.getDay()
+    const day = date.getDay();
     if (day === 0) {
-      return styles.sunday
+      return styles.sunday;
     } else if (day === 6) {
-      return styles.saturday
+      return styles.saturday;
     }
-    return ''
-  }
-
-  const filterDate = (date: Date) => {
-    const today = new Date()
-    return date <= today
-  }
+    return '';
+  };
 
   return (
     <div className={styles.calendarContainer} style={{ zIndex: 1000 }}>
@@ -172,16 +191,18 @@ const Calendar: React.FC<CalendarProps> = ({
         onChange={handleDateChange}
         inline
         locale="ko"
+        maxDate={new Date()}
         renderCustomHeader={renderCustomHeader}
         calendarClassName={styles.customCalendar}
         dayClassName={getDayClassName}
-        filterDate={filterDate}
         formatWeekDay={(day) => day.substr(0, 1)}
         weekDayClassName={getWeekDayClassName}
       />
       {loading && <p>로딩 중...</p>}
+      <div>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Calendar
+export default Calendar;

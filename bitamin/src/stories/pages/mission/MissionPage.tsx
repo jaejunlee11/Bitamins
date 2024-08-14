@@ -1,50 +1,61 @@
-import React, { useState } from 'react'
-import styles from '/src/styles/mission/quest2.module.css'
-import Calendar from './Calendar.tsx'
-import Weather from './Weather.tsx'
-import Mission from './Mission.tsx'
-import Nav from './Nav.tsx'
-import MissionForm from './MissionForm.tsx'
+import React, { useEffect, useState } from 'react'
+import Missionform from '@/stories/pages/mission/Missionform'
+import Calendar from '@/stories/pages/mission/Calendar'
+import CompleteMission from '@/stories/pages/mission/CompleteMission'
+import { fetchMissionsByDate } from '@/api/missionAPI'
+import styles from '/src/styles/mission/MissionPage.module.css'
+import MyPlant from '@/stories/pages/mission/MyPlant'
 
-const MissionPage: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<string | null>(null)
-  const [missionData, setMissionData] = useState<any>(null)
+const App: React.FC = () => {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [hasCompletedTodayMission, setHasCompletedTodayMission] = useState<boolean>(false)
+  const todayDate = new Date().toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).replace(/\. /g, '-').replace('.', '')
+
+  useEffect(() => {
+    const checkTodayMission = async () => {
+      try {
+        const response = await fetchMissionsByDate(todayDate)
+        if (response.success && response.data) {
+          setHasCompletedTodayMission(true)
+        } else {
+          setHasCompletedTodayMission(false)
+        }
+      } catch (error) {
+        console.error('오늘 미션 데이터를 가져오는 중 오류가 발생했습니다.', error)
+        setHasCompletedTodayMission(false)
+      }
+    }
+
+    checkTodayMission()
+  }, [todayDate])
 
   const handleDateChange = (date: Date | null) => {
-    if (date) {
-      const formattedDate = date.toISOString().split('T')[0] // yyyy-MM-dd 형식으로 변환
-      setSelectedDate(formattedDate)
-    } else {
-      setSelectedDate(null)
-    }
+    setSelectedDate(date)
   }
-
-  const handleMissionDataChange = (data: any) => {
-    setMissionData(data)
-  }
-
   return (
-    <div className={styles.bigContainer}>
-      <div className={styles.div}>
-        <Nav />
-        <div className={styles.customContainer}>
-          <Calendar
-            onDateChange={handleDateChange}
-            onMissionDataChange={handleMissionDataChange}
-          />
+    <div className={styles.container}>
+      <div className={styles.plant}>
+        <MyPlant />
+      </div>
+      <div className={styles.mainContent}>
+        <div className={styles.calendar}>
+          <Calendar onDateChange={handleDateChange} />
         </div>
-        <MissionForm
-          selectedDate={selectedDate}
-          missionData={missionData}
-          onSubmitSuccess={() => {
-            // handle submission success
-          }}
-        />
-        <Mission />
-        <Weather />
+        <div className={styles.missionSection}>
+          <div className={styles.missionContainer}>
+            {!hasCompletedTodayMission && selectedDate?.toISOString().split('T')[0] === todayDate && (
+              <Missionform onMissionComplete={() => setHasCompletedTodayMission(true)} />
+            )}
+            <CompleteMission selectedDate={selectedDate} />
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
-export default MissionPage
+export default App

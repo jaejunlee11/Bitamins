@@ -1,17 +1,19 @@
 import { useState, useEffect, useCallback } from 'react'
-import usePhraseStore from '@/store/usePhraseStore'
 import styles from 'styles/main/MainPage.module.css'
 import mainConsultImg from 'assets/image/mainConsultImg.png'
 import mainQuestImg from 'assets/image/mainQuestImg.png'
 import mainImg from 'assets/image/mainImg.png'
 import recordBackGroundImg from 'assets/image/recordBackgroundImg.png'
-import recordStart from 'assets/image/recordStart.png'
+import recordStart from 'assets/image/mic.png'
 import recordSave from 'assets/image/recordSave.png'
 import recordStop from 'assets/image/recordEnd.png'
 import recordAgain from 'assets/image/recordAgain.png'
 import recordPlay from 'assets/image/recordPlay.png'
+import clickme from 'assets/image/clickme.png'
+import RecordModal from '@/stories/pages/main/RecordModal'
+import { saveAudio } from '@/api/phraseAPI'
+import { usePhraseStore } from '@/store/usePhraseStore'
 import HeaderAfterLogin from '@/stories/organisms/common/HeaderAfterLogin'
-import { getPhrases, saveAudio } from '@/api/phraseAPI'
 import { useNavigate } from 'react-router-dom'
 import { HealthReportCheck } from 'api/userAPI'
 import CheckModal from '@/stories/organisms/CheckModal'
@@ -23,11 +25,15 @@ const MainPage: React.FC = () => {
   const [isEnded, setIsEnded] = useState(false)
   const [media, setMedia] = useState<MediaRecorder | null>(null)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
-  const [consultOpacityClass, setConsultOpacityClass] = useState(
-    styles.transparent
-  )
+  const [consultOpacityClass, setConsultOpacityClass] = useState(styles.transparent)
   const [questOpacityClass, setQuestOpacityClass] = useState(styles.transparent)
-  const { phraseContent, phraseId, setPhrase } = usePhraseStore()
+  const [isModalOpen, setIsModalOpen] = useState(false) // 모달 상태 추가
+
+  const { phraseId, phraseContent, fetchPhrase, isSaved, setSaved } = usePhraseStore()
+
+  useEffect(() => {
+    fetchPhrase()
+  }, [fetchPhrase])
   const [isCheckModalOpen, setCheckModalOpen] = useState(false)
 
   const closeCheckModal = () => {
@@ -45,39 +51,17 @@ const MainPage: React.FC = () => {
   }
 
   useEffect(() => {
-    const savedPhrase = localStorage.getItem('phraseContent')
-    const savedPhraseId = localStorage.getItem('phraseId')
-    const savedDate = localStorage.getItem('phraseDate')
-    const todayDate = new Date().toISOString().split('T')[0]
-
-    if (savedPhrase && savedPhraseId && savedDate === todayDate) {
-      setPhrase(savedPhrase, savedPhraseId)
-    } else {
-      getPhrases()
-        .then((data) => {
-          if (data && data.phraseContent && data.id) {
-            setPhrase(data.phraseContent, data.id)
-            localStorage.setItem('phraseContent', data.phraseContent)
-            localStorage.setItem('phraseId', data.id)
-            localStorage.setItem('phraseDate', todayDate) // 현재 날짜를 저장
-          }
-        })
-        .catch((error) => {
-          console.error('Error fetching the phrase:', error)
-        })
-    }
     const init = async()=> {
       const result = await HealthReportCheck()
       if(result.result==0){
         setCheckModalOpen(true)
       }
     }
-  
-    init();
-  }, [setPhrase])
 
-  // 나머지 코드들은 이전과 동일합니다.
+    init();
+  }, [])
   const onRecAudio = () => {
+    if (isSaved) return // 녹음이 저장되었을 경우 녹음 불가
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then((stream) => {
@@ -116,10 +100,8 @@ const MainPage: React.FC = () => {
     }
   }, [audioBlob])
 
-  const onSaveAudio = () => {
-    // 여기에 서버로 업로드하는 로직을 추가할 수 있습니다.
-    // setIsSaved(true);
-    if (phraseId && audioBlob) {
+  const onSaveAudio = async () => {
+    if (phraseContent && audioBlob) {
       const formData = new FormData()
       formData.append(
         'memberPhraseRequest',
@@ -135,20 +117,21 @@ const MainPage: React.FC = () => {
       )
       formData.append('phraseRecord', audioBlob)
 
-      saveAudio(formData)
-        .then((response) => {
-          alert('녹음이 성공적으로 저장되었습니다.')
-        })
-        .catch((error) => {
-          console.error('Error saving the audio:', error)
-          alert('녹음 저장에 실패했습니다.')
-        })
+      try {
+        const response = await saveAudio(formData)
+        alert('녹음이 성공적으로 저장되었습니다.')
+        setSaved(new Date().toISOString().split('T')[0]) // 상태와 날짜 저장
+      } catch (error) {
+        console.error('녹음 저장 중 오류 발생:', error)
+        alert('녹음 저장에 실패했습니다.')
+      }
     } else {
       alert('녹음 파일이 없거나 문구 ID를 찾을 수 없습니다.')
     }
   }
 
   const onResetAudio = () => {
+    if (isSaved) return // 녹음이 저장되었을 경우 리셋 불가
     setAudioBlob(null)
     setIsRecording(false)
     setIsEnded(false)
@@ -174,16 +157,12 @@ const MainPage: React.FC = () => {
 
   const handleMouseEnterConsult = () => {
     setConsultOpacityClass(styles.opaque)
-    document
-      .querySelector(`.${styles.consultBorder}`)
-      ?.classList.add(styles.glow)
+    document.querySelector(`.${styles.consultBorder}`)?.classList.add(styles.glow)
   }
 
   const handleMouseLeaveConsult = () => {
     setConsultOpacityClass(styles.transparent)
-    document
-      .querySelector(`.${styles.consultBorder}`)
-      ?.classList.remove(styles.glow)
+    document.querySelector(`.${styles.consultBorder}`)?.classList.remove(styles.glow)
   }
 
   const handleMouseEnterQuest = () => {
@@ -193,9 +172,15 @@ const MainPage: React.FC = () => {
 
   const handleMouseLeaveQuest = () => {
     setQuestOpacityClass(styles.transparent)
-    document
-      .querySelector(`.${styles.questBorder}`)
-      ?.classList.remove(styles.glow)
+    document.querySelector(`.${styles.questBorder}`)?.classList.remove(styles.glow)
+  }
+
+  const openModal = () => {
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
   }
 
   const onMissionClick = useCallback(() => {
@@ -207,72 +192,95 @@ const MainPage: React.FC = () => {
   }, [navigate])
   return (
     <>
-      <div className={styles.div}>
-        <div className={styles.inner}>
-          <div className={styles.div3}>
-            <p className={styles.p}>{phraseContent}</p>
-          </div>
-        </div>
-        <div className={styles.recordBtns}>
+      {isModalOpen && <RecordModal onClose={closeModal} />}
+      <div className={styles.container}>
+
+        <div className={styles.innerSection}>
           <img
-            className={styles.recordBtn}
-            alt=""
-            src={isRecording ? recordStop : isEnded ? recordPlay : recordStart}
-            onClick={isEnded ? onPlayClick : onRecordClick}
+            className={styles.mainImg}
+            alt="Main Image"
+            src={mainImg}
+            onClick={openModal}
           />
-          {isEnded && (
-            <>
-              <img
-                className={styles.recordBtn}
-                alt=""
-                src={recordAgain}
-                onClick={onAgainClick}
-              />
-              <img
-                className={styles.recordBtn}
-                alt=""
-                src={recordSave}
-                onClick={onSaveAudio}
-              />
-            </>
-          )}
+          <img
+            className={styles.clickmeImg}
+            alt="Main Image"
+            src={clickme}
+            onClick={openModal}
+          />
+          <div className={styles.inner}>
+            <div className={styles.div3}>
+              <p className={styles.p}>{phraseContent}</p>
+            </div>
+          </div>
+          <div className={styles.recordBtns}>
+            <img
+              className={styles.recordBtn}
+              alt=""
+              src={isRecording ? recordStop : isEnded ? recordPlay : recordStart}
+              onClick={isEnded ? onPlayClick : onRecordClick}
+            />
+            {isEnded && !isSaved && (
+              <>
+                <img
+                  className={styles.recordBtn}
+                  alt=""
+                  src={recordAgain}
+                  onClick={onAgainClick}
+                />
+                <img
+                  className={styles.recordBtn}
+                  alt=""
+                  src={recordSave}
+                  onClick={onSaveAudio}
+                />
+              </>
+            )}
+          </div>
+          <img
+            className={styles.recordBackgroundImg}
+            alt=""
+            src={recordBackGroundImg}
+          />
         </div>
-        <img
-          className={styles.recordBackgroundImg}
-          alt=""
-          src={recordBackGroundImg}
-        />
-        <div className={styles.consultBox} onClick={onRectangleClick} />
-        <div className={styles.questBox} onClick={onRectangleClick} />
-        <div
-          className={styles.tryConsultBtn}
-          onMouseEnter={handleMouseEnterConsult}
-          onMouseLeave={handleMouseLeaveConsult}
-          onClick={onconsultationClick}
-        >
-          <b className={styles.b}>상담하기</b>
+
+        {/* 상담 섹션 */}
+        <div className={styles.consultSection}>
+          <div className={styles.consultBox} onClick={onRectangleClick} />
+          <div
+            className={styles.tryConsultBtn}
+            onMouseEnter={handleMouseEnterConsult}
+            onMouseLeave={handleMouseLeaveConsult}
+            onClick={onconsultationClick}
+          >
+            <b className={styles.b}>상담하기</b>
+          </div>
+          <img
+            className={`${styles.mainConsultImg} ${consultOpacityClass}`}
+            src={mainConsultImg}
+            alt="Main Consult"
+          />
+          <div className={styles.consultBorder} />
         </div>
-        <div
-          className={styles.tryQuestBtn}
-          onMouseEnter={handleMouseEnterQuest}
-          onMouseLeave={handleMouseLeaveQuest}
-          onClick={onMissionClick}
-        >
-          <b className={styles.b}>미션하기</b>
+
+        {/* 미션 섹션 */}
+        <div className={styles.questSection}>
+          <div className={styles.questBox} onClick={onRectangleClick} />
+          <div
+            className={styles.tryQuestBtn}
+            onMouseEnter={handleMouseEnterQuest}
+            onMouseLeave={handleMouseLeaveQuest}
+            onClick={onMissionClick}
+          >
+            <b className={styles.b}>미션하기</b>
+          </div>
+          <div className={styles.questBorder} />
+          <img
+            className={`${styles.mainQuestImg} ${questOpacityClass}`}
+            alt="Main Quest"
+            src={mainQuestImg}
+          />
         </div>
-        <img className={styles.mainImg} alt="" src={mainImg} />
-        <div className={styles.consultBorder} />
-        <img
-          className={`${styles.mainConsultImg} ${consultOpacityClass}`}
-          src={mainConsultImg}
-          alt="Main Consult"
-        />
-        <div className={styles.questBorder} />
-        <img
-          className={`${styles.mainQuestImg} ${questOpacityClass}`}
-          alt="Main Quest"
-          src={mainQuestImg}
-        />
       </div>
       {isCheckModalOpen && (
         <CheckModal

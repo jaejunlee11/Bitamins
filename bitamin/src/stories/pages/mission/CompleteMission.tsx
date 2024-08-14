@@ -1,120 +1,165 @@
-import React, { useState, useEffect } from 'react'
-import styles from '/src/styles/mission/quest2.module.css'
-import { fetchMissionsByDate } from '@/api/missionAPI'
-import MissionForm from './MissionForm'
-import { getMemberPhraseByDate } from '@/api/phraseAPI'
-
-interface Mission {
-  id: number
-  missionName: string
-  missionDescription: string
-  missionLevel: number
-  completeDate: string
-  imageUrl: string
-  missionReview: string
-}
+import React, { useEffect, useState } from 'react';
+import { fetchMissionsByDate } from '@/api/missionAPI';
+import { getMemberPhraseByDate } from '@/api/phraseAPI';
+import styles from '/src/styles/mission/MissionPage.module.css';
+import recordOnly from '@/assets/missionImage/recordonly.png';
+import missionDescriptionImg from '@/assets/missionImage/missionDescriptionImg.png';
+import MissionModal from './MissionModal';
 
 interface CompleteMissionProps {
-  selectedDate: string
-}
-
-interface Record {
-  id: number
-  phraseUrl: string
+  selectedDate: Date | null;
 }
 
 const CompleteMission: React.FC<CompleteMissionProps> = ({ selectedDate }) => {
-  const [mission, setMission] = useState<Mission | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const todayDate = new Date().toISOString().split('T')[0]
-  const [record, setRecord] = useState<Record | null>(null)
-
-  const getMission = async (date: string) => {
-    setLoading(true)
-    try {
-      const missionData = await fetchMissionsByDate(date)
-      setMission(missionData)
-    } catch (error) {
-      console.error('Error fetching mission:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [missionData, setMissionData] = useState<any>(null);
+  const [phraseData, setPhraseData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   useEffect(() => {
-    setMission(null) // 상태 초기화
-    getMission(selectedDate)
-  }, [selectedDate])
+    const fetchMissionAndPhraseData = async () => {
+      if (selectedDate) {
+        setLoading(true);
+        setError(null);
 
-  const getRecord = async (date: string) => {
-    setLoading(true)
-    try {
-      const recordDate = await getMemberPhraseByDate(date)
-      setRecord(recordDate)
-    } catch (error) {
-      if (error instanceof Error && (error as any).response?.status !== 500) {
-        console.error('Error fetching record:', error)
+        setMissionData(null);
+        setPhraseData(null);
+
+        try {
+          const formattedDate = selectedDate.toISOString().split('T')[0];
+          const todayDate = new Date().toISOString().split('T')[0];
+
+          const missionResponse = await fetchMissionsByDate(formattedDate);
+          if (missionResponse.success) {
+            setMissionData(missionResponse.data);
+          }
+
+          if (formattedDate === todayDate && missionResponse.data) {
+            const phraseResponse = await getMemberPhraseByDate(formattedDate);
+            if (phraseResponse.success) {
+              setPhraseData(phraseResponse.data);
+            }
+          } else if (formattedDate !== todayDate) {
+            const phraseResponse = await getMemberPhraseByDate(formattedDate);
+            if (phraseResponse.success) {
+              setPhraseData(phraseResponse.data);
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching data:', err);
+        } finally {
+          setLoading(false);
+        }
       }
-    } finally {
-      setLoading(false)
-    }
+    };
+
+    fetchMissionAndPhraseData();
+  }, [selectedDate]);
+
+  const openModal = () => setShowModal(true);
+  const closeModal = () => setShowModal(false);
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
-  useEffect(() => {
-    setRecord(null) // 상태 초기화
-    getRecord(selectedDate)
-  }, [selectedDate])
-
-  const handleSubmitSuccess = () => {
-    getMission(selectedDate)
-    getRecord(selectedDate)
+  if (error) {
+    return <div>{error}</div>;
   }
+
+  const isToday = selectedDate?.toISOString().split('T')[0] === new Date().toISOString().split('T')[0];
 
   return (
-    <div className={styles.missionFormContainer}>
-      {loading ? (
-        <p>미션을 불러오는 중...</p>
-      ) : mission ? (
-        <>
-          <div className={styles.todayMission}>
-            <h3>미션</h3>
-            <p>미션 이름: {mission.missionName}</p>
-            <p>미션 설명: {mission.missionDescription}</p>
-            <p>미션 레벨: {mission.missionLevel}</p>
-          </div>
-          <div className={styles.missionForm}>
-            <div>
-              <label htmlFor="missionReview">미션 리뷰:</label>
-              <p id="missionReview">{mission.missionReview}</p>
-            </div>
-            {mission.imageUrl && (
-              <div>
-                <img
-                  src={mission.imageUrl}
-                  alt="Mission"
-                  style={{ width: '300px', height: 'auto', marginTop: '10px' }}
-                />
-                {record?.phraseUrl && (
-                  <div style={{ marginTop: '10px' }}>
-                    <audio controls style={{ width: '300px' }}>
-                      <source src={record.phraseUrl} type="audio/mpeg" />
-                    </audio>
-                  </div>
-                )}
+    <div>
+      {missionData && !phraseData && (
+        <div>
+          <div className={styles.missionContainer2}>
+            <h3 className={styles.missionTitle}>
+              <div className={styles.missionDate}>
+                {selectedDate?.getDate()}일 미션
               </div>
-            )}
+              <div className={styles.missionName}>
+                {missionData ? missionData.missionName : '미션 데이터가 없습니다.'}
+                <button onClick={openModal} className={styles.modalButton}>
+                  <img src={missionDescriptionImg} alt="정보 보기" style={{ width: '24px', height: '24px' , marginLeft: '15px'}} />
+                </button>
+              </div>
+            </h3>
           </div>
-        </>
-      ) : selectedDate === todayDate ? (
-        <MissionForm
-          selectedDate={selectedDate}
-          onSubmitSuccess={handleSubmitSuccess}
-        /> // 오늘 날짜에 미션이 없으면 MissionForm을 표시합니다.
-      ) : (
-        <p>해당 날짜에 완료된 미션이 없습니다.</p>
+          <div className={styles.missionContent}>
+            <img src={missionData.imageUrl} alt="Mission" className={styles.missionImage} />
+            <div className={styles.missionDetails}>
+              <p>{missionData.missionReview}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {missionData && phraseData && (
+        <div>
+          <div className={styles.missionContainer2}>
+            <h3 className={styles.missionTitle}>
+              <div className={styles.missionDate}>
+                {selectedDate?.getDate()}일 미션
+              </div>
+              <div className={styles.missionName}>
+                {missionData ? missionData.missionName : '미션 데이터가 없습니다.'}
+                <button onClick={openModal} className={styles.modalButton}>
+                  <img src={missionDescriptionImg} alt="정보 보기" style={{ width: '24px', height: '24px', marginLeft: '15px' }} />
+                </button>
+              </div>
+            </h3>
+          </div>
+          <div className={styles.missionContent}>
+            <img src={missionData.imageUrl} alt="Mission" className={styles.missionImage} />
+            <div className={styles.missionDetails}>
+              <p>{missionData.missionReview}</p>
+            </div>
+          </div>
+          <div className={styles.phraseContainer}>
+            <audio controls className={styles.audioPlayer}>
+              <source src={phraseData.phraseUrl} type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+        </div>
+      )}
+
+      {!missionData && phraseData && (
+        // 녹음만 존재할 경우
+        <div className={styles.missionContainer2}>
+          {!isToday && (
+            <div>
+              <h3 className={styles.phraseTitle}>
+                <div className={styles.phraseDate}>
+                  {selectedDate?.getDate()}일 문구
+                </div>
+                <div className={styles.phraseContent}>
+                  {phraseData ? phraseData.phraseContent : '녹음 데이터가 없습니다.'}
+                </div>
+              </h3>
+              <div className={styles.onlyAudio}>
+                <img src={recordOnly} alt="Mission" className={styles.onlyAudioImage} />
+                <audio controls className={styles.onlyAudioPlayer}>
+                  <source src={phraseData.phraseUrl} type="audio/mpeg" />
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {selectedDate && (
+        <MissionModal
+          showModal={showModal}
+          handleClose={closeModal}
+          completeDate={selectedDate.toISOString().split('T')[0]} // 날짜 전달
+        />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default CompleteMission
+export default CompleteMission;
