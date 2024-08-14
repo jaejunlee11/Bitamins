@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '@/api/axiosInstance'
-import styles from 'styles/account/SurveyPage.module.css'
-import HeaderAfterLogin from '@/stories/organisms/common/HeaderAfterLogin'
-import Footer from '@/stories/organisms/common/Footer'
 
 const questions = [
   '평소에는 아무렇지도 않던 일들이 괴롭고 귀찮게 느껴졌다.',
@@ -33,7 +30,6 @@ const SurveyPage: React.FC = () => {
   const [canTakeSurvey, setCanTakeSurvey] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(true)
   const navigate = useNavigate()
-  const username = 'User Name'
 
   useEffect(() => {
     const checkSurveyEligibility = async () => {
@@ -44,13 +40,13 @@ const SurveyPage: React.FC = () => {
         const { result } = response.data
 
         if (result === 0) {
-          setCanTakeSurvey(true) // 기록이 없으므로 설문조사 가능
+          setCanTakeSurvey(true)
         } else {
-          setCanTakeSurvey(false) // 기록이 있으므로 설문조사 불가능
+          setCanTakeSurvey(false)
         }
       } catch (error) {
         console.error('Error checking survey eligibility:', error)
-        setCanTakeSurvey(false) // 오류 발생 시 기본적으로 접근 불가 처리
+        setCanTakeSurvey(false)
       } finally {
         setLoading(false)
       }
@@ -60,8 +56,6 @@ const SurveyPage: React.FC = () => {
   }, [])
 
   const handleScoreChange = useCallback((index: number, score: number) => {
-    console.log(`Question ${index + 1} selected score: ${score}`)
-
     setScores((prevScores) => {
       const newScores = [...prevScores]
       newScores[index] = score
@@ -76,21 +70,13 @@ const SurveyPage: React.FC = () => {
     }
 
     const totalScore = scores.reduce((acc, score) => acc + score, 0)
-
-    const data = {
-      checkupScore: totalScore,
-      // checkupDate: new Date().toISOString().split('T')[0],
-    }
-
-    console.log('합산 점수:', totalScore)
-    console.log('전송 데이터:', data)
+    const data = { checkupScore: totalScore }
 
     try {
       const response = await axiosInstance.post(
         '/members/self-assessment',
         data
       )
-      console.log('응답 데이터:', response.data)
       alert('자가진단 점수가 성공적으로 전송되었습니다.')
     } catch (error) {
       console.error('점수 전송 실패:', error)
@@ -99,7 +85,7 @@ const SurveyPage: React.FC = () => {
   }, [scores])
 
   if (loading) {
-    return <div>로딩 중...</div> // 로딩 상태 표시
+    return <div>로딩 중...</div>
   }
 
   if (!canTakeSurvey) {
@@ -113,72 +99,76 @@ const SurveyPage: React.FC = () => {
 
   return (
     <>
-      {/* <HeaderAfterLogin username={username} /> */}
-      <div className={styles.div}>
-        <div className={styles.item} />
-        <div className={styles.inner} />
-        <div className={styles.groupDiv}>
-          <div className={styles.groupParent}>
-            <div className={styles.component79Wrapper}>
-              <div className={styles.component79}>
-                <div className={styles.cesD}>우울증 척도 (CES-D)</div>
-                <b className={styles.b}>
-                  지난 1주 동안 당신이 느끼고 행동한 것을 가장 잘 나타낸다고
-                  생각되는 답변에 체크해주세요.
-                </b>
-              </div>
+      <div className="relative w-full min-h-[410vh] bg-white text-center font-nanumGothic">
+        <div className="absolute top-0 left-0 w-full h-[15%] bg-[#f9ea9b]" />
+
+        <div className="relative top-[calc(9/16*100vw*0.2)] left-[calc(50%-512px)] w-[1024px]">
+          <div className="relative w-[720px] mx-auto">
+            <div className="relative bg-white shadow-md rounded-lg p-8 mt-10">
+              <div className="text-2xl font-bold">우울증 척도 (CES-D)</div>
+              <b className="block text-sm mt-4 text-lg text-gray-600">
+                지난 1주 동안 당신이 느끼고 행동한 것을 가장 잘 나타낸다고
+                생각되는 답변에 체크해주세요.
+              </b>
             </div>
-            <div className={styles.frameWrapper}>
-              <div className={styles.groupWrapper}>
-                <div className={styles.frameParent}>
-                  {questions.map((question, index) => (
-                    <div key={index} className={styles.questionList}>
-                      <div className={styles.questionBox}>
-                        <div className={styles.div1}>
-                          <div className={styles.wrapper}>
-                            <div className={styles.div2}>{index + 1}</div>
-                          </div>
-                          <div className={styles.container}>
-                            <div className={styles.div3}>{question}</div>
-                          </div>
-                        </div>
-                        <div className={styles.group}>
-                          <button
-                            className={`${styles.div5} ${scores[index] === 0 ? styles.selected : ''}`}
-                            onClick={() => handleScoreChange(index, 0)}
-                          >
-                            극히 드물게 (0점)
-                          </button>
-                          <button
-                            className={`${styles.div7} ${scores[index] === 1 ? styles.selected : ''}`}
-                            onClick={() => handleScoreChange(index, 1)}
-                          >
-                            가끔 (1점)
-                          </button>
-                          <button
-                            className={`${styles.div9} ${scores[index] === 2 ? styles.selected : ''}`}
-                            onClick={() => handleScoreChange(index, 2)}
-                          >
-                            자주 (2점)
-                          </button>
-                          <button
-                            className={`${styles.div5} ${scores[index] === 3 ? styles.selected : ''}`}
-                            onClick={() => handleScoreChange(index, 3)}
-                          >
-                            대부분 (3점)
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+            {questions.map((question, index) => (
+              <div
+                key={index}
+                className="bg-white shadow-md rounded-lg p-8 mt-10"
+              >
+                <div className="flex items-center">
+                  <div className="flex items-center justify-center w-8 h-8 bg-[#ff713c] text-white rounded-full">
+                    {index + 1}
+                  </div>
+
+                  <div className="ml-4 flex-1 text-left text-darkslategray">
+                    {question}
+                  </div>
+                </div>
+                <div className="flex mt-4 space-x-4 text-sm text-gray-600">
+                  <button
+                    className={`px-4 py-2 rounded ${scores[index] === 0 ? 'bg-[#ff713c] text-white' : 'bg-gray-200'}`}
+                    onClick={() => handleScoreChange(index, 0)}
+                  >
+                    극히 드물게 (0점)
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded ${scores[index] === 1 ? 'bg-[#ff713c] text-white' : 'bg-gray-200'}`}
+                    onClick={() => handleScoreChange(index, 1)}
+                  >
+                    가끔 (1점)
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded ${scores[index] === 2 ? 'bg-[#ff713c] text-white' : 'bg-gray-200'}`}
+                    onClick={() => handleScoreChange(index, 2)}
+                  >
+                    자주 (2점)
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded ${scores[index] === 3 ? 'bg-[#ff713c] text-white' : 'bg-gray-200'}`}
+                    onClick={() => handleScoreChange(index, 3)}
+                  >
+                    대부분 (3점)
+                  </button>
                 </div>
               </div>
+            ))}
+
+            {/* 버튼 위치 */}
+            <div className="mt-10 flex justify-center space-x-4">
+              <button
+                className="w-[113px] h-[31px] bg-[#ff713c] text-white rounded-lg flex items-center justify-center"
+                onClick={handleSubmit}
+              >
+                설문 완료
+              </button>
+              <button
+                className="w-[113px] h-[31px] border border-[#ff713c] text-[#ff713c] rounded-lg flex items-center justify-center"
+                onClick={() => navigate(-1)}
+              >
+                취소
+              </button>
             </div>
-          </div>
-        </div>
-        <div className={styles.bParent}>
-          <div className={styles.b5} onClick={handleSubmit}>
-            <b className={styles.div3}>설문 완료</b>
           </div>
         </div>
       </div>

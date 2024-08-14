@@ -229,53 +229,56 @@ const HealthUP: React.FC = () => {
   }
 
   return (
-    <div className={styles.up}>
-      <div className={styles.upChild} />
-      <img
-        className={styles.upItem}
-        alt="운동url"
-        src={exerciseDescription.exerciseUrl}
-      />
-      <div className={styles.rectangleParent}>
-        <div className={styles.div}>{(count / 100).toFixed(2)}</div>
-        <div className={styles.canvasContainer}>
-          <canvas ref={canvasRef} className={styles.canvas} />
+    <div style={{ paddingTop: '6%' }}>
+      <div className={styles.up}>
+        <div className={styles.upChild} />
+        <img
+          className={styles.upItem}
+          alt="운동url"
+          src={exerciseDescription.exerciseUrl}
+        />
+        <div className={styles.rectangleParent}>
+          <div className={styles.div}>{(count / 100).toFixed(2)}</div>
+          <div className={styles.canvasContainer}>
+            <canvas ref={canvasRef} className={styles.canvas} />
+          </div>
         </div>
-      </div>
-      <div className={styles.rectangleDiv} />
-      <div className={styles.rectangleGroup} onClick={handleExit}>
-        <div className={styles.groupItem} />
-        <b className={styles.b}>나가기</b>
-      </div>
-      <b className={styles.b1}>{exerciseDescription.title}</b>
-      <div
-        className={styles.div2}
-        onClick={() => setExerciseDescription(firstExercise)} // firstExercise의 정보를 가져오는 함수 연결
-      >
-        {firstExercise.title} {/* firstExercise의 title을 여기에 표시 */}
-      </div>
-      <div
-        className={styles.div22}
-        onClick={() => setExerciseDescription(secondExercise)} // firstExercise의 정보를 가져오는 함수 연결
-      >
-        {secondExercise.title} {/* SecondExercise의 title을 여기에 표시 */}
-      </div>
-      <div
-        className={styles.div222}
-        onClick={() => setExerciseDescription(thirdExercise)} // firstExercise의 정보를 가져오는 함수 연결
-      >
-        {thirdExercise.title} {/* firstExercise의 title을 여기에 표시 */}
-      </div>
-
-      <div className={styles.div13}>
-        <p className={styles.p}>{exerciseDescription.description}</p>
-      </div>
-      <div className={styles.upChild2} />
-      <div className={styles.upChild3} />
-      <div className={styles.div14}>하루 홈트</div>
-      {/* <div className={styles.canvasContainer}>
+        <div className={styles.rectangleDiv} />
+        <div className={styles.rectangleGroup} onClick={handleExit}>
+          <div className={styles.groupItem} />
+          <b className={styles.b}>나가기</b>
+        </div>
+        <b className={styles.b1}>{exerciseDescription.title}</b>
+        <div style={{ bottom: 0 }}>
+          <div
+            className={styles.div2}
+            onClick={() => setExerciseDescription(firstExercise)} // firstExercise의 정보를 가져오는 함수 연결
+          >
+            {firstExercise.title} {/* firstExercise의 title을 여기에 표시 */}
+          </div>
+          <div
+            className={styles.div22}
+            onClick={() => setExerciseDescription(secondExercise)} // firstExercise의 정보를 가져오는 함수 연결
+          >
+            {secondExercise.title} {/* SecondExercise의 title을 여기에 표시 */}
+          </div>
+          <div
+            className={styles.div222}
+            onClick={() => setExerciseDescription(thirdExercise)} // firstExercise의 정보를 가져오는 함수 연결
+          >
+            {thirdExercise.title} {/* firstExercise의 title을 여기에 표시 */}
+          </div>
+        </div>
+        <div className={styles.div13}>
+          <p className={styles.p}>{exerciseDescription.description}</p>
+        </div>
+        <div className={styles.upChild2} />
+        <div className={styles.upChild3} />
+        <div className={styles.div14}>하루 홈트</div>
+        {/* <div className={styles.canvasContainer}>
         <canvas ref={canvasRef} className={styles.canvas} />
       </div> */}
+      </div>
     </div>
   )
 }
