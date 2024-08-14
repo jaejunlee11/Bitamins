@@ -1,4 +1,3 @@
-<<<<<<< bitamin/src/stories/pages/account/LoginPage.tsx
 import { useState, useCallback, useEffect } from 'react'
 import axiosInstance, { setAccessToken } from 'api/axiosInstance'
 import useAuthStore from 'store/useAuthStore' 
@@ -18,6 +17,9 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('')
   const [, setCookie] = useCookies(['refreshToken'])
   const navigate = useNavigate()
+  const [isModalOpen, setModalOpen] = useState<boolean>(false)
+  const [responseData, setResponseData] = useState({})
+
 
   const {
     setAccessToken: setAuthAccessToken,
