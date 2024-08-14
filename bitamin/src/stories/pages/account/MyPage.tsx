@@ -522,8 +522,8 @@ const MyPage: React.FC = () => {
       />
       {isModalOpen && (
         <Modal
-          title="비밀번호 변경"
-          content="비밀번호가 성공적으로 변경되었습니다."
+          title="회원 정보 변경"
+          content="회원 정보가 성공적으로 변경되었습니다."
           iconSrc="fi.FiEdit"
           onClose={closeModal}
           headerBackgroundColor="#FF713C"

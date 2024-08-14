@@ -6,6 +6,7 @@ const axiosInstance = axios.create({
   // localhost에서는 refreshToken은 발급되지 않음.
   // accessToken
   baseURL: 'https://i11b105.p.ssafy.io/api', // API 기본 URL 설정
+  // baseURL: 'http://localhost:8080/api', // API 기본 URL 설정
   headers: {
     'Content-Type': 'application/json',
   },

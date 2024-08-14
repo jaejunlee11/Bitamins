@@ -57,33 +57,12 @@ const LoginPage: React.FC = () => {
   const handleLogin = async () => {
     try {
       console.log('Login request data:', { email, password })
-
-      // loginUser 함수로 로그인 시도
-      const { accessToken, refreshToken } = await loginUser(email, password)
-
-      console.log('Access Token:', accessToken)
-      console.log('Refresh Token:', refreshToken)
-
-      setAccessToken(accessToken)
-      setAuthAccessToken(accessToken)
-      setAuthRefreshToken(refreshToken)
-
-      setCookie('refreshToken', refreshToken, {
-        path: '/',
-        secure: true,
-        sameSite: 'strict',
+      const response = await axiosInstance.post<LoginResponse>('/auth/login', {
+        email,
+        password,
       })
-
-      // axiosInstance에 accessToken 설정
-      axiosInstance.defaults.headers.common['Authorization'] =
-        `Bearer ${accessToken}`
-
-      // 로그인 후 유저 정보 강제 업데이트
-      await fetchUser()
-
-      sessionStorage.setItem('isAuthenticated', 'true')
-      alert('Login successful!')
-      navigate('/home')
+      setResponseData(response)
+      setModalOpen(true)
     } catch (error: any) {
       console.error('Login error:', error.message)
       alert(`사용자를 찾을 수 없습니다.: ${error.message}`)
