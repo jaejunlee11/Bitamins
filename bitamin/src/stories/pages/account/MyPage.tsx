@@ -1,7 +1,8 @@
-import { useState, useEffect, ChangeEvent, useRef } from 'react'
+import React, { useState, useEffect, ChangeEvent, useRef } from 'react'
 import styles from 'styles/account/MyPage.module.css'
 import HospitalMap from 'stories/organisms/HospitalMap'
 import Modal from '@/stories/organisms/Modal'
+import PasswordChangeModal from '@/stories/organisms/PasswordChangeModal'
 import {
   fetchUserInfo,
   updateUserInfo,
@@ -64,7 +65,8 @@ const MyPage: React.FC = () => {
 
   const [isEditing, setIsEditing] = useState(false)
   const [isImageDeleted, setIsImageDeleted] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false) 
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false)
 
   const [healthReports, setHealthReports] = useState<any[]>([])
   const [chartData, setChartData] = useState<any[]>([]) // 차트 데이터 상태 추가
@@ -79,6 +81,15 @@ const MyPage: React.FC = () => {
     } else {
       return `현재 점수는 심각한 수준의 우울감을 나타내며, 즉각적인 전문적인 지원이 필요할 수 있습니다. 이 정도의 우울감은 일상생활의 기능을 크게 저하시킬 수 있으며, 신체적, 심리적 건강에 심각한 영향을 미칠 수 있습니다. 가능한 빨리 전문기관을 찾아가 치료적 개입과 평가를 받아보시기를 강력히 권장드립니다. 전문가의 도움을 통해, 당신의 현재 상태를 개선할 수 있는 구체적인 방법을 찾을 수 있을 것입니다. 혼자가 아닌, 함께 극복해 나가는 것이 중요합니다.`
     }
+  }
+
+
+  const openPasswordModal = () => setIsPasswordModalOpen(true)
+  const closePasswordModal = () => setIsPasswordModalOpen(false)
+  const closeModal = () => setIsModalOpen(false)
+
+  const handlePasswordChangeSuccess = () => {
+    setIsModalOpen(true)
   }
 
   useEffect(() => {
@@ -278,10 +289,6 @@ const MyPage: React.FC = () => {
     }
   }
   
-  const closeModal = () => {
-    setIsModalOpen(false)
-  }
-
   return (
     <>
       <div className={styles.div}>
@@ -443,7 +450,7 @@ const MyPage: React.FC = () => {
               </div>
               <div
                 className={`${styles.container} ${styles.buttonStyle}`}
-                onClick={() => navigate('/change-password')}
+                onClick={openPasswordModal}
               >
                 <div className={styles.div6}>비밀번호 변경</div>
               </div>
@@ -509,10 +516,11 @@ const MyPage: React.FC = () => {
           </ResponsiveContainer>
         </div>
       </div>
+      <PasswordChangeModal isOpen={isPasswordModalOpen} onRequestClose={closePasswordModal} onSuccess={handlePasswordChangeSuccess} />
       {isModalOpen && (
         <Modal
-          title="개인정보 수정"
-          content="개인정보가 성공적으로 수정되었습니다."
+          title="비밀번호 변경"
+          content="비밀번호가 성공적으로 변경되었습니다."
           iconSrc="fi.FiEdit"
           onClose={closeModal}
           headerBackgroundColor="#FF713C"
