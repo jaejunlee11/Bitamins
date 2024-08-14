@@ -1,0 +1,98 @@
+/* custom-datepicker.css */
+.react-datepicker {
+    font-family: 'Arial', sans-serif;
+    border: none;
+}
+
+.react-datepicker__current-month {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.react-datepicker__day-name,
+.react-datepicker__day {
+    width: 2rem;
+    line-height: 2rem;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+    background-color: #fbfbca;
+    color: #000000;
+}
+
+.react-datepicker__day--outside-month {
+    color: #ccc;
+}
+
+.react-datepicker__day:hover {
+    background-color: #fbfbca;
+    color: #000000;
+}
+
+.react-datepicker__day {
+    position: relative; /* 점을 표시하기 위해 상대 위치 지정 */
+}
+
+.react-datepicker__day--mission::before,
+.react-datepicker__day--phrase::before,
+.react-datepicker__day--phrase--mission::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%); /* 가운데로 위치 조정 */
+}
+
+.react-datepicker__day--mission::before {
+    background-color: #b1dcf6;
+}
+
+.react-datepicker__day--phrase::before {
+    background-color: #b3b3f8;
+}
+
+.react-datepicker__day--phrase--mission::before {
+    background-color: #fac2c2; /* 두 클래스가 모두 적용된 경우 */
+}
+
+.react-datepicker__day--disabled {
+    pointer-events: none; /* 마우스 이벤트를 비활성화 */
+    cursor: default;
+    color: #ccc; /* 비활성화된 날짜에 대한 색상 */
+}
+
+.react-datepicker__day--disabled:hover {
+    background-color: transparent; /* 호버 시 배경색 변경 없음 */
+    color: #ccc; /* 호버 시에도 색상이 변하지 않음 */
+}
+
+.react-datepicker {
+    font-family: 'Arial', sans-serif;
+}
+
+.react-datepicker__header {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.react-datepicker__day-names {
+    border-bottom: none; /* 요일 밑줄 제거 */
+}
+
+.react-datepicker__day-name,
+.react-datepicker__day {
+    width: 2.5rem;
+    line-height: 2.5rem;
+    border: none; /* 요일과 날짜 셀의 테두리 제거 */
+}
+
+.react-datepicker__current-month {
+    font-size: 1.2em;
+    font-weight: bold;
+    border-bottom: none; /* 상단 줄 제거 */
+}

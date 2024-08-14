@@ -1,409 +1,160 @@
-.componentChild {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  background-color: #f9ea9b;
-}
-.inner {
-  position: absolute;
-  top: 73px;
-  left: 0px;
-  width: 1024px;
-  height: 306px;
-}
-.bitamin {
-  width: 136px;
-  position: relative;
-  font-size: 32px;
-  font-family: 'Bagel Fat One';
-  text-align: left;
-  display: inline-block;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-.div2 {
-  position: relative;
-}
-.wrapper {
-  width: 73px;
-  height: 23px;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: center;
-}
-.child {
-  width: 50px;
-  position: relative;
-  border-radius: 2px;
-  background-color: rgba(252, 124, 76, 0.74);
-  height: 2px;
-  opacity: 0;
-}
-.div1 {
-  width: 60px;
-  height: 74px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  box-sizing: border-box;
-  gap: 5px;
-}
-.up {
-  width: 22px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 33px;
-  flex-shrink: 0;
-}
-.upWrapper {
-  width: 27px;
-  height: 36px;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: center;
-  margin-left: -4px;
-  color: #ff713c;
-  font-family: 'Ownglyph ryuttung';
-}
-.group {
-  width: 73px;
-  height: 23px;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: flex-end;
-}
-.parent {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 80px;
-  color: #777;
-}
-.div8 {
-  width: 50px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  flex-shrink: 0;
-}
-.div9 {
-  width: 20px;
-  position: relative;
-  color: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  flex-shrink: 0;
-}
-.div7 {
-  width: 124px;
-  height: 98px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  color: #555;
-}
-.navbar {
-  position: absolute;
-  top: -1px;
-  left: 39px;
-  background-color: #fff;
-  width: 944px;
-  height: 74px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 94px;
-}
-.b {
-  position: absolute;
-  width: 47.22%;
-  top: 0%;
-  left: 26.39%;
-  display: inline-block;
-}
-.bitamin1 {
-  position: absolute;
-  top: 79.17%;
-  left: 0%;
-  font-size: 10px;
-}
-.component63 {
-  position: absolute;
-  height: 10.43%;
-  width: 42.99%;
-  top: 0%;
-  right: 26.57%;
-  bottom: 89.57%;
-  left: 30.45%;
-}
-.component65Child {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  box-shadow: 9px 9px 25px rgba(179, 175, 174, 0.24);
-  border-radius: 10px;
-  background-color: #fff;
-}
-.component61Child {
-  position: absolute;
-  height: 71.74%;
-  width: 100%;
-  top: 28.26%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  border-radius: 3px;
-  background-color: #d9d9d9;
-}
-.div11 {
-  position: absolute;
-  top: 0%;
-  left: 2.19%;
-}
-.component61 {
-  position: absolute;
-  height: 16.14%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 83.86%;
-  left: 0%;
-}
-.component62 {
-  position: absolute;
-  height: 16.14%;
-  width: 100%;
-  top: 19.3%;
-  right: 0%;
-  bottom: 64.56%;
-  left: 0%;
-}
-.component55Child {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  border-radius: 3px;
-  background-color: #ff713c;
-  cursor: pointer;
-}
-.b1 {
-  position: absolute;
-  top: 33.33%;
-  left: 43.8%;
-}
-.component55 {
-  position: absolute;
-  height: 11.58%;
-  width: 100%;
-  top: 47.02%;
-  right: 0%;
-  bottom: 41.4%;
-  left: 0%;
-  font-size: 12px;
-  color: #fff;
-}
-.component56Child {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  border-radius: 3px;
-  background-color: #fff;
-  border: 1px solid #ff713c;
-  box-sizing: border-box;
-  cursor: pointer;
-}
-.b2 {
-  position: absolute;
-  top: 33.33%;
-  left: 41.61%;
-}
-.component56 {
-  position: absolute;
-  height: 11.58%;
-  width: 100%;
-  top: 61.75%;
-  right: 0%;
-  bottom: 26.67%;
-  left: 0%;
-  font-size: 12px;
-  color: #ff713c;
-}
-.component60Child {
-  position: absolute;
-  height: 55.81%;
-  width: 0.53%;
-  top: 9.3%;
-  right: 67.91%;
-  bottom: 34.88%;
-  left: 31.55%;
-  background-color: #d9d9d9;
-}
-.component60Item {
-  position: absolute;
-  height: 55.81%;
-  width: 0.53%;
-  top: 9.3%;
-  right: 27.27%;
-  bottom: 34.88%;
-  left: 72.19%;
-  background-color: #d9d9d9;
-}
-.reactIconssisinaver {
-  position: absolute;
-  height: 61.54%;
-  width: 66.67%;
-  top: 0%;
-  right: 16.67%;
-  bottom: 38.46%;
-  left: 16.67%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.div13 {
-  position: absolute;
-  top: 84.62%;
-  left: 0%;
-}
-.component58 {
-  position: absolute;
-  height: 90.7%;
-  width: 19.25%;
-  top: 9.3%;
-  right: 39.04%;
-  bottom: 0%;
-  left: 41.71%;
-}
-.reactIconsfcfcgoogle {
-  position: absolute;
-  height: 61.54%;
-  width: 80%;
-  top: 0%;
-  right: 6.67%;
-  bottom: 38.46%;
-  left: 13.33%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.component59 {
-  position: absolute;
-  height: 90.7%;
-  width: 16.04%;
-  top: 9.3%;
-  right: 0%;
-  bottom: 0%;
-  left: 83.96%;
-}
-.component57Child {
-  position: absolute;
-  height: 72.09%;
-  width: 82.05%;
-  top: 0%;
-  right: 17.95%;
-  bottom: 27.91%;
-  left: 0%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-  object-fit: cover;
-}
-.div15 {
-  position: absolute;
-  width: 94.87%;
-  top: 86.05%;
-  left: 5.13%;
-  display: inline-block;
-}
-.component57 {
-  position: absolute;
-  height: 100%;
-  width: 20.86%;
-  top: 0%;
-  right: 79.14%;
-  bottom: 0%;
-  left: 0%;
-}
-.component60 {
-  position: absolute;
-  height: 15.09%;
-  width: 68.25%;
-  top: 84.91%;
-  right: 15.69%;
-  bottom: 0%;
-  left: 16.06%;
-  font-size: 6px;
-}
-.component64 {
-  position: absolute;
-  height: 72.89%;
-  width: 81.79%;
-  top: 12.28%;
-  right: 9.25%;
-  bottom: 14.83%;
-  left: 8.96%;
-}
-.component65 {
-  position: absolute;
-  height: 85%;
-  width: 100%;
-  top: 15%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  font-size: 10px;
-  color: #555;
-}
-.component66 {
-  position: absolute;
-  top: 158px;
-  left: 338px;
-  width: 335px;
-  height: 460px;
-  text-align: left;
-  font-size: 24px;
-  color: #333;
-}
 .div {
   width: 100%;
+  height: 100vh;
   position: relative;
   background-color: #fffbfa;
-  height: 768px;
   overflow: hidden;
   text-align: center;
   font-size: 14px;
   color: #ff713c;
   font-family: NanumGothic;
+}
+
+.backred {
+  position: absolute;
+  height: 50%;
+  width: 100%;
+  top: 0;
+  background-color: #f9ea9b;
+}
+
+.component66 {
+  position: relative;
+  margin: 0 auto;
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  font-size: 0.5rem;
+  color: #333;
+}
+
+.component63 {
+  margin-top: 140px;
+  margin-bottom: 20px;
+  font-size: 0.5rem;
+}
+
+.b {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.bitamin1 {
+  font-size: 1.1rem;
+  color: rgb(98, 98, 98);
+}
+/* 로그인 박스 뒤 흰 배경 */
+.component65 {
+  position: relative;
+  background-color: #fff;
+  padding: 60px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  width: 500px;
+  left: -18px;
+  height: 600px;
+}
+
+.component65Child,
+.component61Child {
+  display: none;
+}
+
+.div11 {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+/* 로그인 회원가입 버튼 */
+.component55Child,
+.component56Child {
+  background-color: #ff713c;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20 px;
+}
+
+.component56Child {
+  background-color: #fff;
+  border: 1px solid #ff713c;
+  color: #ff713c;
+}
+
+.component60 {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.component58,
+.component59,
+.component57 {
+  flex: 1;
+  margin: 5px;
+}
+
+.reactIconssisinaver,
+.reactIconsfcfcgoogle,
+.component57Child {
+  width: 100%;
+  height: auto;
+}
+
+.div13 {
+  font-size: 0.875rem;
+  margin-top: 10px;
+}
+
+.div15 {
+  font-size: 0.875rem;
+  margin-top: 10px;
+}
+
+/* 반응형 미디어 쿼리 */
+@media (max-width: 768px) {
+  .component66 {
+    width: 95%;
+    font-size: 1.2rem;
+  }
+
+  .b {
+    font-size: 1.5rem;
+  }
+
+  .bitamin1 {
+    font-size: 0.875rem;
+  }
+
+  .component55Child,
+  .component56Child {
+    font-size: 0.875rem;
+    padding: 8px;
+  }
+
+  .component60 {
+    flex-direction: column;
+  }
+
+  .component58,
+  .component59,
+  .component57 {
+    margin: 10px 0;
+  }
+
+  .div13,
+  .div15 {
+    font-size: 0.75rem;
+  }
 }

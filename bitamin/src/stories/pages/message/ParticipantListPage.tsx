@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import styles from 'styles/message/ParticipantListPage.module.css'
+import ParticipantsListWithMessageCreate from 'stories/organisms/ParticipantListPage'
 
 const ParticipantListPage: React.FC = () => {
   const [isFrameOpen, setFrameOpen] = useState(false)
@@ -18,6 +19,8 @@ const ParticipantListPage: React.FC = () => {
 
   return (
     <>
+      <ParticipantsListWithMessageCreate />
+      <br />
       <div className={styles.div}>
         <div className={styles.child} />
         <img className={styles.item} alt="" src="Vector 33.svg" />
