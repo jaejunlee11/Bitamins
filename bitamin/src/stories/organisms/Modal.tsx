@@ -15,10 +15,12 @@ const ModalOverlay = styled.div`
   justify-content: center;
 `
 
-// 중간 컴포넌트를 사용하여 props 필터링
-const StyledModalContainer = styled(({ width, height, ...props }) => (
-  <div {...props} />
-))<{ width?: string; height?: string }>`
+interface StyledModalContainerProps {
+  width?: string
+  height?: string
+}
+
+const StyledModalContainer = styled.div<StyledModalContainerProps>`
   position: relative;
   background-color: #fff;
   border-radius: 23px;
@@ -28,10 +30,11 @@ const StyledModalContainer = styled(({ width, height, ...props }) => (
   overflow: hidden;
 `
 
-// 중간 컴포넌트를 사용하여 props 필터링
-const StyledModalHeader = styled(({ backgroundColor, ...props }) => (
-  <div {...props} />
-))<{ backgroundColor?: string }>`
+interface StyledModalHeaderProps {
+  backgroundColor?: string
+}
+
+const StyledModalHeader = styled.div<StyledModalHeaderProps>`
   background-color: ${({ backgroundColor }) => backgroundColor || '#ff713c'};
   height: 2.25rem;
   border-radius: 23px 23px 0 0;
@@ -71,18 +74,21 @@ const ModalButton = styled.button`
   width: 150px;
 `
 
-// props를 스타일링에만 사용하도록 처리
-const StyledModalButton = styled(({ borderColor, textColor, ...props }) => (
-  <ModalButton {...props} />
-))`
+interface StyledModalButtonProps {
+  borderColor?: string
+  textColor?: string
+}
+
+const StyledModalButton = styled(ModalButton)<StyledModalButtonProps>`
   border: 1px solid ${({ borderColor }) => borderColor || '#ff713c'};
   color: ${({ textColor }) => textColor || '#ff713c'};
 `
 
-// props를 스타일링에만 사용하도록 처리
-const StyledModalContent = styled(({ textColor, ...props }) => (
-  <ModalContent {...props} />
-))`
+interface StyledModalContentProps {
+  textColor?: string
+}
+
+const StyledModalContent = styled(ModalContent)<StyledModalContentProps>`
   color: ${({ textColor }) => textColor || '#ff713c'};
 `
 
@@ -104,13 +110,11 @@ interface ModalProps {
 
 const getIconComponent = (iconSrc: string, size: number) => {
   const [library, iconName] = iconSrc.split('.')
-  console.log(`Library: ${library}, Icon Name: ${iconName}`)
   if (library === 'ri') {
-    return RiIcons[iconName]
+    return (RiIcons as any)[iconName]
   } else if (library === 'fi') {
-    return FiIcons[iconName]
+    return (FiIcons as any)[iconName]
   } else if (library === 'src') {
-    console.log(`public/${iconName}.png`)
     return (props: any) => (
       <img src={`/src/assets/image/${iconName}.png`} width={size} {...props} />
     )
@@ -140,7 +144,7 @@ const Modal: FunctionComponent<ModalProps> = ({
       <StyledModalContainer
         width={width}
         height={height}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
       >
         <StyledModalHeader backgroundColor={headerBackgroundColor}>
           <ModalTitle>{title}</ModalTitle>

@@ -5,7 +5,7 @@ import {
   joinConsultation,
   useJoinRandomRoom,
 } from 'store/useConsultationStore'
-import { RoomSearch, Consultation, JoinConsultation } from 'ts/consultationType'
+import { RoomSearch, Consultation, JoinData } from 'ts/consultationType'
 import CreateRoomModal from './CreateRoomModal'
 import RandomConsultationModal from './RandomConsultationModal'
 import PasswordModal from './PasswordModal'
@@ -37,7 +37,9 @@ const ConsultationListPa: React.FC = () => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false)
   const [selectedConsultation, setSelectedConsultation] =
     useState<Consultation | null>(null)
-  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [passwordError, setPasswordError] = useState<string | undefined>(
+    undefined
+  )
   const [visibleConsultations, setVisibleConsultations] = useState<number>(5)
 
   const loadConsultations = async (
@@ -77,7 +79,7 @@ const ConsultationListPa: React.FC = () => {
     password: string = ''
   ) => {
     try {
-      const joinData: JoinConsultation = {
+      const joinData: JoinData = {
         id: consultation.id,
         isPrivated: consultation.isPrivated,
         password,
@@ -86,7 +88,6 @@ const ConsultationListPa: React.FC = () => {
       }
 
       await joinRoom(joinData)
-      setJoinConsultation(joinData)
       navigate('/consult')
     } catch (error) {
       setError('Failed to join the room')
@@ -97,7 +98,7 @@ const ConsultationListPa: React.FC = () => {
   const handlePasswordSubmit = async (password: string) => {
     if (selectedConsultation) {
       try {
-        const joinData: JoinConsultation = {
+        const joinData: JoinData = {
           id: selectedConsultation.id,
           isPrivated: selectedConsultation.isPrivated,
           password,
@@ -106,7 +107,6 @@ const ConsultationListPa: React.FC = () => {
         }
 
         await joinRoom(joinData)
-        setJoinConsultation(joinData)
         setIsPasswordModalOpen(false)
         navigate('/consult')
       } catch (error) {

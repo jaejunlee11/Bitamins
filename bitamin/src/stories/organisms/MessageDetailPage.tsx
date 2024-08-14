@@ -11,23 +11,47 @@ import CheckModal from '@/stories/organisms/CheckModal'
 import ReportUserModal from './ReportUserModal'
 import { RiDeleteBin6Line, RiAlertLine } from 'react-icons/ri'
 
-const MessageDetailPage = () => {
-  const { messageId } = useParams()
+// 인터페이스 정의
+interface Reply {
+  id: number
+  memberNickName: string
+  content: string
+  isRead: number
+  sendDate: string
+  url: string
+}
+
+interface MessageDetail {
+  id: number
+  nickname: string
+  opponentId: number
+  category: string
+  title: string
+  content: string
+  sendDate: string
+  counselingDate: string
+  isRead: number
+  url: string
+  replies: Reply[]
+}
+
+const MessageDetailPage: React.FC = () => {
+  const { messageId } = useParams<{ messageId: string }>()
   const navigate = useNavigate()
-  const [message, setMessage] = useState(null)
+  const [message, setMessage] = useState<MessageDetail | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')
   const [showReplyInput, setShowReplyInput] = useState(false)
 
-  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false) // 쪽지 삭제 모달 상태
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
   const [isMessageModalOpen, setMessageModalOpen] = useState(false)
   const [isMessageSendModalOpen, setMessageSendModalOpen] = useState(false)
 
   const [isCheckReplyModalOpen, setCheckReplyModalOpen] = useState(false)
   const [isCheckModalOpen, setCheckModalOpen] = useState(false)
   const [replyModalId, setReplyModalId] = useState(0)
-  const [isReportModalOpen, setReportModalOpen] = useState(false) // 신고 모달 상태 추가
+  const [isReportModalOpen, setReportModalOpen] = useState(false)
 
   const closeCheckModal = () => {
     setCheckModalOpen(false)
@@ -36,7 +60,7 @@ const MessageDetailPage = () => {
   const handleConfirm = async () => {
     try {
       await deleteMessage(Number(messageId))
-      setDeleteModalOpen(true) // 삭제 모달 열기
+      setDeleteModalOpen(true)
     } catch (err) {
       alert('Failed to delete message')
       console.error('Error deleting message:', err)
@@ -94,12 +118,12 @@ const MessageDetailPage = () => {
     setCheckModalOpen(true)
   }
 
-  const handleDeleteReply = async (replyId) => {
+  const handleDeleteReply = async (replyId: number) => {
     await setReplyModalId(replyId)
     setCheckReplyModalOpen(true)
   }
 
-  const deleteToReply = async (replyId) => {
+  const deleteToReply = async (replyId: number) => {
     try {
       await deleteReply(replyId)
       setMessage((prevMessage) => {
@@ -118,6 +142,11 @@ const MessageDetailPage = () => {
       alert('Failed to delete reply')
       console.error('Error deleting reply:', err)
     }
+  }
+
+  const formatTime = (time: string): string => {
+    const date = new Date(time)
+    return `${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`
   }
 
   const handleCreateReply = async () => {
@@ -149,7 +178,8 @@ const MessageDetailPage = () => {
   const isAdmin = message?.nickname === '관리자'
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md relative">
+      {/* 상단 버튼들 */}
       <div className="flex justify-between items-center mb-4">
         <button
           className="bg-gray-200 text-gray-700 px-3 py-1 rounded"
@@ -159,17 +189,22 @@ const MessageDetailPage = () => {
         </button>
         <div className="flex items-center space-x-2">
           <button
-            className="text-red-500 hover:text-red-700"
+            className="text-gray-500 hover:text-gray-700"
             onClick={handleDeleteMessage}
           >
             <RiDeleteBin6Line size={24} />
           </button>
           <button
             className="text-yellow-500 hover:text-yellow-700"
-            onClick={() => setReportModalOpen(true)} // 신고 모달 열기
+            onClick={() => setReportModalOpen(true)}
           >
             <RiAlertLine size={24} />
           </button>
+        </div>
+        <div className="text-sm text-gray-500 absolute top-0 right-0 mt-2 mr-2">
+          {message?.counselingDate && (
+            <span>{formatTime(message.counselingDate)}</span>
+          )}
         </div>
       </div>
 
@@ -180,7 +215,8 @@ const MessageDetailPage = () => {
         </p>
         {message?.counselingDate && (
           <p className="text-gray-700">
-            <strong>컨설팅 예약 시간:</strong> {message.counselingDate}
+            <strong>컨설팅 예약 시간:</strong>{' '}
+            {formatTime(message.counselingDate)}
           </p>
         )}
         <p className="text-gray-800 mt-4">{message?.content}</p>
@@ -200,7 +236,9 @@ const MessageDetailPage = () => {
             <div className="flex-1">
               <span className="font-semibold">{reply.memberNickName}</span>
               <p className="text-gray-700">{reply.content}</p>
-              <small className="text-gray-500">{reply.sendDate}</small>
+              <small className="text-gray-500">
+                {formatTime(reply.sendDate)}
+              </small>
             </div>
             <button
               className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
@@ -258,7 +296,7 @@ const MessageDetailPage = () => {
           title="쪽지가 삭제되었습니다."
           content="쪽지가 성공적으로 삭제되었습니다."
           iconSrc="src.alert"
-          onClose={closeDeleteModal} // 삭제 모달 닫기
+          onClose={closeDeleteModal}
           headerBackgroundColor="#FF1B1B"
           buttonBorderColor="#FF1B1B"
           buttonTextColor="#FF1B1B"
@@ -320,7 +358,7 @@ const MessageDetailPage = () => {
         <ReportUserModal
           isOpen={isReportModalOpen}
           onRequestClose={() => setReportModalOpen(false)}
-          respondentId={message?.senderId} // 신고 대상자의 ID를 전달
+          respondentId={String(message?.opponentId)} // number를 string으로 변환
         />
       )}
     </div>

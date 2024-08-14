@@ -1,7 +1,7 @@
-import React, { FunctionComponent } from 'react';
-import styled from 'styled-components';
-import * as RiIcons from 'react-icons/ri';
-import * as FiIcons from 'react-icons/fi';
+import React, { FunctionComponent } from 'react'
+import styled from 'styled-components'
+import * as RiIcons from 'react-icons/ri'
+import * as FiIcons from 'react-icons/fi'
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -13,10 +13,14 @@ const ModalOverlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-`;
+`
 
-// 중간 컴포넌트를 사용하여 props 필터링
-const StyledModalContainer = styled(({ width, height, ...props }) => <div {...props} />)<{ width?: string; height?: string }>`
+interface StyledModalContainerProps {
+  width?: string
+  height?: string
+}
+
+const StyledModalContainer = styled.div<StyledModalContainerProps>`
   position: relative;
   background-color: #fff;
   border-radius: 23px;
@@ -24,28 +28,31 @@ const StyledModalContainer = styled(({ width, height, ...props }) => <div {...pr
   width: ${({ width }) => width || '28.25rem'};
   height: ${({ height }) => height || '18.938rem'};
   overflow: hidden;
-`;
+`
 
-// 중간 컴포넌트를 사용하여 props 필터링
-const StyledModalHeader = styled(({ backgroundColor, ...props }) => <div {...props} />)<{ backgroundColor?: string }>`
+interface StyledModalHeaderProps {
+  backgroundColor?: string
+}
+
+const StyledModalHeader = styled.div<StyledModalHeaderProps>`
   background-color: ${({ backgroundColor }) => backgroundColor || '#ff713c'};
   height: 2.25rem;
   border-radius: 23px 23px 0 0;
   display: flex;
   align-items: center;
   justify-content: center;
-`;
+`
 
 const ModalTitle = styled.b`
   color: #fff;
   font-size: 1.25rem;
-`;
+`
 
 const ModalContent = styled.div`
   padding: 1rem;
   text-align: center;
   color: #ff713c;
-`;
+`
 
 const IconContainer = styled.div`
   display: flex;
@@ -58,7 +65,7 @@ const ModalFooter = styled.div`
   justify-content: center;
   margin-top: 1rem;
   gap: 0.5rem;
-`;
+`
 
 const ModalButton = styled.button`
   background-color: #fff;
@@ -66,55 +73,62 @@ const ModalButton = styled.button`
   padding: 0.5rem;
   cursor: pointer;
   width: 120px;
-`;
+`
 
-// props를 스타일링에만 사용하도록 처리
-const StyledModalButton = styled(({ borderColor, textColor, ...props }) => <ModalButton {...props} />)`
+interface StyledModalButtonProps {
+  borderColor?: string
+  textColor?: string
+}
+
+const StyledModalButton = styled(ModalButton)<StyledModalButtonProps>`
   border: 1px solid ${({ borderColor }) => borderColor || '#ff713c'};
   color: ${({ textColor }) => textColor || '#ff713c'};
-`;
+`
 
-// 새로운 스타일 버튼 추가
-const StyledSecondaryButton = styled(StyledModalButton)`
+const StyledSecondaryButton = styled(StyledModalButton)<StyledModalButtonProps>`
   background-color: ${({ textColor }) => textColor || '#ff713c'};
   color: #fff;
-`;
+`
 
-const StyledModalContent = styled(({ textColor, ...props }) => <ModalContent {...props} />)`
+interface StyledModalContentProps {
+  textColor?: string
+}
+
+const StyledModalContent = styled(ModalContent)<StyledModalContentProps>`
   color: ${({ textColor }) => textColor || '#ff713c'};
-`;
+`
 
 interface ModalProps {
-  title: string;
-  content: string;
-  iconSrc?: string;
-  confirmText?: string;
-  onConfirm?: () => void;
-  onClose: () => void;
-  width?: string;
-  height?: string;
-  headerBackgroundColor?: string;
-  buttonBorderColor?: string;
-  buttonTextColor?: string;
-  imgSize?: number;
-  imgColor?: string;
-  secondaryButtonText?: string;
-  onSecondaryAction?: () => void;
+  title: string
+  content: string
+  iconSrc?: string
+  confirmText?: string
+  onConfirm?: () => void
+  onClose: () => void
+  width?: string
+  height?: string
+  headerBackgroundColor?: string
+  buttonBorderColor?: string
+  buttonTextColor?: string
+  imgSize?: number
+  imgColor?: string
+  secondaryButtonText?: string
+  onSecondaryAction?: () => void
 }
 
 const getIconComponent = (iconSrc: string, size: number) => {
-  const [library, iconName] = iconSrc.split('.');
-  console.log(`Library: ${library}, Icon Name: ${iconName}`);
+  const [library, iconName] = iconSrc.split('.')
   if (library === 'ri') {
-    return RiIcons[iconName];
+    return (RiIcons as any)[iconName]
   } else if (library === 'fi') {
-    return FiIcons[iconName];
+    return (FiIcons as any)[iconName]
   } else if (library === 'src') {
-    console.log(`public/${iconName}.png`);
-    return (props: any) => <img src={`/src/assets/image/${iconName}.png`} width={size} {...props} />;
+    return (props: any) => (
+      <img src={`/src/assets/image/${iconName}.png`} width={size} {...props} />
+    )
   }
-  return null;
-};
+  return null
+}
 
 const CheckModal: FunctionComponent<ModalProps> = ({
   title,
@@ -133,11 +147,15 @@ const CheckModal: FunctionComponent<ModalProps> = ({
   secondaryButtonText = '취소',
   onSecondaryAction,
 }) => {
-  const IconComponent = iconSrc ? getIconComponent(iconSrc, imgSize) : null;
+  const IconComponent = iconSrc ? getIconComponent(iconSrc, imgSize) : null
 
   return (
     <ModalOverlay onClick={onClose}>
-      <StyledModalContainer width={width} height={height} onClick={(e) => e.stopPropagation()}>
+      <StyledModalContainer
+        width={width}
+        height={height}
+        onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
+      >
         <StyledModalHeader backgroundColor={headerBackgroundColor}>
           <ModalTitle>{title}</ModalTitle>
         </StyledModalHeader>
@@ -165,7 +183,7 @@ const CheckModal: FunctionComponent<ModalProps> = ({
         </ModalFooter>
       </StyledModalContainer>
     </ModalOverlay>
-  );
-};
+  )
+}
 
-export default CheckModal;
+export default CheckModal

@@ -103,7 +103,7 @@ const SurveyPage: React.FC = () => {
         <div className="absolute top-0 left-0 w-full h-[15%] bg-[#f9ea9b]" />
 
         <div className="relative top-[calc(9/16*100vw*0.2)] left-[calc(50%-512px)] w-[1024px]">
-          <div className="relative w-[720px] mx-auto">
+          <div className="relative w-[80%] mx-auto">
             <div className="relative bg-white shadow-md rounded-lg p-8 mt-10">
               <div className="text-2xl font-bold">우울증 척도 (CES-D)</div>
               <b className="block text-sm mt-4 text-lg text-gray-600">
@@ -125,7 +125,7 @@ const SurveyPage: React.FC = () => {
                     {question}
                   </div>
                 </div>
-                <div className="flex mt-4 space-x-4 text-sm text-gray-600">
+                <div className="flex mt-4 space-x-4 text-sm text-gray-600 justify-center items-center">
                   <button
                     className={`px-4 py-2 rounded ${scores[index] === 0 ? 'bg-[#ff713c] text-white' : 'bg-gray-200'}`}
                     onClick={() => handleScoreChange(index, 0)}

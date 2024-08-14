@@ -35,8 +35,10 @@ export interface JoinConsultation {
   id: number
   memberId: number
   nickname: string
-  profileKey: string | null
   profileUrl: string | null
+  isPrivated?: boolean
+  startTime: string
+  password?: string // 이 부분을 추가합니다.
 }
 
 export interface CreateConsultation {
