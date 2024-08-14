@@ -2,7 +2,7 @@ import { FunctionComponent } from 'react'
 
 const Footer: FunctionComponent = () => {
   return (
-    <div className="w-full bg-gray-100 py-[1.6vh] px-[14vw] box-border text-left text-[0.9vw] text-gray-200 font-bagel-fat-one">
+    <footer className="w-full bg-gray-100 py-[1.6vh] px-[14vw] box-border text-left text-[0.9vw] text-gray-200 font-bagel-fat-one mt-auto">
       <div className="w-[60vw] flex flex-col items-center justify-start gap-[0.5vh]">
         <img className="w-[60vw] max-h-full" alt="" src="Vector 50.svg" />
         <div className="w-[59.5vw] flex flex-row items-start justify-between">
@@ -47,7 +47,7 @@ const Footer: FunctionComponent = () => {
           </div>
         </div>
       </div>
-    </div>
+    </footer>
   )
 }
 
