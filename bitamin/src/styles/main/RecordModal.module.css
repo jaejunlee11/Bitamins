@@ -1,0 +1,61 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000; /* 녹음 버튼보다 높은 값으로 설정 */
+}
+
+.modalContent {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+    z-index: 2100; /* 모달 내용이 모달 오버레이보다 위에 있도록 설정 */
+}
+
+.closeButton {
+    position: absolute;
+    bottom: 10px; /* 아래쪽으로 10px 떨어지게 설정 */
+    right: 10px; /* 오른쪽으로 10px 떨어지게 설정 */
+    border: none;
+    background: #f18282; /* 배경색 (빨간색으로 강조) */
+    border-radius: 10%; /* 둥근 모서리 */
+    width: 40px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white; /* 글자 색상 (흰색) */
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease; /* 배경색과 변형에 부드러운 전환 효과 추가 */
+}
+
+
+.closeButton:hover {
+    background: #ff9191; /* 호버 시 배경색 변화 (어두운 빨간색) */
+}
+
+.closeButton:active {
+    transform: scale(0.9); /* 클릭 시 버튼 축소 효과 */
+}
+
+.info {
+    font-weight: bold;
+    margin-top: 60px;
+}
+
+.content {
+    margin-top: 30px;
+    line-height: 30px;
+    text-align: center; /* 텍스트를 가운데 정렬 */
+}
+

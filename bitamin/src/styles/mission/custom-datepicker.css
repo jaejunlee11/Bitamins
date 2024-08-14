@@ -41,7 +41,7 @@
 .react-datepicker__day--phrase--mission::before {
     content: '';
     display: inline-block;
-    width: 7px; /* 점 크기 살짝 축소 */
+    width: 7px;
     height: 7px;
     border-radius: 50%;
     position: absolute;

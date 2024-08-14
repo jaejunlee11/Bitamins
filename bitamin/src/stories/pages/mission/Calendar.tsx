@@ -18,7 +18,7 @@ interface CalendarProps {
 const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [loading, setLoading] = useState<boolean>(false);
-    const [monthMissions, setMonthMissions] = useState<any[]>([]); // 초기값을 빈 배열로 설정
+    const [monthMissions, setMonthMissions] = useState<any[]>([]);
 
     const fetchMissionDate = async (date: Date) => {
         const formattedDate = format(date, 'yyyy-MM-dd');
@@ -27,14 +27,11 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
             const data = await fetchMissionsByDate(formattedDate);
             const missionDate = new Date(data.completeDate);
 
-            // 월간 미션 및 문구 데이터 가져오기
             const response = await fetchMonthMissionAndPhrase(formattedDate);
             const monthData = response.data;
-
-            // monthMissions가 배열인지 확인하고 배열이 아닌 경우 빈 배열로 설정
             setMonthMissions(Array.isArray(monthData) ? monthData : []);
 
-            setSelectedDate(date); // 초기 날짜 설정
+            setSelectedDate(date);
         } catch (error) {
             console.error('Error fetching mission date:', error);
         } finally {
@@ -47,7 +44,7 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
         fetchMissionDate(today);
         onDateChange(today);
         return () => {
-            setLoading(false); // 컴포넌트 언마운트 시 상태 업데이트 방지
+            setLoading(false);
         };
     }, []);
 
@@ -56,16 +53,46 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
             const correctedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
             setSelectedDate(correctedDate);
             onDateChange(correctedDate);
-            fetchMissionDate(correctedDate); // 새로운 날짜 선택 시 미션 데이터 가져오기
+            fetchMissionDate(correctedDate);
         }
     };
+  const findEarliestMissionDate = (missions: any[]) => {
+    const completedMissions = missions.filter(mission => mission.memberMissionId);
 
-    const handleMonthChange = async (date: Date) => {
-        const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1); // 해당 달의 1일로 설정
-        setSelectedDate(firstDayOfMonth);
-        onDateChange(firstDayOfMonth);
-        fetchMissionDate(firstDayOfMonth); // 해당 달의 1일에 대한 미션 데이터 가져오기
-    };
+    if (completedMissions.length > 0) {
+      // complete한 미션이 있는 가장 빠른 날짜를 찾음
+      const earliestMissionDate = completedMissions.reduce((earliest, mission) => {
+        const missionDate = new Date(mission.activityDate);
+        return missionDate < earliest ? missionDate : earliest;
+      }, new Date(completedMissions[0].activityDate));
+
+      return earliestMissionDate;
+    } else {
+      // complete한 미션이 없다면 1일로 설정
+      return null;
+    }
+  };
+
+  const handleMonthChange = async (date: Date) => {
+    const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+
+    try {
+      setLoading(true);
+      const response = await fetchMonthMissionAndPhrase(format(firstDayOfMonth, 'yyyy-MM-dd'));
+      const monthData = response.data;
+      setMonthMissions(Array.isArray(monthData) ? monthData : []);
+
+      const earliestMissionDate = findEarliestMissionDate(monthData) || firstDayOfMonth;
+
+      setSelectedDate(earliestMissionDate);
+      onDateChange(earliestMissionDate);
+    } catch (error) {
+      console.error('Error fetching month missions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
     const renderCustomHeader = ({
                                     date,
@@ -76,54 +103,78 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
         decreaseMonth: () => void;
         increaseMonth: () => void;
     }) => (
-        <div className={styles.header}>
-            <button
-                className={styles.prevButton}
-                onClick={() => {
-                    decreaseMonth();
-                    handleMonthChange(new Date(date.getFullYear(), date.getMonth() - 1)); // 이전 달로 이동 후 해당 달의 1일로 설정
-                }}
-            >
-                {'<'}
-            </button>
-            <span className={styles.currentMonth}>{format(date, 'yyyy.MM')}</span>
-            <button
-                className={styles.nextButton}
-                onClick={() => {
-                    increaseMonth();
-                    handleMonthChange(new Date(date.getFullYear(), date.getMonth() + 1)); // 다음 달로 이동 후 해당 달의 1일로 설정
-                }}
-            >
-                {'>'}
-            </button>
-        </div>
+      <div className={styles.header}>
+          <button
+            className={styles.prevButton}
+            onClick={() => {
+                decreaseMonth();
+                handleMonthChange(new Date(date.getFullYear(), date.getMonth() - 1));
+            }}
+          >
+              {'<'}
+          </button>
+          <span className={styles.currentMonth}>{format(date, 'yyyy.MM')}</span>
+          <button
+            className={styles.nextButton}
+            onClick={() => {
+                increaseMonth();
+                handleMonthChange(new Date(date.getFullYear(), date.getMonth() + 1));
+            }}
+          >
+              {'>'}
+          </button>
+      </div>
     );
 
-    const getDayClassName = (date: Date) => {
-        let classNames = '';
+  const getDayClassName = (date: Date) => {
+    let classNames = '';
 
-        // 월간 미션 데이터에서 해당 날짜에 미션이나 문구가 있는지 확인
-        const hasMission = monthMissions.some(mission =>
-            new Date(mission.activityDate).toDateString() === date.toDateString() && mission.memberMissionId
-        );
-        const hasPhrase = monthMissions.some(mission =>
-            new Date(mission.activityDate).toDateString() === date.toDateString() && mission.memberPhraseId
-        );
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 오늘 날짜의 시간을 00:00:00으로 설정
+    date.setHours(0, 0, 0, 0); // 입력받은 날짜의 시간을 00:00:00으로 설정
 
-        if (hasMission && !hasPhrase) {
-            classNames += ' react-datepicker__day--mission'; // 미션만 있는 경우
-        }
-        if (hasPhrase && !hasMission) {
-            classNames += ' react-datepicker__day--phrase'; // 문구만 있는 경우
-        }
-        if (hasPhrase && hasMission) {
-            classNames += ' react-datepicker__day--phrase--mission'; // 미션과 문구가 모두 있는 경우
-        }
+    const isToday = date.getTime() === today.getTime();
 
-        return classNames.trim();
-    };
+    const hasMission = monthMissions.some(mission =>
+      new Date(mission.activityDate).toDateString() === date.toDateString() && mission.memberMissionId
+    );
+    const hasPhrase = monthMissions.some(mission =>
+      new Date(mission.activityDate).toDateString() === date.toDateString() && mission.memberPhraseId
+    );
 
-    const getWeekDayClassName = (date: Date) => {
+    // 오늘 날짜에 대해서도 CSS 클래스를 적용
+    if (isToday) {
+      if (hasMission && !hasPhrase) {
+        classNames += ' react-datepicker__day--mission';
+      }
+      if (hasPhrase && !hasMission) {
+        classNames += ' react-datepicker__day--phrase';
+      }
+      if (hasPhrase && hasMission) {
+        classNames += ' react-datepicker__day--phrase--mission';
+      }
+    } else {
+      if (hasMission && !hasPhrase) {
+        classNames += ' react-datepicker__day--mission';
+      }
+      if (hasPhrase && !hasMission) {
+        classNames += ' react-datepicker__day--phrase';
+      }
+      if (hasPhrase && hasMission) {
+        classNames += ' react-datepicker__day--phrase--mission';
+      }
+
+      if (!hasMission && !hasPhrase) {
+        classNames += ' react-datepicker__day--disabled';
+      }
+    }
+
+    return classNames.trim();
+  };
+
+
+
+  const getWeekDayClassName = (date: Date) => {
         const day = date.getDay();
         if (day === 0) {
             return styles.sunday;
@@ -134,21 +185,23 @@ const Calendar: React.FC<CalendarProps> = ({ onDateChange }) => {
     };
 
     return (
-        <div className={styles.calendarContainer} style={{ zIndex: 1000 }}>
-            <DatePicker
-                selected={selectedDate}
-                onChange={handleDateChange}
-                inline
-                locale="ko"
-                maxDate={new Date()} // 오늘 날짜 이후는 선택할 수 없게 설정
-                renderCustomHeader={renderCustomHeader}
-                calendarClassName={styles.customCalendar}
-                dayClassName={getDayClassName}
-                formatWeekDay={(day) => day.substr(0, 1)}
-                weekDayClassName={getWeekDayClassName}
-            />
-            {loading && <p>로딩 중...</p>}
+      <div className={styles.calendarContainer} style={{ zIndex: 1000 }}>
+          <DatePicker
+            selected={selectedDate}
+            onChange={handleDateChange}
+            inline
+            locale="ko"
+            maxDate={new Date()}
+            renderCustomHeader={renderCustomHeader}
+            calendarClassName={styles.customCalendar}
+            dayClassName={getDayClassName}
+            formatWeekDay={(day) => day.substr(0, 1)}
+            weekDayClassName={getWeekDayClassName}
+          />
+          {loading && <p>로딩 중...</p>}
+        <div>
         </div>
+      </div>
     );
 };
 

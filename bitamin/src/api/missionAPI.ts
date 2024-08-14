@@ -21,7 +21,6 @@ export const substituteMission = async (missionId: number) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error substituting mission:', error);
         throw error;
     }
 };
@@ -34,7 +33,6 @@ export const fetchMonthMissionAndPhrase = async (date: string) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error fetching month mission and phrase:', error);
         throw error;
     }
 };
@@ -47,11 +45,6 @@ export const fetchMissionsByDate = async (completeDate: string) => {
         });
         return response.data;
     } catch (error) {
-        // @ts-ignore
-        if (error.response) {
-            // @ts-ignore
-            console.error('Response data:', error.response.data);
-        }
         throw error;
     }
 };
@@ -70,7 +63,6 @@ export const submitMission = async (missionData: FormData) => {
         );
         return response.data;
     } catch (error) {
-        console.error('Error submitting mission:', error);
         throw error;
     }
 };
@@ -81,7 +73,18 @@ export const getExperience = async () => {
         const response = await axiosInstance.get(`${BASE_URL}/missions/plant`);
         return response.data;
     } catch (error) {
-        console.error('Error fetching experience:', error);
         throw error;
     }
 };
+
+// 미션 id로 미션 설명 가져오기
+export const fetchMissionById = async (missionId: number) => {
+    try {
+        const response = await axiosInstance.get(`${BASE_URL}/missions/description`, {
+            params: { missionId: missionId }
+        })
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
