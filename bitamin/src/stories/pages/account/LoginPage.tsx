@@ -7,6 +7,12 @@ import styles from 'styles/account/LoginPage.module.css'
 import HeaderBeforeLogin from '@/stories/organisms/common/HeaderBeforeLogin'
 import Modal from '@/stories/organisms/Modal'
 
+// 서버 응답 타입을 정의
+interface LoginResponse {
+  accessToken: string
+  refreshToken: string
+}
+
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -50,7 +56,7 @@ const LoginPage: React.FC = () => {
   const handleLogin = async () => {
     try {
       console.log('Login request data:', { email, password })
-      const response = await axiosInstance.post('/auth/login', {
+      const response = await axiosInstance.post<LoginResponse>('/auth/login', {
         email,
         password,
       })
@@ -67,6 +73,7 @@ const LoginPage: React.FC = () => {
   const handleSignUp = useCallback(() => {
     navigate('/signup')
   }, [navigate])
+
   return (
     <>
       <div className={styles.div}>
