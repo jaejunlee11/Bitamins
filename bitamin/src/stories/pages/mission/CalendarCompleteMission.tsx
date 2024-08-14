@@ -21,7 +21,7 @@ const MissionPage: React.FC = () => {
         <Calendar onDateChange={handleDateChange} />
       </div>
       <div className={styles.completeMissionContainer}>
-        {selectedDate && <CompleteMission selectedDate={selectedDate} />}
+        {selectedDate && <CompleteMission selectedDate={new Date(selectedDate)} />}
       </div>
     </div>
   )

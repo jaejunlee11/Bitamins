@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Missionform from '@/stories/pages/mission/Missionform'
+import Missionform from '@/stories/pages/mission/MissionForm'
 import Calendar from '@/stories/pages/mission/Calendar'
 import CompleteMission from '@/stories/pages/mission/CompleteMission'
 import { fetchMissionsByDate } from '@/api/missionAPI'

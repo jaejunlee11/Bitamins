@@ -61,7 +61,7 @@ const LoginPage: React.FC = () => {
         email,
         password,
       })
-      setResponseData(response)
+      setResponseData(response.data)
       setModalOpen(true)
     } catch (error: any) {
       console.error('Login error:', error.message)
