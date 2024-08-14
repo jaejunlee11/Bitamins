@@ -36,6 +36,15 @@ public class MissionController {
         return missionResponse;
     }
 
+    // 미션 설명 보기
+    @GetMapping("/description")
+    public ApiResponse<MissionDescriptionResponse> getMissionDescription(@RequestParam("missionId") Long missionId){
+
+        // Service 호출
+        ApiResponse<MissionDescriptionResponse> missionDescription = missionService.readMissionDescription(missionId);
+        return missionDescription;
+    }
+
     // 미션 교체
     @GetMapping("/substitute")
     public ApiResponse<MissionResponse> getMissionSubstitute(@RequestParam("missionId") Long missionId){
