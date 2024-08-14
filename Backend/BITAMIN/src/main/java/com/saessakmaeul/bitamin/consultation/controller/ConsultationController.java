@@ -9,7 +9,7 @@ import com.saessakmaeul.bitamin.util.JwtUtil;
 import io.openvidu.java.client.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -21,7 +21,7 @@ import java.util.*;
 public class ConsultationController {
     private final OpenVidu openVidu;
     // Broadcast 필요한 상황 오면 구현
-//    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final SimpMessagingTemplate simpMessagingTemplate;
     private final ConsultationService consultationService;
     private final GptService GptService;
     private final JwtUtil jwtUtil;
@@ -190,10 +190,11 @@ public class ConsultationController {
         return ResponseEntity.status(200).body("정상적으로 채팅이 저장되었습니다.");
     }
 
-    @PostMapping("/moderators/{category}")
+    @PostMapping("/moderators/{category}/{consultationId}")
     public ResponseEntity<?> selectPrompt(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                           @PathVariable("category") SearchCondition category,
-                                          @RequestBody GptCompletionRequest gptCompletions) {
+                                          @PathVariable("consultationId") Long consultationId,
+                                          @RequestBody GptCompletionRequest gptCompletions) throws OpenViduJavaClientException, OpenViduHttpException {
         String nickname = jwtUtil.extractNickname(tokenHeader.substring(7));
 
         GptResponseList gptResponses = new GptResponseList();
@@ -211,6 +212,13 @@ public class ConsultationController {
         }
 
         gptResponses.setGptResponses(map);
+
+        if(category != SearchCondition.요약) {
+            String data = gptResponses.getGptResponses().get(jwtUtil.extractNickname(tokenHeader.substring(7))).getContent();
+
+            // 구독된 상담방으로 broadcast
+            simpMessagingTemplate.convertAndSend("/sub/consultations/" + consultationId, data);
+        }
 
         return ResponseEntity.status(200).body(gptResponses);
     }
