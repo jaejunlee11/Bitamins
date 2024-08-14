@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import * as tmPose from '@teachablemachine/pose'
 import exerciseAPI from '@/api/exerciseAPI'
+import styles from 'styles/healthUp/HealthUpPage.module.css'
 
 interface execrciseModelInterface {
   id: number
@@ -23,7 +24,11 @@ const HealthUP: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [labelContainer, setLabelContainer] = useState<string[]>([])
   const location = useLocation()
-  const { level } = location.state
+  const navigate = useNavigate()
+
+  // location.state를 안전하게 처리
+  const level = location.state?.level || 1
+
   const [execrciseModel, setExecrciseModel] = useState<execrciseModelInterface>(
     {
       id: 3,
@@ -33,58 +38,102 @@ const HealthUP: React.FC = () => {
       thirdExercise: 12,
     }
   )
+
+  const [firstExercise, setFirstExercise] =
+    useState<exerciseDescriptionInterface>({
+      id: 0,
+      title: '첫 번째 운동',
+      description: '',
+      level: 0,
+      exerciseUrl: '',
+    })
+
+  const [secondExercise, setSecondExercise] =
+    useState<exerciseDescriptionInterface>({
+      id: 0,
+      title: '두 번째 운동',
+      description: '',
+      level: 0,
+      exerciseUrl: '',
+    })
+
+  const [thirdExercise, setThirdExercise] =
+    useState<exerciseDescriptionInterface>({
+      id: 0,
+      title: '세 번째 운동',
+      description: '',
+      level: 0,
+      exerciseUrl: '',
+    })
+
   const [exerciseDescription, setExerciseDescription] =
     useState<exerciseDescriptionInterface>({
       id: 5,
       title: '자세 이름',
-      description: '자세 설명',
+      description: '',
       level: 2,
       exerciseUrl:
         'https://bitamin-sassack.s3.ap-northeast-2.amazonaws.com/381495f2-8b15-46c9-b09f-0ae4407db89e_mainQuestImg.png',
     })
+
   const [predictContainer, setPredictContainer] = useState<number>(0)
   const [count, setCount] = useState<number>(500) // initialize count for the pose
   const [currentModelIndex, setCurrentModelIndex] = useState<number>(1) // index to keep track of current model
-  const [firstClassLabel, setFirstClassLabel] = useState<string>()
   const modelRef = useRef<tmPose.CustomPoseNet | null>(null)
   const webcamRef = useRef<tmPose.Webcam | null>(null)
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
-  const [buttonText, setButtonText] = useState<string>('시작 하기')
+  // const [buttonText, setButtonText] = useState<string>('시작 하기')
 
   useEffect(() => {
     const init = async () => {
-      const URL = execrciseModel.modelUrl
-      const modelURL = URL + 'model.json'
-      const metadataURL = URL + 'metadata.json'
+      try {
+        const response = await exerciseAPI.fetchExerciseModel(level)
+        setExecrciseModel(response)
 
-      // 모델 url 가져오기 -> level 1만 가지고 온 거 맞나?
-      // const response = await exerciseAPI.fetchExerciseModel(1)
-      const response = await exerciseAPI.fetchExerciseModel(level)
-      setExecrciseModel(response)
+        const modelURL = response.modelUrl + 'model.json'
+        const metadataURL = response.modelUrl + 'metadata.json'
 
-      // 모델 세팅하기
-      const model = await tmPose.load(modelURL, metadataURL)
-      modelRef.current = model
-      const maxPredictions = model.getTotalClasses()
+        // 모델 세팅하기
+        const model = await tmPose.load(modelURL, metadataURL)
+        modelRef.current = model
 
-      // 웹캠 세팅 하기
-      const webcam = new tmPose.Webcam(200, 200, true) // width, height, flip
-      await webcam.setup() // request access to the webcam
-      await webcam.play()
-      webcamRef.current = webcam
-      window.requestAnimationFrame(loop)
+        // 웹캠 세팅하기
+        const webcam = new tmPose.Webcam(585, 485, true) // Increase width and height
+        await webcam.setup() // request access to the webcam
+        await webcam.play()
+        webcamRef.current = webcam
+        window.requestAnimationFrame(loop)
 
-      const canvas = canvasRef.current
-      if (canvas) {
-        canvas.width = 200
-        canvas.height = 200
-        ctxRef.current = canvas.getContext('2d')
+        const canvas = canvasRef.current
+        if (canvas) {
+          canvas.width = 897 // Increased width
+          canvas.height = 897 // Increased height
+          ctxRef.current = canvas.getContext('2d')
+        }
+
+        // 자세 이름 세팅하기
+        const labels = await model.getClassLabels()
+        setLabelContainer(labels)
+
+        // 각 운동의 제목을 가져오기
+        const firstExerciseInfo = await exerciseAPI.fetchExercise(
+          response.firstExercise
+        )
+        setFirstExercise(firstExerciseInfo)
+
+        const secondExerciseInfo = await exerciseAPI.fetchExercise(
+          response.secondExercise
+        )
+        setSecondExercise(secondExerciseInfo)
+
+        const thirdExerciseInfo = await exerciseAPI.fetchExercise(
+          response.thirdExercise
+        )
+        setThirdExercise(thirdExerciseInfo)
+      } catch (error) {
+        console.error('Error during model initialization:', error)
+        navigate('/healthuplist') // 에러 발생 시 에러 페이지로 리디렉션
       }
-
-      // 자세 이름 세팅하기
-      const labels = await model.getClassLabels()
-      setLabelContainer(labels)
-      setFirstClassLabel(labels[1])
     }
 
     init()
@@ -94,46 +143,53 @@ const HealthUP: React.FC = () => {
         webcamRef.current.stop()
       }
     }
-  }, [])
+  }, [level, navigate]) // 의존성 배열에 level과 navigate 추가
 
-  // 자세 시간을 다 채운 경우 다음 번호로 넘어가고 다음 버튼이 활성화
-  // 추가로 다음 자세의 설명 받아오기
-  useEffect(() => {
-    if (count === 0) {
-      console.log('Pose held for required time. Moving to the next pose.')
-      setButtonText('다음')
-    }
-  }, [count])
+  // useEffect(() => {
+  //   if (count === 0) {
+  //     setButtonText('다음')
+  //   }
+  // }, [count])
 
-  const nextPose = async () => {
-    setCurrentModelIndex((prevIndex) => prevIndex + 1)
-    if (currentModelIndex === 1) {
-      const description = await exerciseAPI.fetchExercise(
-        execrciseModel.firstExercise
-      )
-      setExerciseDescription(description)
-      setCount(500)
-      setButtonText('운동 중')
-    } else if (currentModelIndex === 2) {
-      const description = await exerciseAPI.fetchExercise(
-        execrciseModel.secondExercise
-      )
-      setExerciseDescription(description)
-      setCount(500)
-      setButtonText('운동 중')
-    } else if (currentModelIndex === 3) {
-      const description = await exerciseAPI.fetchExercise(
-        execrciseModel.thirdExercise
-      )
-      setExerciseDescription(description)
-      setCount(500)
-      setButtonText('운동 중')
-    } else {
-      // 다른 곳으로 라우팅 시키기
+  // const nextPose = async () => {
+  //   setCurrentModelIndex((prevIndex) => prevIndex + 1)
+
+  //   try {
+  //     let description
+  //     if (currentModelIndex === 1) {
+  //       description = await exerciseAPI.fetchExercise(
+  //         execrciseModel.firstExercise
+  //       )
+  //     } else if (currentModelIndex === 2) {
+  //       description = await exerciseAPI.fetchExercise(
+  //         execrciseModel.secondExercise
+  //       )
+  //     } else if (currentModelIndex === 3) {
+  //       description = await exerciseAPI.fetchExercise(
+  //         execrciseModel.thirdExercise
+  //       )
+  //     } else {
+  //       // 마지막 운동 이후에 다른 곳으로 라우팅 시키기
+  //       navigate('/healthuplist')
+  //       return
+  //     }
+
+  //     setExerciseDescription(description)
+  //     setCount(500)
+  //     // setButtonText('다음')
+  //   } catch (error) {
+  //     console.error('Error fetching next exercise:', error)
+  //   }
+  // }
+
+  const handleExit = () => {
+    if (webcamRef.current) {
+      webcamRef.current.stop() // 웹캠 중지
     }
+    navigate('/healthuplist') // '나가기' 버튼을 클릭 시 healthuplist로 이동
   }
 
-  const loop = async (timestamp: number) => {
+  const loop = async () => {
     if (webcamRef.current && modelRef.current) {
       webcamRef.current.update() // update the webcam frame
       await predict()
@@ -148,11 +204,19 @@ const HealthUP: React.FC = () => {
       )
       const prediction = await modelRef.current.predict(posenetOutput)
 
-      if (prediction[currentModelIndex].probability > 0.7) {
-        setCount((prevCount) => Math.max(prevCount - 1, 0))
-      }
+      if (currentModelIndex < prediction.length) {
+        const currentPrediction = prediction[currentModelIndex]
 
-      setPredictContainer(prediction[currentModelIndex].probability)
+        if (currentPrediction && currentPrediction.probability > 0.7) {
+          setCount((prevCount) => Math.max(prevCount - 1, 0))
+          setPredictContainer(currentPrediction.probability)
+        } else {
+          console.error('Probability is undefined or below threshold')
+          console.log('Probability Value:', currentPrediction?.probability)
+        }
+      } else {
+        console.error('Prediction index out of bounds')
+      }
 
       drawPose(pose)
     }
@@ -165,26 +229,53 @@ const HealthUP: React.FC = () => {
   }
 
   return (
-    <div className="pose-detector">
-      <div className="left">
-        <div className="counting">
-          <div>Count: {count / 100}</div>
-          <div>{exerciseDescription.title}</div>
-          <div className="label-container">
-            {(predictContainer * 100).toFixed(2)}
-          </div>
+    <div className={styles.up}>
+      <div className={styles.upChild} />
+      <img
+        className={styles.upItem}
+        alt="운동url"
+        src={exerciseDescription.exerciseUrl}
+      />
+      <div className={styles.rectangleParent}>
+        <div className={styles.div}>{(count / 100).toFixed(2)}</div>
+        <div className={styles.canvasContainer}>
+          <canvas ref={canvasRef} className={styles.canvas} />
         </div>
-        <div>
-          <img src={exerciseDescription.exerciseUrl} alt="Exercise" />
-        </div>
-        <div>{exerciseDescription.description}</div>
       </div>
-      <div className="right">
-        <canvas ref={canvasRef} />
-        <button id="nextButton" onClick={nextPose}>
-          {buttonText}
-        </button>
+      <div className={styles.rectangleDiv} />
+      <div className={styles.rectangleGroup} onClick={handleExit}>
+        <div className={styles.groupItem} />
+        <b className={styles.b}>나가기</b>
       </div>
+      <b className={styles.b1}>{exerciseDescription.title}</b>
+      <div
+        className={styles.div2}
+        onClick={() => setExerciseDescription(firstExercise)} // firstExercise의 정보를 가져오는 함수 연결
+      >
+        {firstExercise.title} {/* firstExercise의 title을 여기에 표시 */}
+      </div>
+      <div
+        className={styles.div22}
+        onClick={() => setExerciseDescription(secondExercise)} // firstExercise의 정보를 가져오는 함수 연결
+      >
+        {secondExercise.title} {/* SecondExercise의 title을 여기에 표시 */}
+      </div>
+      <div
+        className={styles.div222}
+        onClick={() => setExerciseDescription(thirdExercise)} // firstExercise의 정보를 가져오는 함수 연결
+      >
+        {thirdExercise.title} {/* firstExercise의 title을 여기에 표시 */}
+      </div>
+
+      <div className={styles.div13}>
+        <p className={styles.p}>{exerciseDescription.description}</p>
+      </div>
+      <div className={styles.upChild2} />
+      <div className={styles.upChild3} />
+      <div className={styles.div14}>하루 홈트</div>
+      {/* <div className={styles.canvasContainer}>
+        <canvas ref={canvasRef} className={styles.canvas} />
+      </div> */}
     </div>
   )
 }

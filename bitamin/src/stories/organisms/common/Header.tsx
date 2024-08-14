@@ -4,7 +4,7 @@ import useAuthStore from '@/store/useAuthStore'
 import { useCookies } from 'react-cookie'
 import useUserStore from '@/store/useUserStore'
 
-const Header: FunctionComponent<{ username?: string }> = ({ username }) => {
+const Header: FunctionComponent = () => {
   const navigate = useNavigate()
   const { accessToken, refreshToken, clearAuth, role } = useAuthStore()
   const [, , removeCookie] = useCookies(['refreshToken'])
@@ -130,7 +130,7 @@ const Header: FunctionComponent<{ username?: string }> = ({ username }) => {
                   <div className="h-[1.563rem] flex flex-row items-center justify-center">
                     <div className="w-[3.313rem] relative flex items-center h-[1.5rem] shrink-0">
                       <span className="w-full">
-                        <span>{username}</span>
+                        <span>{user?.nickname}</span>
                         <span className="font-nanumbarunpen text-[1.063rem]">
                           <span>{` `}</span>
                           <span className="text-[0.75rem]">님</span>

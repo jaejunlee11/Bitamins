@@ -4,22 +4,22 @@ import { sendChatGPTMessage } from 'api/consultationAPI'
 import { ChatLog, Message } from 'ts/consultationType'
 
 interface ChatState {
-  chatLog: ChatLog
-  sttTexts: { [user: string]: string[] } // STT 텍스트를 저장할 상태 추가
+  exChatLog: ChatLog // 기존 ChatLog를 exChatLog로 변경
+  chatLog: ChatLog // STT 텍스트와 새로운 메시지를 저장할 새로운 ChatLog
   sendMessage: (
     user: string,
     content: string,
     category: string
   ) => Promise<void>
   resetChatLog: () => void
-  saveSttText: (user: string, text: string) => void // STT 텍스트 저장 메서드 추가
+  saveSttText: (user: string, text: string) => void // STT 텍스트 저장 메서드
 }
 
 export const useChatStore = create<ChatState>()(
   persist(
     (set, get) => ({
-      chatLog: {},
-      sttTexts: {}, // 초기 STT 텍스트 상태
+      exChatLog: {}, // 초기 exChatLog 상태
+      chatLog: {}, // 초기 chatLog 상태
 
       sendMessage: async (user: string, content: string, category: string) => {
         try {
@@ -61,6 +61,7 @@ export const useChatStore = create<ChatState>()(
             const utterance = new SpeechSynthesisUtterance(
               assistantMessage.content
             )
+            utterance.lang = 'ko-KR'
             speechSynthesis.speak(utterance)
           } else {
             console.error('TTS를 지원하지 않는 브라우저입니다.')
@@ -76,14 +77,24 @@ export const useChatStore = create<ChatState>()(
       },
 
       saveSttText: (user: string, text: string) => {
-        set((state) => ({
-          sttTexts: {
-            ...state.sttTexts,
-            [user]: [...(state.sttTexts[user] || []), text],
-          },
-        }))
+        set((state) => {
+          const userMessages = state.chatLog[user]?.messages || []
+          const newMessage: Message = {
+            role: 'user',
+            content: text,
+          }
 
-        // 텍스트가 저장될 때마다 콘솔에 출력
+          return {
+            chatLog: {
+              ...state.chatLog,
+              [user]: {
+                userId: user,
+                messages: [...userMessages, newMessage],
+              },
+            },
+          }
+        })
+
         console.log(`STT Text saved for ${user}: ${text}`)
       },
     }),

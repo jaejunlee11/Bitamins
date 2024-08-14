@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { fetchMessages, deleteMessage } from 'api/messageAPI'
 import { useNavigate } from 'react-router-dom'
 import Modal from '@/stories/organisms/Modal'
-import CheckModal from '@/stories/organisms/CheckModal';
+import CheckModal from '@/stories/organisms/CheckModal'
 
 interface Message {
   id: number
@@ -16,11 +16,11 @@ const MessageListPage: React.FC = () => {
   const [hoveredMessageId, setHoveredMessageId] = useState<number | null>(null)
   const navigate = useNavigate()
   const [isModalOpen, setModalOpen] = useState<boolean>(false)
-  const [isCheckModalOpen, setCheckModalOpen] = useState(false);
-  const [toDeleteMessage,setToDeleteMessage] = useState<number>(0);
+  const [isCheckModalOpen, setCheckModalOpen] = useState(false)
+  const [toDeleteMessage, setToDeleteMessage] = useState<number>(0)
 
   const closeCheckModal = () => {
-    setCheckModalOpen(false);
+    setCheckModalOpen(false)
   }
 
   const handleConfirm = async () => {
@@ -30,25 +30,29 @@ const MessageListPage: React.FC = () => {
       setMessages((prevMessages) =>
         prevMessages.filter((message) => message.id !== toDeleteMessage)
       )
-      setMessages(messages.filter((message) => message.id !== toDeleteMessage))
       setModalOpen(true)
     } catch (error) {
       console.error('Failed to delete message:', error)
-    }
-    finally{
+    } finally {
       closeCheckModal()
     }
-  };
+  }
 
   const handleSecondaryAction = () => {
-    closeCheckModal();
-  };
+    closeCheckModal()
+  }
 
   useEffect(() => {
     const loadMessages = async () => {
       try {
         const data = await fetchMessages()
-        setMessages(data)
+
+        // 날짜 형식 변환
+        const formattedMessages = data.map((message: Message) => ({
+          ...message,
+          sendDate: formatDate(message.sendDate),
+        }))
+        setMessages(formattedMessages)
       } catch (error) {
         console.error('Failed to fetch messages:', error)
       }
@@ -56,6 +60,17 @@ const MessageListPage: React.FC = () => {
 
     loadMessages()
   }, [])
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+
+    return `${year}-${month}-${day} ${hours}:${minutes}`
+  }
 
   const handleDelete = async (id: number) => {
     setToDeleteMessage(id)
@@ -125,7 +140,7 @@ const MessageListPage: React.FC = () => {
           </li>
         ))}
       </ul>
-            {isModalOpen && (
+      {isModalOpen && (
         <Modal
           title="쪽지가 삭제되었습니다."
           content="쪽지가 성공적으로 삭제되었습니다."
@@ -142,7 +157,7 @@ const MessageListPage: React.FC = () => {
         <CheckModal
           title="쪽지 삭제"
           content="정말 삭제하시겠습니까?"
-          iconSrc="src.alert" 
+          iconSrc="src.alert"
           confirmText="확인"
           onConfirm={handleConfirm}
           onClose={closeCheckModal}

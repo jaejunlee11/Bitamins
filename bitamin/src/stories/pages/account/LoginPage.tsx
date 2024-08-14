@@ -62,7 +62,6 @@ const LoginPage: React.FC = () => {
   }, [navigate])
   return (
     <>
-      <HeaderBeforeLogin />
       <div className={styles.div}>
         <div className={styles.backred} />
         <div className={styles.component66}>

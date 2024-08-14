@@ -1,8 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, useLocation } from 'react-router-dom'
 import AppRouter from 'router/AppRouter'
-import HeaderBeforeLogin from 'stories/organisms/common/HeaderBeforeLogin'
-import HeaderAfterLogin from 'stories/organisms/common/HeaderAfterLogin'
 import Footer from 'stories/organisms/common/Footer'
 import Header from './stories/organisms/common/Header'
 
@@ -15,14 +13,9 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      {/* <HeaderBeforeLogin /> */}
-      {/* <HeaderAfterLogin /> */}
-      {/* {isLoggedIn ? <HeaderAfterLogin /> : <HeaderBeforeLogin />} */}
-      <Header />
-      {/* {!excludeHeaderPaths.includes(location.pathname) &&
-        (isLoggedIn ? <HeaderAfterLogin /> : <HeaderBeforeLogin />)} */}
+      {!excludeHeaderPaths.includes(location.pathname) && <Header />}
       <AppRouter />
-      {/* {!excludeFooterPaths.includes(location.pathname) && <Footer />} */}
+      {!excludeFooterPaths.includes(location.pathname) && <Footer />}
     </>
   )
 }

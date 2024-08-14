@@ -84,6 +84,7 @@ class VideoRoomComponent extends Component {
 
     console.log('Joining session with ID:', this.state.mySessionId)
     console.log('Using token:', this.state.token)
+    this.startStt()
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -413,9 +414,10 @@ class VideoRoomComponent extends Component {
   startStt() {
     // STT 초기화 및 시작
     const recognition = new window.webkitSpeechRecognition()
-    recognition.lang = 'en-US'
+    recognition.lang = 'ko-KR'
     recognition.interimResults = false
     recognition.maxAlternatives = 1
+    console.log('stt 시작')
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript

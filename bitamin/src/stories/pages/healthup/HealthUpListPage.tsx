@@ -1,22 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import styles from 'styles/healthup/HealthUpListPage.module.css'
-import exerciseAPI from '@/api/exerciseAPI'
 import { useNavigate } from 'react-router-dom'
 import homeExerciseImg from 'assets/image/homeExercise.png'
 import YogaExerciseImg from 'assets/image/YogaExercise.png'
-
-// interface execrciseModelInterface {
-//   id: number
-//   modelUrl: string
-//   firstExercixe: number
-//   secondExercise: number
-//   thirdExercise: number
-// }
 
 const UP: React.FC = () => {
   const navigate = useNavigate()
   // 하루요가
   const onYogaClick = useCallback(() => {
+    console.log('Navigating to HealthUP with level 1')
+
     navigate('/healthup', { state: { level: 1 } }) // level 1: 하루 요가
   }, [navigate])
 
@@ -28,28 +21,36 @@ const UP: React.FC = () => {
   return (
     <div className={styles.up}>
       <div className={styles.upChild} />
-
-      <div className={styles.rectangleParent} onClick={onYogaClick}>
-        <div className={styles.rectangleDiv} onClick={onYogaClick} />
-        <div className={styles.groupChild2}>
-          <img
-            className={styles.homeExerciseImg}
-            alt=""
-            src={homeExerciseImg}
-          />
+      {/* 하루 요가 영역 */}
+      <div className={styles.groupChildht} onClick={onYogaClick} />
+      <div className={styles.groupChildht3} />
+      <div className={styles.homet}>
+        <div className={`${styles.div2} SMN_effect-46`}>
+          <a href="#" onClick={onYogaClick}>
+            하루 요가
+          </a>
         </div>
-        <div className={styles.div} onClick={onYogaClick}>
-          하루 요가
-        </div>
+        <img
+          className={styles.homeExerciseImg}
+          alt="하루 요가"
+          src={homeExerciseImg}
+          onClick={onYogaClick} // 이미지 클릭 시 onYogaClick 호출
+        />
       </div>
-
+      {/* 하루 홈트 영역 */}
       <div className={styles.groupChild} onClick={onHomeTrainingClick} />
       <div className={styles.groupChild3} />
       <div className={styles.homet}>
-        <div className={styles.div1} onClick={onHomeTrainingClick}>
-          하루 홈트
+        <div className={`${styles.div1} SMN_effect-46`}>
+          <a href="#" onClick={onHomeTrainingClick}>
+            하루 홈트
+          </a>
         </div>
-        <img className={styles.YogaExerciseImg} alt="" src={YogaExerciseImg} />
+        <img
+          className={styles.YogaExerciseImg}
+          alt="하루 홈트"
+          src={YogaExerciseImg}
+        />
       </div>
     </div>
   )

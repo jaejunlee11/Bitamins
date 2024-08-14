@@ -19,8 +19,7 @@ const MessageDetailPage = () => {
   const [error, setError] = useState(null)
   const [replyContent, setReplyContent] = useState('')
   const [showReplyInput, setShowReplyInput] = useState(false)
-
-  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false) // 쪽지 삭제 모달 상태
+  const [isModalOpen, setModalOpen] = useState(false)
   const [isMessageModalOpen, setMessageModalOpen] = useState(false)
   const [isMessageSendModalOpen, setMessageSendModalOpen] = useState(false)
 
@@ -36,7 +35,7 @@ const MessageDetailPage = () => {
   const handleConfirm = async () => {
     try {
       await deleteMessage(Number(messageId))
-      setDeleteModalOpen(true) // 삭제 모달 열기
+      setModalOpen(true)
     } catch (err) {
       alert('Failed to delete message')
       console.error('Error deleting message:', err)
@@ -62,8 +61,8 @@ const MessageDetailPage = () => {
     closeReplyCheckModal()
   }
 
-  const closeDeleteModal = () => {
-    setDeleteModalOpen(false)
+  const closeModal = () => {
+    setModalOpen(false)
     navigate('/messagelist')
   }
 
@@ -253,12 +252,12 @@ const MessageDetailPage = () => {
         </div>
       )}
 
-      {isDeleteModalOpen && (
+      {isModalOpen && (
         <Modal
           title="쪽지가 삭제되었습니다."
           content="쪽지가 성공적으로 삭제되었습니다."
           iconSrc="src.alert"
-          onClose={closeDeleteModal} // 삭제 모달 닫기
+          onClose={closeModal}
           headerBackgroundColor="#FF1B1B"
           buttonBorderColor="#FF1B1B"
           buttonTextColor="#FF1B1B"

@@ -182,7 +182,6 @@ const SurveyPage: React.FC = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   )
 }

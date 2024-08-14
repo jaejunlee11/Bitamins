@@ -183,75 +183,7 @@ const MainPage: React.FC = () => {
 
   return (
     <>
-      {/* <HeaderAfterLogin username="{username}" /> */}
-      {/* <ModalExample /> */}
       <div className={styles.div}>
-        {/* <div className={styles.navbar}>
-          <div className={styles.bitamin}>BItAMin</div>
-          <div className={styles.parent}>
-            <div className={styles.div4} onClick={onRectangleClick}>
-              <div className={styles.wrapper}>
-                <div className={styles.b}>상담</div>
-              </div>
-              <div className={styles.child12} />
-            </div>
-            <div className={styles.div4} onClick={onRectangleClick}>
-              <div className={styles.wrapper}>
-                <div className={styles.b}>미션</div>
-              </div>
-              <div className={styles.child12} />
-            </div>
-            <div className={styles.div4} onClick={onRectangleClick}>
-              <div className={styles.group}>
-                <div className={styles.b}>건강</div>
-                <div className={styles.upWrapper}>
-                  <div className={styles.up}>UP !</div>
-                </div>
-              </div>
-              <div className={styles.child12} />
-            </div>
-            <div className={styles.div4} onClick={onRectangleClick}>
-              <div className={styles.wrapper}>
-                <div className={styles.b}>관리자</div>
-              </div>
-              <div className={styles.child12} />
-            </div>
-          </div>
-          <div className={styles.div12}>
-            <div className={styles.frameParent}>
-              <div className={styles.personcircleParent}>
-                <img
-                  className={styles.personcircleIcon}
-                  alt=""
-                  src="PersonCircle.svg"
-                />
-                <div className={styles.frameGroup}>
-                  <div className={styles.frameDiv}>
-                    <div className={styles.div13}>
-                      <span className={styles.txt}>
-                        <span>김싸피</span>
-                        <span className={styles.span}>
-                          <span>{` `}</span>
-                          <span className={styles.span1}>님</span>
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-                  <div className={styles.vectorWrapper}>
-                    <img
-                      className={styles.vectorIcon}
-                      alt=""
-                      src="Vector.svg"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className={styles.wrapper1} onClick={onRectangleClick}>
-                <img className={styles.icon} alt="" src="쪽지 버튼.svg" />
-              </div>
-            </div>
-          </div>
-        </div> */}
         <div className={styles.inner}>
           <div className={styles.div3}>
             <p className={styles.p}>{phraseContent}</p>

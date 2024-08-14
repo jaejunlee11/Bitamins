@@ -59,3 +59,11 @@ export const updateComplaintStopDate = async (id: number, stopDate: number) => {
     throw new Error('Failed to update ComplaintStopDate')
   }
 }
+
+// const axiosInstance = axios.create({
+//   baseURL: 'https://your-api-base-url.com', // 실제 API의 base URL로 변경해주세요.
+//   headers: {
+//     'Content-Type': 'application/json',
+//     // 필요한 경우 인증 토큰 등 추가 헤더 설정
+//   },
+// })
