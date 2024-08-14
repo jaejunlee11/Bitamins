@@ -73,17 +73,20 @@ public class MessageService {
     public MessageDetailResponse getMessageDetail(long id,long userId) throws Exception{
         Message message = messageRepository.findById(id).orElseThrow(()->new Exception("해당 id를 가진 메시지가 없습니다."));
         String nickname = null;
+        Long opponentId = null;
         String url = null;
         // 유저가 송신자인 경우
         if(userId == message.getSenderId()){
             Member member = memberRepository.findById(message.getReceiverId()).orElseThrow(()->new Exception("존재하지 않는 reciever 입니다."));
             nickname = member.getNickname();
+            opponentId = member.getId();
             url = member.getProfileUrl();
         }
         // 유저가 수신자인 경우
         else {
             Member member = memberRepository.findById(message.getSenderId()).orElseThrow(()->new Exception("존재하지 않는 sender 입니다."));
             nickname = member.getNickname();
+            opponentId = member.getId();
             url = member.getProfileUrl();
         }
         // 답장 조회
@@ -111,6 +114,7 @@ public class MessageService {
         MessageDetailResponse result = MessageDetailResponse.builder()
                 .id(id)
                 .nickname(nickname)
+                .opponentId(opponentId)
                 .category(message.getCategory())
                 .title(message.getTitle())
                 .content(message.getContent())
