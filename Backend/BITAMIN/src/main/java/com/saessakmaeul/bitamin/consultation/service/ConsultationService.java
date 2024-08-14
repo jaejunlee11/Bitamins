@@ -1,12 +1,12 @@
 package com.saessakmaeul.bitamin.consultation.service;
 
-import com.saessakmaeul.bitamin.consultation.Entity.ChatingLog;
+import com.saessakmaeul.bitamin.consultation.Entity.ChattingLog;
 import com.saessakmaeul.bitamin.consultation.Entity.Consultation;
 import com.saessakmaeul.bitamin.consultation.Entity.Participant;
 import com.saessakmaeul.bitamin.consultation.Entity.SearchCondition;
 import com.saessakmaeul.bitamin.consultation.dto.request.*;
 import com.saessakmaeul.bitamin.consultation.dto.response.*;
-import com.saessakmaeul.bitamin.consultation.repository.ChatingLogRepository;
+import com.saessakmaeul.bitamin.consultation.repository.ChattingLogRepository;
 import com.saessakmaeul.bitamin.consultation.repository.ConsultationRepository;
 import com.saessakmaeul.bitamin.consultation.repository.ParticipantRepository;
 import com.saessakmaeul.bitamin.member.entity.Member;
@@ -30,7 +30,7 @@ public class ConsultationService {
     private final ConsultationRepository consultationRepository;
     private final ParticipantRepository participantRepository;
     private final MemberRepository memberRepository;
-    private final ChatingLogRepository chatingLogRepository;
+    private final ChattingLogRepository chattingLogRepository;
 
     // 방 리스트 조회
     public SelectAllResponse selectAll(int page, int size, SearchCondition type) {
@@ -328,40 +328,42 @@ public class ConsultationService {
     }
 
     // 채팅 조회
-    public List<findChatingResponse> findChating(Long consultationId) {
-        List<ChatingLog> chatingLog = chatingLogRepository.findByConsultationId(consultationId);
+    public List<FindChattingResponse> findChatting(Long consultationId) {
+        Consultation c = Consultation.builder().id(consultationId).build();
 
-        return chatingLog.stream()
-                .map(chating -> findChatingResponse.builder()
-                        .id(chating.getId())
-                        .content(chating.getContent())
-                        .memberId(chating.getMemberId())
-                        .memberNickname(chating.getMemberNickname())
-                        .sendTime(chating.getSendTime())
-                        .consultationId(chating.getConsultationId())
+        List<ChattingLog> chattingLog = chattingLogRepository.findByConsultationId(c);
+
+        return chattingLog.stream()
+                .map(chatting -> FindChattingResponse.builder()
+                        .id(chatting.getId())
+                        .content(chatting.getContent())
+                        .memberId(chatting.getMemberId().getId())
+                        .memberNickname(chatting.getMemberNickname())
+                        .sendTime(chatting.getSendTime())
+                        .consultationId(chatting.getConsultationId().getId())
                         .build()
                 )
                 .collect(Collectors.toList());
     }
 
     // 채팅 등록
-    public int registChating(RegistChatingRequest registChatingRequest) {
-        Member m = Member.builder().id(registChatingRequest.getMemberId()).build();
-        Consultation c = Consultation.builder().id(registChatingRequest.getConsultationId()).build();
+    public int registChatting(RegistChattingRequest registChattingRequest) {
+        Member m = Member.builder().id(registChattingRequest.getMemberId()).build();
+        Consultation c = Consultation.builder().id(registChattingRequest.getConsultationId()).build();
 
         Optional<Participant> participant = participantRepository.findByMemberIdAndConsultationId(m, c);
 
         if(participant.isEmpty()) return 0;
 
-        ChatingLog chatingLog = ChatingLog.builder()
-                .consultationId(registChatingRequest.getConsultationId())
-                .memberId(registChatingRequest.getMemberId())
-                .memberNickname(registChatingRequest.getMemberNickname())
-                .content(registChatingRequest.getContent())
+        ChattingLog chattingLog = ChattingLog.builder()
+                .consultationId(c)
+                .memberId(m)
+                .memberNickname(registChattingRequest.getMemberNickname())
+                .content(registChattingRequest.getContent())
                 .build();
 
         try {
-            chatingLogRepository.save(chatingLog);
+            chattingLogRepository.save(chattingLog);
         } catch (RuntimeException e) {
             throw new RuntimeException("db 오류 rollback");
         }
@@ -428,7 +430,7 @@ public class ConsultationService {
     }
 
     // 상세 조회
-    public ConsultationDetailResponse consultationDetail(Long id, Long memberId) {
+    public ConsultationDetailResponse findConsultationDetail(Long id, Long memberId) {
         Optional<Consultation> consultation = consultationRepository.findById(id);
 
         if(consultation.isEmpty()) return null;
