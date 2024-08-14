@@ -167,23 +167,23 @@ public class ConsultationController {
         return ResponseEntity.status(200).body("정상적으로 퇴장 처리 되었습니다.");
     }
 
-    @GetMapping("/chatings/{consultationId}")
-    public ResponseEntity<?> findChating(@PathVariable("consultationId") Long consultationId) {
-        List<findChatingResponse> chatingList = consultationService.findChating(consultationId);
+    @GetMapping("/chattings/{consultationId}")
+    public ResponseEntity<?> findChatting(@PathVariable("consultationId") Long consultationId) {
+        List<FindChattingResponse> chattingList = consultationService.findChatting(consultationId);
 
-        return ResponseEntity.status(200).body(chatingList);
+        return ResponseEntity.status(200).body(chattingList);
     }
 
-    @PostMapping("/chatings")
-    public ResponseEntity<?> registChating(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
-                                           @RequestBody RegistChatingRequest registChatingRequest) {
+    @PostMapping("/chattings")
+    public ResponseEntity<?> registChatting(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+                                           @RequestBody RegistChattingRequest registChattingRequest) {
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
         String memberNickname = jwtUtil.extractNickname(tokenHeader.substring(7));
 
-        registChatingRequest.setMemberId(memberId);
-        registChatingRequest.setMemberNickname(memberNickname);
+        registChattingRequest.setMemberId(memberId);
+        registChattingRequest.setMemberNickname(memberNickname);
 
-        int result = consultationService.registChating(registChatingRequest);
+        int result = consultationService.registChatting(registChattingRequest);
 
         if(result == 0) return ResponseEntity.status(404).body("채팅이 저장되지 않았습니다.");
 
@@ -270,12 +270,12 @@ public class ConsultationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> ConsultationDetail(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
+    public ResponseEntity<?> findConsultationDetail(@RequestHeader(value = "Authorization", required = false) String tokenHeader,
                                                 @PathVariable("id") Long id) {
 
         Long memberId = jwtUtil.extractUserId(tokenHeader.substring(7));
 
-        ConsultationDetailResponse consultationDetailResponse = consultationService.consultationDetail(id, memberId);
+        ConsultationDetailResponse consultationDetailResponse = consultationService.findConsultationDetail(id, memberId);
 
         if(consultationDetailResponse == null) return ResponseEntity.status(404).body("올바르지 않은 접근입니다.");
 
