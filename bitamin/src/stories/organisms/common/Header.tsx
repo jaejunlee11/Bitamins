@@ -9,13 +9,12 @@ const Header: FunctionComponent = () => {
   const { accessToken, refreshToken, clearAuth, role } = useAuthStore()
   const [, , removeCookie] = useCookies(['refreshToken'])
   const [dropdownVisible, setDropdownVisible] = useState(false)
-  const { user, fetchUser } = useUserStore()
+  const { user, fetchUser, loading, clearUserData } = useUserStore()
 
+  // 유저 데이터를 강제로 불러오도록 수정
   useEffect(() => {
-    if (!user) {
-      fetchUser()
-    }
-  }, [user, fetchUser])
+    fetchUser() // 항상 최신 유저 데이터를 불러오도록 수정
+  }, [fetchUser])
 
   const onBItAMinTextClick = useCallback(() => {
     navigate('/home')
@@ -51,10 +50,11 @@ const Header: FunctionComponent = () => {
 
   const onLogoutClick = useCallback(() => {
     clearAuth()
+    clearUserData() // 유저 데이터를 초기화
     removeCookie('refreshToken', { path: '/' })
     alert('Logged out successfully!')
     navigate('/home')
-  }, [navigate, clearAuth, removeCookie])
+  }, [navigate, clearAuth, removeCookie, clearUserData])
 
   const toggleDropdown = useCallback(() => {
     setDropdownVisible((prev) => !prev)
@@ -128,15 +128,19 @@ const Header: FunctionComponent = () => {
                   onClick={toggleDropdown}
                 >
                   <div className="h-[1.563rem] flex flex-row items-center justify-center">
-                    <div className="w-[3.313rem] relative flex items-center h-[1.5rem] shrink-0">
-                      <span className="w-full">
-                        <span>{user?.nickname}</span>
-                        <span className="font-nanumbarunpen text-[1.063rem]">
-                          <span>{` `}</span>
-                          <span className="text-[0.75rem]">님</span>
+                    {loading ? (
+                      <div>로딩 중...</div>
+                    ) : (
+                      <div className="w-[3.313rem] relative flex items-center h-[1.5rem] shrink-0">
+                        <span className="w-full">
+                          <span>{user?.name}</span>
+                          <span className="font-nanumbarunpen text-[1.063rem]">
+                            <span>{` `}</span>
+                            <span className="text-[0.75rem]">님</span>
+                          </span>
                         </span>
-                      </span>
-                    </div>
+                      </div>
+                    )}
                   </div>
                   <div className="w-[0.563rem] h-[1.188rem] flex flex-col items-center justify-end py-[0.312rem] px-[0rem] box-border">
                     <img

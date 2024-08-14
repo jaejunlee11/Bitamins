@@ -129,7 +129,24 @@ const MapBox: React.FC<MapBoxProps> = ({ lat, lng }) => {
   }
 
   useEffect(() => {
-    initializeMap()
+    const mapScript = document.createElement('script')
+
+    mapScript.async = true
+    mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_APP_KAKAO_KEY}&autoload=false&libraries=services`
+
+    document.head.appendChild(mapScript)
+
+    const onLoadKakaoMap = () => {
+      window.kakao.maps.load(() => {
+        initializeMap()
+      })
+    }
+
+    mapScript.addEventListener('load', onLoadKakaoMap)
+
+    return () => {
+      mapScript.removeEventListener('load', onLoadKakaoMap)
+    }
   }, [])
 
   const handleCenter = () => {

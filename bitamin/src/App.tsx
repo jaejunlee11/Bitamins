@@ -1,7 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, useLocation } from 'react-router-dom'
 import AppRouter from 'router/AppRouter'
-import Footer from 'stories/organisms/common/Footer'
+// import Footer from 'stories/organisms/common/Footer'
 import Header from './stories/organisms/common/Header'
 
 const AppContent: React.FC = () => {

@@ -1,4 +1,35 @@
 import axiosInstance from './axiosInstance'
+// 회원 id, nickname 조회
+export const getUserInfo = async () => {
+  try {
+    const response = await axiosInstance.get('/members/info')
+    return response.data
+  } catch (error: any) {
+    console.error('Error fetching user information:', error.response || error)
+    if (error.response && error.response.status === 404) {
+      throw new Error('아이디가 없습니다.')
+    } else {
+      throw new Error('Failed to fetch user information')
+    }
+  }
+}
+// 로그인 시도하는 함수
+export const loginUser = async (email: string, password: string) => {
+  try {
+    const response = await axiosInstance.post('/auth/login', {
+      email,
+      password,
+    })
+    return response.data
+  } catch (error: any) {
+    console.error('Login error:', error.response || error.message)
+    if (error.response && error.response.status === 404) {
+      throw new Error('아이디가 없습니다.')
+    } else {
+      throw new Error('Login failed')
+    }
+  }
+}
 
 // 사용자 등록
 export const registerUser = async (signupForm: any) => {
@@ -49,7 +80,7 @@ export const checkEmail = async (email: string) => {
     throw new Error('Failed to check email')
   }
 }
-// 닉네임 중복 확인 함수 추가
+// 닉네임 중복 확인 함수
 export const checkNickname = async (nickname: string) => {
   try {
     const response = await axiosInstance.post(
