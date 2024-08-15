@@ -229,6 +229,7 @@ interface ChatState {
   sendMessage: (
     user: string,
     content: string,
+    category: string,
     consultationId: number
   ) => Promise<void>
   resetChatLog: () => void
@@ -242,6 +243,7 @@ export const useChatStore = create<ChatState>()(
       sendMessage: async (
         user: string,
         content: string,
+        category: string,
         consultationId: number
       ) => {
         try {
@@ -257,6 +259,7 @@ export const useChatStore = create<ChatState>()(
           const response = await sendChatGPTMessage(
             user,
             content,
+            category,
             consultationId,
             userMessages
           )

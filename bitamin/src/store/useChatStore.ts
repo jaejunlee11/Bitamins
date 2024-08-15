@@ -9,6 +9,7 @@ interface ChatState {
   sendMessage: (
     user: string,
     content: string,
+    category: string,
     consultationId: number
   ) => Promise<void>
   resetChatLog: () => void
@@ -21,7 +22,12 @@ export const useChatStore = create<ChatState>()(
       exChatLog: {}, // 초기 exChatLog 상태
       chatLog: {}, // 초기 chatLog 상태
 
-      sendMessage: async (user: string, content: string, consultationId: number) => {
+      sendMessage: async (
+        user: string,
+        content: string,
+        category: string,
+        consultationId: number
+      ) => {
         try {
           const currentChatLog = get().chatLog
 
@@ -36,6 +42,7 @@ export const useChatStore = create<ChatState>()(
           const response = await sendChatGPTMessage(
             user,
             content,
+            category,
             consultationId,
             userMessages
           )

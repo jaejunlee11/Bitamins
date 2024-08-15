@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import IconButton from '@material-ui/core/IconButton'
 import Fab from '@material-ui/core/Fab'
 import Send from '@material-ui/icons/Send'
 import { Tooltip } from '@material-ui/core'
@@ -10,13 +9,13 @@ export default class SidebarComponent extends Component {
     this.state = {
       messageList: [],
       message: '',
-      participants: [], // 참여자 리스트를 관리하기 위한 상태 추가
     }
     this.chatScroll = React.createRef()
 
     this.handleChange = this.handleChange.bind(this)
     this.handlePressKey = this.handlePressKey.bind(this)
     this.sendMessage = this.sendMessage.bind(this)
+    this.handleParticipantAction = this.handleParticipantAction.bind(this)
   }
 
   componentDidMount() {
@@ -75,6 +74,11 @@ export default class SidebarComponent extends Component {
     this.setState({ message: '' })
   }
 
+  handleParticipantAction(participant) {
+    console.log('Action button clicked for:', participant.nickname)
+    // 여기서 participant에 대한 작업을 수행합니다.
+  }
+
   scrollToBottom() {
     setTimeout(() => {
       try {
@@ -84,13 +88,15 @@ export default class SidebarComponent extends Component {
   }
 
   render() {
+    const localUser = this.props.user
+
     return (
       <div className="flex h-full">
         {/* 참여자 리스트 영역 */}
         <div className="w-2/5 p-4 border-r border-gray-200">
           <h2 className="text-lg font-bold mb-4">참여자 리스트</h2>
           <ul className="space-y-2">
-            {this.state.participants.map((participant, index) => (
+            {this.props.participants.map((participant, index) => (
               <li
                 key={index}
                 className="flex items-center justify-between p-2 bg-gray-100 rounded-lg"
@@ -98,12 +104,15 @@ export default class SidebarComponent extends Component {
                 <span className="text-sm font-medium">
                   {participant.nickname}
                 </span>
-                <button
-                  className="text-sm text-blue-500 hover:underline"
-                  onClick={() => this.handleParticipantAction(participant)}
-                >
-                  Action
-                </button>
+                {participant.getConnectionId() !==
+                  localUser.getConnectionId() && (
+                  <button
+                    className="text-sm text-blue-500 hover:underline"
+                    onClick={() => this.handleParticipantAction(participant)}
+                  >
+                    Action
+                  </button>
+                )}
               </li>
             ))}
           </ul>
