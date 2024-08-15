@@ -26,7 +26,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws")
                 .setAllowedOrigins("http://localhost:5174","http://localhost:5173", "http://localhost:3000", "https://i11b105.p.ssafy.io","http://i11b105.p.ssafy.io")
                 .withSockJS(); // WebSocket 엔드포인트 등록
-//        registry.addEndpoint("/ws").setAllowedOrigins("*");
     }
 
     @Override
