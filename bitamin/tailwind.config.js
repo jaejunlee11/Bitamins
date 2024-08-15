@@ -8,6 +8,7 @@ module.exports = {
         nanum: ['Nanum Gothic', 'sans-serif'],
         nanumBold: ['Nanum Gothic Bold', 'sans-serif'],
         ownglyph: ['Ownglyph ryuttung', 'cursive'],
+        bagel: ['Bagel Fat One', 'cursive'],
       },
     },
   },
