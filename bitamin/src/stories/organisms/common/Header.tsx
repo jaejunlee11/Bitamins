@@ -150,43 +150,41 @@ const Header: FunctionComponent = () => {
         )}
       </div>
       {accessToken ? (
-        <div className="relative w-[7.75rem] font-ownglyph h-full flex flex-col items-center justify-center text-darkgray">
-          <div className="self-stretch flex flex-row items-center justify-start gap-[0.375rem]">
-            <div className="flex flex-row items-center justify-start gap-[0.437rem]">
-              <img
-                className="w-[1.188rem] relative h-[1.188rem] overflow-hidden shrink-0"
-                alt=""
-                src={mainQuestImg}
-              />
-              <div
-                className="w-[4.5rem] h-[1.188rem] flex flex-row items-center justify-start gap-[0.25rem] cursor-pointer"
-                onClick={toggleDropdown}
-              >
-                <div className="h-[1.563rem] flex flex-col items-center justify-center">
-                  <div className="w-[5rem] relative flex items-center h-[1.5rem] shrink-0">
-                    {loading ? (
-                      <div>로딩 중...</div>
-                    ) : (
-                      <span className="w-full whitespace-nowrap">
-                        <span className="text-[1.3rem]">{user?.name}</span>
-                        <span className="font-ownglyph text-[1rem]">
-                          <span className="text-[1rem]">님</span>
-                        </span>
+        <div className="relative w-[10rem] font-ownglyph h-full flex flex-row items-center justify-start text-darkgray ml-[-3rem]">
+          <div className="flex flex-row items-center justify-start gap-[0.437rem]">
+            <img
+              className="w-[4rem] h-[2.5rem] relative overflow-hidden shrink-0"
+              alt=""
+              src={mainQuestImg}
+            />
+            <div
+              className="w-[4.5rem] h-[1.188rem] flex flex-row items-center justify-start gap-[0.25rem] cursor-pointer"
+              onClick={toggleDropdown}
+            >
+              <div className="h-[1.563rem] flex flex-col items-center justify-center">
+                <div className="w-[5rem] relative flex items-center h-[1.5rem] shrink-0">
+                  {loading ? (
+                    <div>로딩 중...</div>
+                  ) : (
+                    <span className="w-full whitespace-nowrap">
+                      <span className="text-[1.3rem]">{user?.name}</span>
+                      <span className="font-ownglyph text-[1rem]">
+                        <span className="text-[1rem]">님</span>
                       </span>
-                    )}
-                  </div>
-                </div>
-                <div className="w-[0.563rem] h-[1.188rem] flex flex-col items-center justify-end py-[0.312rem] px-[0rem] box-border">
-                  <img></img>
+                    </span>
+                  )}
                 </div>
               </div>
+              <div className="w-[0.563rem] h-[1.188rem] flex flex-col items-center justify-end py-[0.312rem] px-[0rem] box-border">
+                <img></img>
+              </div>
             </div>
-            <div
-              className="h-[1.5rem] flex flex-row items-start justify-end cursor-pointer"
-              onClick={onMessageClick}
-            >
-              <BsSend />
-            </div>
+          </div>
+          <div
+            className="h-[1.5rem] flex flex-row items-center justify-end cursor-pointer"
+            onClick={onMessageClick}
+          >
+            <BsSend />
           </div>
           {dropdownVisible && (
             <div className="absolute top-[5rem] left-0 w-[6rem] shadow-[4px_4px_25px_rgba(0,_0,_0,_0.25)] flex flex-col items-start justify-start mt-[0.25rem] text-[0.875rem] text-gray bg-white rounded-[0.25rem]">

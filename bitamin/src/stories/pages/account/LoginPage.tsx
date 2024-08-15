@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import axiosInstance, { setAccessToken } from 'api/axiosInstance'
 import useAuthStore from 'store/useAuthStore'
 import { useCookies } from 'react-cookie'
@@ -100,6 +100,12 @@ const LoginPage: React.FC = () => {
     kakaoLogin()
   }
 
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleLogin()
+    }
+  }
+
   useEffect(() => {
     const query = new URLSearchParams(location.search)
     const emailQuery = query.get('email')
@@ -128,6 +134,7 @@ const LoginPage: React.FC = () => {
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onKeyPress={handleKeyPress} // Enter 키를 눌렀을 때 로그인 버튼 클릭
                   placeholder="이메일을 입력하세요"
                   className={styles.div11}
                 />
@@ -138,6 +145,7 @@ const LoginPage: React.FC = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={handleKeyPress} // Enter 키를 눌렀을 때 로그인 버튼 클릭
                   placeholder="비밀번호를 입력하세요"
                   className={styles.div11}
                 />
