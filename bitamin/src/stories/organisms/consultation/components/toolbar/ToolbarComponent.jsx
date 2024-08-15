@@ -44,6 +44,7 @@ class ToolbarComponent extends Component {
     this.toggleGptInput = this.toggleGptInput.bind(this)
     this.handleGptInputChange = this.handleGptInputChange.bind(this)
     this.handleSendGptRequest = this.handleSendGptRequest.bind(this)
+    this.consultationId = this.consultationId
   }
 
   micStatusChanged() {
@@ -100,7 +101,7 @@ class ToolbarComponent extends Component {
     if (gptInput.trim() !== '') {
       try {
         const { sendMessage } = useChatStore.getState() // GPT 메시지 전송 함수 가져오기
-        await sendMessage('user1', gptInput, '미술') // 예시로 'user1'을 사용
+        await sendMessage('test1', gptInput, this.consultationId) // 예시로 'user1'을 사용
       } catch (error) {
         console.error('Failed to send GPT request:', error)
       } finally {
@@ -113,6 +114,7 @@ class ToolbarComponent extends Component {
     const mySessionId = this.props.sessionId
     const localUser = this.props.user
     const { showGptInput, gptInput } = this.state
+    this.consultationId = this.props.consultationId
     return (
       <AppBar className="toolbar" id="header">
         <Toolbar className="toolbar">

@@ -75,12 +75,12 @@ const Header: FunctionComponent = () => {
   return (
     <div className="w-full fixed top-0 z-50 flex flex-row items-center justify-between text-center text-[0.875rem] text-brand-primary font-nanumgothic bg-white h-[calc(9/16*100vw*0.1)] px-[44px] font-nanumgothic">
       <div
-        className="w-[8.5rem] relative text-[3rem] font-bagel-fat-one text-left inline-block shrink-0 cursor-pointer text-[#ff713c]"
+        className="w-[8.5rem] relative text-[3rem] font-bagel text-left inline-block shrink-0 cursor-pointer text-[#ff713c]"
         onClick={onBItAMinTextClick}
       >
         BItAMin
       </div>
-      <div className="flex flex-row items-center justify-start gap-[3.125rem]">
+      <div className="flex flex-row items-center justify-start gap-[7.125rem]">
         <div
           className={`w-[5rem] h-full flex flex-col items-center justify-center p-[0.312rem] box-border gap-[0.312rem] cursor-pointer ${
             isConsultationActive ? 'text-[#ff713c]' : 'text-black'
@@ -150,7 +150,7 @@ const Header: FunctionComponent = () => {
         )}
       </div>
       {accessToken ? (
-        <div className="relative w-[7.75rem] h-full flex flex-col items-center justify-center text-darkgray">
+        <div className="relative w-[7.75rem] font-ownglyph h-full flex flex-col items-center justify-center text-darkgray">
           <div className="self-stretch flex flex-row items-center justify-start gap-[0.375rem]">
             <div className="flex flex-row items-center justify-start gap-[0.437rem]">
               <img
@@ -169,7 +169,7 @@ const Header: FunctionComponent = () => {
                     ) : (
                       <span className="w-full whitespace-nowrap">
                         <span className="text-[1rem]">{user?.name}</span>
-                        <span className="font-nanumbarunpen text-[1rem]">
+                        <span className="font-ownglyph text-[1rem]">
                           <span className="text-[1rem]">님</span>
                         </span>
                       </span>

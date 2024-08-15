@@ -652,7 +652,7 @@ class VideoRoomComponent extends Component {
           />
         )}
         <div className="container" id="container">
-          <ToolbarComponent
+        <ToolbarComponent
             sessionId={mySessionId}
             user={localUser}
             showNotification={this.state.messageReceived}
@@ -664,6 +664,7 @@ class VideoRoomComponent extends Component {
             switchCamera={this.switchCamera}
             leaveSession={() => this.setState({ showModal: true })}
             toggleChat={this.toggleChat}
+            consultationId={this.state.consultationId}
           />
 
           <DialogExtensionComponent

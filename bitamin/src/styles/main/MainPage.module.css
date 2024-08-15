@@ -7,7 +7,7 @@
   text-align: center;
   font-size: 14px;
   color: #fff;
-  font-family: NanumGothicCoding;
+  /* font-family: NanumGothicCoding; */
 }
 
 .innerSection {
@@ -80,6 +80,16 @@
   animation: zoom 1s ease-in-out 3; /* 애니메이션 1초 동안 3번 반복 */
 }
 
+.mainImg2 {
+  position: absolute;
+  top: 99px;
+  right: 0;
+  width: 280px;
+  height: 280px;
+  object-fit: cover;
+  z-index: 1000;
+}
+
 .clickmeImg {
   position: absolute;
   top: 99px;
@@ -95,7 +105,6 @@
   animation: shake 0.5s ease-in-out 6; /* 애니메이션 0.5초 동안 여섯 번 반복 */
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); /* 빛나는 효과 추가 */
 }
-
 
 @keyframes shake {
   0% {
@@ -253,12 +262,12 @@
 
 .glow {
   box-shadow:
-          0 0 20px rgba(255, 255, 255, 0.8),
-          0 0 30px rgba(255, 255, 255, 0.6),
-          0 0 40px rgba(255, 255, 255, 0.4),
-          inset 0 0 10px rgba(255, 255, 255, 0.8),
-          inset 0 0 20px rgba(255, 255, 255, 0.6),
-          inset 0 0 30px rgba(255, 255, 255, 0.4);
+    0 0 20px rgba(255, 255, 255, 0.8),
+    0 0 30px rgba(255, 255, 255, 0.6),
+    0 0 40px rgba(255, 255, 255, 0.4),
+    inset 0 0 10px rgba(255, 255, 255, 0.8),
+    inset 0 0 20px rgba(255, 255, 255, 0.6),
+    inset 0 0 30px rgba(255, 255, 255, 0.4);
 }
 
 @media (max-width: 1024px) {
@@ -276,20 +285,30 @@
     transform: translateX(-50%);
   }
 
+  .mainImg2 {
+    width: 200px;
+    height: 200px;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
   .inner, .consultBox, .questBox, .consultBorder, .questBorder {
     width: 90%;
     left: 50%;
     transform: translateX(-50%);
   }
 
-  .tryConsultBtn, .tryQuestBtn {
+  .tryConsultBtn,
+  .tryQuestBtn {
     top: auto;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
   }
 
-  .mainConsultImg, .mainQuestImg {
+  .mainConsultImg,
+  .mainQuestImg {
     top: auto;
     bottom: 20px;
     left: 50%;
@@ -308,13 +327,21 @@
     height: 150px;
   }
 
+  .mainImg2 {
+    width: 150px;
+    height: 150px;
+  }
+
   .inner, .consultBox, .questBox, .consultBorder, .questBorder {
     width: 90%;
     left: 50%;
     transform: translateX(-50%);
   }
 
-  .tryConsultBtn, .tryQuestBtn, .mainConsultImg, .mainQuestImg {
+  .tryConsultBtn,
+  .tryQuestBtn,
+  .mainConsultImg,
+  .mainQuestImg {
     width: 80%;
     left: 50%;
     transform: translateX(-50%);
@@ -332,13 +359,21 @@
     height: 120px;
   }
 
+  .mainImg2 {
+    width: 120px;
+    height: 120px;
+  }
+
   .inner, .consultBox, .questBox, .consultBorder, .questBorder {
     width: 90%;
     left: 50%;
     transform: translateX(-50%);
   }
 
-  .tryConsultBtn, .tryQuestBtn, .mainConsultImg, .mainQuestImg {
+  .tryConsultBtn,
+  .tryQuestBtn,
+  .mainConsultImg,
+  .mainQuestImg {
     width: 70%;
     left: 50%;
     transform: translateX(-50%);

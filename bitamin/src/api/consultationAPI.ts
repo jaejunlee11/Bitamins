@@ -108,7 +108,7 @@ export const joinRandomRoom = async (type: string) => {
 export const sendChatGPTMessage = async (
   user: string,
   content: string,
-  category: string,
+  consultationId: number,
   previousMessages: Message[]
 ) => {
   try {
@@ -121,7 +121,7 @@ export const sendChatGPTMessage = async (
     }
 
     const response = await axiosInstance.post<ChatGPTResponse>(
-      `/consultations/moderators/${category}`,
+      `/consultations/moderators/독서/${consultationId}`,
       requestData
     )
 
