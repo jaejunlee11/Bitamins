@@ -1,11 +1,11 @@
 package com.saessakmaeul.bitamin.message.controller;
 
-import com.saessakmaeul.bitamin.message.dto.requestDto.MessageRegistRequest;
-import com.saessakmaeul.bitamin.message.dto.requestDto.ReplyRegistRequest;
-import com.saessakmaeul.bitamin.message.dto.responseDto.MessageDetailResponse;
-import com.saessakmaeul.bitamin.message.dto.responseDto.MessageSimpleResponse;
+import com.saessakmaeul.bitamin.message.dto.request.MessageRegistRequest;
+import com.saessakmaeul.bitamin.message.dto.request.ReplyRegistRequest;
+import com.saessakmaeul.bitamin.message.dto.response.MessageDetailResponse;
+import com.saessakmaeul.bitamin.message.dto.response.MessageSimpleResponse;
 import com.saessakmaeul.bitamin.message.service.MessageService;
-import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
