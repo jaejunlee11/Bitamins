@@ -1,10 +1,7 @@
 import React, { Component } from 'react'
 import IconButton from '@material-ui/core/IconButton'
 import Fab from '@material-ui/core/Fab'
-import HighlightOff from '@material-ui/icons/HighlightOff'
 import Send from '@material-ui/icons/Send'
-
-// import './ChatComponent.css'
 import { Tooltip } from '@material-ui/core'
 
 export default class SidebarComponent extends Component {
@@ -13,6 +10,7 @@ export default class SidebarComponent extends Component {
     this.state = {
       messageList: [],
       message: '',
+      participants: [], // 참여자 리스트를 관리하기 위한 상태 추가
     }
     this.chatScroll = React.createRef()
 
@@ -32,6 +30,7 @@ export default class SidebarComponent extends Component {
           nickname: data.nickname,
           message: data.message,
         })
+
         const document = window.document
         setTimeout(() => {
           const userImg = document.getElementById(
@@ -42,6 +41,7 @@ export default class SidebarComponent extends Component {
           avatar.drawImage(video, 200, 120, 285, 285, 0, 0, 60, 60)
           this.props.messageReceived()
         }, 50)
+
         this.setState({ messageList: messageList })
         this.scrollToBottom()
       })
@@ -58,7 +58,6 @@ export default class SidebarComponent extends Component {
   }
 
   sendMessage() {
-    console.log(this.state.message)
     if (this.props.user && this.state.message) {
       let message = this.state.message.replace(/ +(?= )/g, '')
       if (message !== '' && message !== ' ') {
@@ -85,58 +84,72 @@ export default class SidebarComponent extends Component {
   }
 
   render() {
-    const styleChat = { display: this.props.chatDisplay }
     return (
-      <div id="chatContainer">
-        <div id="chatToolbar">
-          <span>
-            {this.props.user.getStreamManager().stream.session.sessionId} - CHAT
-          </span>
-        </div>
-        <div className="message-wrap" ref={this.chatScroll}>
-          {this.state.messageList.map((data, i) => (
-            <div
-              key={i}
-              id="remoteUsers"
-              className={
-                'message' +
-                (data.connectionId !== this.props.user.getConnectionId()
-                  ? ' left'
-                  : ' right')
-              }
-            >
-              <canvas
-                id={'userImg-' + i}
-                width="60"
-                height="60"
-                className="user-img"
-              />
-              <div className="msg-detail">
-                <div className="msg-info">
-                  <p> {data.nickname}</p>
-                </div>
-                <div className="msg-content">
-                  <span className="triangle" />
-                  <p className="text">{data.message}</p>
-                </div>
-              </div>
-            </div>
-          ))}
+      <div className="flex h-full">
+        {/* 참여자 리스트 영역 */}
+        <div className="w-2/5 p-4 border-r border-gray-200">
+          <h2 className="text-lg font-bold mb-4">참여자 리스트</h2>
+          <ul className="space-y-2">
+            {this.state.participants.map((participant, index) => (
+              <li
+                key={index}
+                className="flex items-center justify-between p-2 bg-gray-100 rounded-lg"
+              >
+                <span className="text-sm font-medium">
+                  {participant.nickname}
+                </span>
+                <button
+                  className="text-sm text-blue-500 hover:underline"
+                  onClick={() => this.handleParticipantAction(participant)}
+                >
+                  Action
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <div id="messageInput">
-          <input
-            placeholder="Send a messge"
-            id="chatInput"
-            value={this.state.message}
-            onChange={this.handleChange}
-            onKeyPress={this.handlePressKey}
-          />
-          <Tooltip title="Send message">
-            <Fab size="small" id="sendButton" onClick={this.sendMessage}>
-              <Send />
-            </Fab>
-          </Tooltip>
+        {/* 채팅 영역 */}
+        <div className="w-3/5 flex flex-col justify-between p-4">
+          <div className="flex-1 overflow-y-auto" ref={this.chatScroll}>
+            {this.state.messageList.map((data, i) => (
+              <div
+                key={i}
+                className={`flex ${
+                  data.connectionId !== this.props.user.getConnectionId()
+                    ? 'justify-start'
+                    : 'justify-end'
+                } mb-2`}
+              >
+                <canvas
+                  id={'userImg-' + i}
+                  width="60"
+                  height="60"
+                  className="rounded-full"
+                />
+                <div className="ml-2">
+                  <p className="font-bold">{data.nickname}</p>
+                  <div className="bg-gray-200 rounded-lg p-2">
+                    <p>{data.message}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center mt-4">
+            <input
+              className="flex-1 p-2 border border-gray-300 rounded-lg"
+              placeholder="메시지 입력..."
+              value={this.state.message}
+              onChange={this.handleChange}
+              onKeyPress={this.handlePressKey}
+            />
+            <Tooltip title="메시지 전송">
+              <Fab size="small" className="ml-2" onClick={this.sendMessage}>
+                <Send />
+              </Fab>
+            </Tooltip>
+          </div>
         </div>
       </div>
     )
