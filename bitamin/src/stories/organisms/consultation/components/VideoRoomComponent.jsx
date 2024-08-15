@@ -36,7 +36,7 @@ class VideoRoomComponent extends Component {
       session: undefined,
       localUser: undefined,
       subscribers: [], // remotes 대신 subscribers로 초기화
-      chatDisplay: 'none',
+      chatDisplay: 'block',
       currentVideoDevice: undefined,
       token: token,
       showModal: false, // 모달 표시 여부 상태
@@ -731,8 +731,7 @@ class VideoRoomComponent extends Component {
                   />
                 </div>
               )}
-
-            {/* Participants List */}
+            {/* Participants List
             <div className="participants-list">
               <h3>Participants:</h3>
               <ul>
@@ -747,7 +746,7 @@ class VideoRoomComponent extends Component {
                   </li>
                 ))}
               </ul>
-            </div>
+            </div> */}
           </div>
 
           {/* <SidebarComponent
@@ -759,11 +758,15 @@ class VideoRoomComponent extends Component {
             messageReceived={this.checkNotification}
           /> */}
 
-          {/* <SidebarComponent
-            user={localUser}
-            chatDisplay={this.state.chatDisplay}
-            messageReceived={this.checkNotification}
-          /> */}
+          {localUser !== undefined &&
+            localUser.getStreamManager() !== undefined && (
+              <SidebarComponent
+                user={this.state.localUser}
+                chatDisplay={this.state.chatDisplay}
+                messageReceived={this.checkNotification}
+                participants={this.state.participants} // 참가자 리스트를 전달
+              />
+            )}
 
           {/* <ChatComponent
             user={localUser}
