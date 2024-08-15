@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Missionform from '@/stories/pages/mission/MissionForm'
+import MissionForm from '@/stories/pages/mission/MissionForm'
 import Calendar from '@/stories/pages/mission/Calendar'
 import CompleteMission from '@/stories/pages/mission/CompleteMission'
 import { fetchMissionsByDate } from '@/api/missionAPI'
@@ -48,7 +48,7 @@ const App: React.FC = () => {
         <div className={styles.missionSection}>
           <div className={styles.missionContainer}>
             {!hasCompletedTodayMission && selectedDate?.toISOString().split('T')[0] === todayDate && (
-              <Missionform onMissionComplete={() => setHasCompletedTodayMission(true)} />
+              <MissionForm onMissionComplete={() => setHasCompletedTodayMission(true)} />
             )}
             <CompleteMission selectedDate={selectedDate} />
           </div>
