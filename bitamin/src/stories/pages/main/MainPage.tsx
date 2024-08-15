@@ -255,14 +255,14 @@ const MainPage: React.FC = () => {
         </div>
 
         {/* 상담 섹션 */}
-        <div className={styles.consultSection}>
-          <div className={styles.consultBox} onClick={onRectangleClick} />
-          <div
-            className={styles.tryConsultBtn}
-            onMouseEnter={handleMouseEnterConsult}
-            onMouseLeave={handleMouseLeaveConsult}
-            onClick={onconsultationClick}
-          >
+        <div
+          className={`${styles.consultSection} cursor-pointer`}
+          onMouseEnter={handleMouseEnterConsult}
+          onMouseLeave={handleMouseLeaveConsult}
+          onClick={onconsultationClick}
+        >
+          <div className={styles.consultBox} />
+          <div className={styles.tryConsultBtn}>
             <b className={styles.b}>상담하기</b>
           </div>
           <img
@@ -274,14 +274,14 @@ const MainPage: React.FC = () => {
         </div>
 
         {/* 미션 섹션 */}
-        <div className={styles.questSection}>
-          <div className={styles.questBox} onClick={onRectangleClick} />
-          <div
-            className={styles.tryQuestBtn}
-            onMouseEnter={handleMouseEnterQuest}
-            onMouseLeave={handleMouseLeaveQuest}
-            onClick={onMissionClick}
-          >
+        <div
+          className={`${styles.questSection} cursor-pointer`}
+          onMouseEnter={handleMouseEnterQuest}
+          onMouseLeave={handleMouseLeaveQuest}
+          onClick={onMissionClick}
+        >
+          <div className={styles.questBox} />
+          <div className={styles.tryQuestBtn}>
             <b className={styles.b}>미션하기</b>
           </div>
           <div className={styles.questBorder} />

@@ -293,7 +293,11 @@
     transform: translateX(-50%);
   }
 
-  .inner, .consultBox, .questBox, .consultBorder, .questBorder {
+  .inner,
+  .consultBox,
+  .questBox,
+  .consultBorder,
+  .questBorder {
     width: 90%;
     left: 50%;
     transform: translateX(-50%);
@@ -332,7 +336,11 @@
     height: 150px;
   }
 
-  .inner, .consultBox, .questBox, .consultBorder, .questBorder {
+  .inner,
+  .consultBox,
+  .questBox,
+  .consultBorder,
+  .questBorder {
     width: 90%;
     left: 50%;
     transform: translateX(-50%);
@@ -364,7 +372,11 @@
     height: 120px;
   }
 
-  .inner, .consultBox, .questBox, .consultBorder, .questBorder {
+  .inner,
+  .consultBox,
+  .questBox,
+  .consultBorder,
+  .questBorder {
     width: 90%;
     left: 50%;
     transform: translateX(-50%);
