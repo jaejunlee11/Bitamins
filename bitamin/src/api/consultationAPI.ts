@@ -121,7 +121,7 @@ export const sendChatGPTMessage = async (
     }
 
     const response = await axiosInstance.post<ChatGPTResponse>(
-      `/consultations/moderators1/${category}`,
+      `/consultations/moderators/${category}`,
       requestData
     )
 
