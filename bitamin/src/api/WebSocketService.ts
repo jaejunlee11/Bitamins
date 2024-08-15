@@ -8,7 +8,7 @@ export class WebSocketService {
   constructor() {
     const { accessToken } = useAuthStore.getState()
     this.client = new Client({
-      // brokerURL: 'wss://i11b105.p.ssafy.io', // SockJS 사용 시 undefined로 설정
+      brokerURL: 'ws://i11b105.p.ssafy.io/ws', // SockJS 사용 시 undefined로 설정
 
       // Authorization 헤더를 connectHeaders에 추가
       connectHeaders: {
@@ -16,6 +16,7 @@ export class WebSocketService {
       },
       debug: (str: string) => {
         console.log(new Date(), str)
+        console.log(str)
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
@@ -23,10 +24,9 @@ export class WebSocketService {
       // webSocketFactory: () => {
       //   return new SockJS('/ws') // SockJS를 사용하여 WebSocket 연결을 설정
       // },
-      webSocketFactory: () => {
-        console.log("생성됨 .......")
-        return new SockJS('wss://i11b105.p.ssafy.io/ws') // 정확한 SockJS URL 설정
-      },
+      // webSocketFactory: () => {
+      //   return new SockJS('wss://i11b105.p.ssafy.io/ws') // 정확한 SockJS URL 설정
+      // },
     })
 
     this.client.onConnect = (frame: Frame) => {
@@ -40,7 +40,7 @@ export class WebSocketService {
   }
 
   public activate() {
-    console.log("activate됨????????")
+    console.log('activate됨????????')
     if (!this.client.active) {
       this.client.activate()
     }
