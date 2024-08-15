@@ -8,6 +8,8 @@ import { loginUser } from 'api/userAPI' // 로그인 API 함수 가져오기
 import styles from 'styles/account/LoginPage.module.css'
 import Modal from '@/stories/organisms/Modal'
 import { googleLogin, kakaoLogin } from '@/api/userAPI'
+import googleImg from '@/assets/image/google.png'
+import kakakoImg from '@/assets/image/kakao2.png'
 
 interface LoginResponse {
   accessToken: string
@@ -158,14 +160,14 @@ const LoginPage: React.FC = () => {
                   <img
                     className={styles.loginIcon}
                     alt="Google Login"
-                    src="/src/assets/image/google.png"
+                    src={googleImg}
                   />
                 </div>
                 <div className={styles.component57} onClick={handleKakaoLogin}>
                   <img
                     className={styles.loginIcon}
                     alt="Kakao Login"
-                    src="/src/assets/image/kakao2.png"
+                    src={kakakoImg}
                   />
                 </div>
               </div>
