@@ -20,7 +20,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ConsultationController {
     private final OpenVidu openVidu;
-    // Broadcast 필요한 상황 오면 구현
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final ConsultationService consultationService;
     private final GptService GptService;
@@ -64,8 +63,8 @@ public class ConsultationController {
 
         Map<String,Object> params = new HashMap<>();
 
-//        // 상담 시작 시간이 지났는지 아닌지 확인
-//        if(joinRoomRequest.getStartTime().isBefore(LocalDateTime.now())) return ResponseEntity.status(404).body("입장 가능 시간이 아닙니다.");
+        // 상담 시작 시간이 지났는지 아닌지 확인
+        if(joinRoomRequest.getStartTime().isBefore(LocalDateTime.now())) return ResponseEntity.status(404).body("입장 가능 시간이 아닙니다.");
 
         // 입장 가능한 세션인지 확인
         Session session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
