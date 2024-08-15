@@ -2,6 +2,8 @@ import React, { FunctionComponent } from 'react'
 import styled from 'styled-components'
 import * as RiIcons from 'react-icons/ri'
 import * as FiIcons from 'react-icons/fi'
+import alert from '@/assets/image/alert.png'
+import room from '@/assets/image/room.png'
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -125,7 +127,7 @@ const getIconComponent = (iconSrc: string, size: number) => {
     return (FiIcons as any)[iconName]
   } else if (library === 'src') {
     return (props: any) => (
-      <img src={`/src/assets/image/${iconName}.png`} width={size} {...props} />
+      <img src={alert} width={size} {...props} />
     )
   }
   return null
