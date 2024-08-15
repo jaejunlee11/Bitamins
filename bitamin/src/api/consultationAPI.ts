@@ -72,7 +72,7 @@ export const joinRoom = async (joinData: JoinData) => {
     //     }
     //   )
     // }, 5000);
-   
+
     return response.data
   } catch (error) {
     console.error('Error joining room:', error)
@@ -110,6 +110,7 @@ export const getRoomData = async (consultationId: number) => {
 export const sendChatGPTMessage = async (
   user: string,
   content: string,
+  category: string,
   consultationId: number,
   previousMessages: Message[]
 ) => {
@@ -123,7 +124,7 @@ export const sendChatGPTMessage = async (
     }
 
     const response = await axiosInstance.post<ChatGPTResponse>(
-      `/consultations/moderators/독서/${consultationId}`,
+      `/consultations/moderators/${category}/${consultationId}`,
       requestData
     )
 

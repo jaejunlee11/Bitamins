@@ -43,6 +43,8 @@ class VideoRoomComponent extends Component {
       consultationId: consultationId,
       participants: [], // 참여자 리스트 상태 추가
       roomData: null, // roomData 상태 추가
+      count: 0, // 초기 count 값을 0으로 설정
+      maxCount: 0, // 초기값을 0으로 설정
     }
 
     this.joinSession = this.joinSession.bind(this)
@@ -97,6 +99,10 @@ class VideoRoomComponent extends Component {
       const roomData = fetchRoomData.getState().roomData
       this.setState({ roomData })
       console.log('roomdata입니다', roomData)
+    })
+
+    this.setState({
+      maxCount: this.state.roomData?.category === '미술' ? 6 : 5,
     })
   }
 
@@ -647,6 +653,39 @@ class VideoRoomComponent extends Component {
     // 여기서 participant에 대한 작업을 수행합니다. 예: 참가자 제거, 권한 변경 등
   }
 
+  handleSummaryClick() {
+    console.log('요약 버튼 클릭됨')
+    // 요약 버튼 클릭 시 수행할 작업 추가
+    useChatStore
+      .getState()
+      .sendMessage(
+        this.state.myUserName,
+        useChatStore.getState().sttText,
+        '요약',
+        this.state.consultationId
+      )
+  }
+
+  handleTransferClick = () => {
+    if (this.state.count < this.state.maxCount) {
+      // maxCount를 기준으로 체크
+      this.setState(
+        (prevState) => ({ count: prevState.count + 1 }),
+        () => {
+          console.log('넘기기 버튼 클릭됨, 현재 count:', this.state.count)
+          useChatStore
+            .getState()
+            .sendMessage(
+              this.state.myUserName,
+              useChatStore.getState().sttText,
+              this.state.count,
+              this.state.consultationId
+            )
+        }
+      )
+    }
+  }
+
   render() {
     const mySessionId = this.state.mySessionId
     const roomData = this.state.roomData
@@ -659,6 +698,10 @@ class VideoRoomComponent extends Component {
           <HeaderComponent
             isPrivate={roomData.isPrivate} // 방이 비밀방인지 여부에 따라 변경
             title={roomData.title} // 세션 ID를 방 제목으로 사용
+            count={this.state.count} // count를 전달
+            maxCount={this.state.maxCount} // maxCount를 전달
+            handleTransferClick={this.handleTransferClick} // count 증가 메서드를 전달
+            handleSummaryClick={this.handleSummaryClick}
           />
         )}
         {/* <SidebarComponent
@@ -761,10 +804,27 @@ class VideoRoomComponent extends Component {
           {localUser !== undefined &&
             localUser.getStreamManager() !== undefined && (
               <SidebarComponent
-                user={this.state.localUser}
+                user={localUser}
                 chatDisplay={this.state.chatDisplay}
                 messageReceived={this.checkNotification}
-                participants={this.state.participants} // 참가자 리스트를 전달
+                participant={this.state.participants}
+              />
+            )}
+
+          {/* <ChatComponent
+            user={localUser}
+            chatDisplay={this.state.chatDisplay}
+            close={this.toggleChat}
+            messageReceived={this.checkNotification}
+          /> */}
+
+          {localUser !== undefined &&
+            localUser.getStreamManager() !== undefined && (
+              <SidebarComponent
+                user={localUser}
+                chatDisplay={this.state.chatDisplay}
+                messageReceived={this.checkNotification}
+                handleParticipantAction={this.handleParticipantAction}
               />
             )}
 
