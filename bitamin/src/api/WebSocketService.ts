@@ -8,7 +8,7 @@ export class WebSocketService {
   constructor() {
     const { accessToken } = useAuthStore.getState()
     this.client = new Client({
-      brokerURL: 'ws://i11b105.p.ssafy.io/ws', // SockJS 사용 시 undefined로 설정
+      brokerURL: 'ws://i11b105.p.ssafy.io/api/ws', // SockJS 사용 시 undefined로 설정
 
       // Authorization 헤더를 connectHeaders에 추가
       connectHeaders: {
