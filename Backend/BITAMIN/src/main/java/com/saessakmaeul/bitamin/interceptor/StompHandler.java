@@ -1,7 +1,7 @@
 package com.saessakmaeul.bitamin.interceptor;
 
 import com.saessakmaeul.bitamin.member.service.CustomUserDetailsService;
-import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;

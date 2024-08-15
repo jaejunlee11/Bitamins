@@ -4,7 +4,7 @@ import com.saessakmaeul.bitamin.mission.dto.request.MemberMissionRequest;
 import com.saessakmaeul.bitamin.mission.dto.request.MemberPhraseRequest;
 import com.saessakmaeul.bitamin.mission.dto.response.*;
 import com.saessakmaeul.bitamin.mission.service.*;
-import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

@@ -2,11 +2,11 @@ package com.saessakmaeul.bitamin.message.service;
 
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
-import com.saessakmaeul.bitamin.message.dto.requestDto.MessageRegistRequest;
-import com.saessakmaeul.bitamin.message.dto.requestDto.ReplyRegistRequest;
-import com.saessakmaeul.bitamin.message.dto.responseDto.MessageDetailResponse;
-import com.saessakmaeul.bitamin.message.dto.responseDto.MessageSimpleResponse;
-import com.saessakmaeul.bitamin.message.dto.responseDto.Replies;
+import com.saessakmaeul.bitamin.message.dto.request.MessageRegistRequest;
+import com.saessakmaeul.bitamin.message.dto.request.ReplyRegistRequest;
+import com.saessakmaeul.bitamin.message.dto.response.MessageDetailResponse;
+import com.saessakmaeul.bitamin.message.dto.response.MessageSimpleResponse;
+import com.saessakmaeul.bitamin.message.dto.response.Replies;
 import com.saessakmaeul.bitamin.message.entity.Message;
 import com.saessakmaeul.bitamin.message.entity.Reply;
 import com.saessakmaeul.bitamin.message.repository.MessageRepository;
