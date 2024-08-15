@@ -4,7 +4,7 @@ import com.saessakmaeul.bitamin.member.dto.request.*;
 import com.saessakmaeul.bitamin.member.dto.response.*;
 import com.saessakmaeul.bitamin.member.repository.DongCodeRepository;
 import com.saessakmaeul.bitamin.member.service.MemberService;
-import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -111,7 +111,7 @@ public class MemberController {
 
 
     @GetMapping("/info")
-    public ResponseEntity<MemberBasicInfo> getUserInfo(HttpServletRequest request) {
+    public ResponseEntity<MemberBasicInfoResponse> getUserInfo(HttpServletRequest request) {
         try {
             String token = getTokenFromRequest(request);
             if (token == null) {
@@ -119,7 +119,7 @@ public class MemberController {
             }
             Long userId = jwtUtil.extractUserId(token);
             String nickname = jwtUtil.extractNickname(token);
-            return ResponseEntity.ok(new MemberBasicInfo(userId, nickname));
+            return ResponseEntity.ok(new MemberBasicInfoResponse(userId, nickname));
         } catch (Exception e) {
             logger.error("회원 기본 정보 조회 오류: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

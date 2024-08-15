@@ -5,7 +5,7 @@ import com.saessakmaeul.bitamin.consultation.dto.request.*;
 import com.saessakmaeul.bitamin.consultation.dto.response.*;
 import com.saessakmaeul.bitamin.consultation.service.ConsultationService;
 import com.saessakmaeul.bitamin.consultation.service.GptService;
-import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import io.openvidu.java.client.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.saessakmaeul.bitamin.util;
+package com.saessakmaeul.bitamin.util.jwt;
 
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.entity.RefreshToken;
