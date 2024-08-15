@@ -25,7 +25,6 @@ const ReportUserModal: React.FC<ReportUserModalProps> = ({
   const handleSubmit = async () => {
     try {
       await submitReport(respondentId, selectedCategories, content, 1) // 쪽지 신고(1)로 설정
-      alert('신고가 성공적으로 접수되었습니다.')
       onRequestClose()
     } catch (error) {
       console.error('신고 접수 중 오류 발생:', error)

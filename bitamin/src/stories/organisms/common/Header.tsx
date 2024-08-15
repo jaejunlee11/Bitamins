@@ -16,6 +16,10 @@ const Header: FunctionComponent = () => {
     fetchUser() // 항상 최신 유저 데이터를 불러오도록 수정
   }, [fetchUser])
 
+  useEffect(() => {
+    setDropdownVisible(false)
+  }, [location])
+
   const onBItAMinTextClick = useCallback(() => {
     navigate('/home')
   }, [navigate])
