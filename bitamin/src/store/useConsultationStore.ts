@@ -7,6 +7,8 @@ import {
   CreateConsultation,
   JoinConsultation,
   ChatLog,
+  Participant,
+  RoomData1,
 } from 'ts/consultationType'
 import {
   fetchConsultations,
@@ -15,9 +17,10 @@ import {
   createRoom,
   sendChatGPTMessage,
   leaveConsultation,
-  // getRoomData,
+  getRoomData,
 } from 'api/consultationAPI'
 import { WebSocketService } from 'api/WebSocketService'
+import { MenuList } from '@material-ui/core'
 
 // Consultation List 상태 관리
 interface ConsultationState {
@@ -63,6 +66,7 @@ type JoinData = Pick<
 
 interface JoinConsultationState {
   joinconsultation: JoinConsultation | null
+  roomData: RoomData1 | null
   joinRoom: (joinData: JoinData) => Promise<JoinConsultation>
   resetConsultation: () => void
   setJoinConsultation: (consultation: JoinConsultation | null) => void
@@ -72,6 +76,7 @@ export const joinConsultation = create<JoinConsultationState>()(
   persist(
     (set) => ({
       joinconsultation: null,
+      roomData: null,
 
       joinRoom: async (joinData: JoinData) => {
         try {
@@ -87,7 +92,7 @@ export const joinConsultation = create<JoinConsultationState>()(
               `/sub/consultations/${consultationId}`,
               (message) => {
                 console.log('Received message in joinRoom:', message)
-  
+
                 // 여기서 받은 메시지를 처리하는 로직을 추가할 수 있습니다.
                 // 예를 들어, 메시지를 UI에 표시하거나 알림을 띄울 수 있습니다.
                 if (message.type === 'USER_JOINED') {
@@ -96,9 +101,9 @@ export const joinConsultation = create<JoinConsultationState>()(
                 }
               }
             )
-          }, 5000);
-          
+          }, 5000)
 
+          // set({ joinconsultation: consultation, roomData })
           set({ joinconsultation: consultation })
 
           return consultation
@@ -118,6 +123,37 @@ export const joinConsultation = create<JoinConsultationState>()(
     }),
     {
       name: 'consultation-storage',
+    }
+  )
+)
+
+interface getRoomDataState {
+  consultationId: number | null
+  roomData: RoomData1 | null
+  getRoom: (consultationId: number) => Promise<void>
+}
+
+export const fetchRoomData = create<getRoomDataState>()(
+  persist(
+    (set) => ({
+      consultationId: null,
+      roomData: null,
+
+      getRoom: async (consultationId: number) => {
+        try {
+          const response = await getRoomData(consultationId)
+          set({
+            roomData: response,
+          })
+
+          console.log(response)
+        } catch (error) {
+          console.error('Failed to fetch roomData:', error)
+        }
+      },
+    }),
+    {
+      name: 'consultationList-storage',
     }
   )
 )
@@ -203,7 +239,11 @@ export const useChatStore = create<ChatState>()(
     (set, get) => ({
       chatLog: {},
 
-      sendMessage: async (user: string, content: string, consultationId: number) => {
+      sendMessage: async (
+        user: string,
+        content: string,
+        consultationId: number
+      ) => {
         try {
           const currentChatLog = get().chatLog
 

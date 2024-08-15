@@ -104,3 +104,24 @@ export interface ChatGPTResponse {
     }
   }
 }
+
+export interface Participant {
+  id: number
+  memberId: number
+  memberNickname: string
+  consultationId: number
+  consultationDate: string
+  profileUrl: string
+}
+
+export interface RoomData1 {
+  id: number
+  category: string
+  title: string
+  isPrivated: boolean
+  password: string
+  startTime: string
+  endTime: string
+  currentParticipants: number
+  participants: Participant[]
+}

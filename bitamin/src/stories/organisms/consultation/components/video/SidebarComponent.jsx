@@ -1,38 +1,144 @@
-import React from 'react'
-import ChatComponent from '../chat/ChatComponent'
+import React, { Component } from 'react'
+import IconButton from '@material-ui/core/IconButton'
+import Fab from '@material-ui/core/Fab'
+import HighlightOff from '@material-ui/icons/HighlightOff'
+import Send from '@material-ui/icons/Send'
 
-const SidebarComponent = ({ participants, onParticipantAction, localUser }) => {
-  return (
-    <div className="w-64 p-4 bg-gray-100 border-l border-gray-300 h-full flex flex-col justify-between">
-      <div>
-        <h3 className="text-lg font-semibold mb-4">참여자 리스트</h3>
-        <ul className="space-y-2">
-          {participants.map((participant, index) => (
-            <li key={index} className="flex justify-between items-center">
-              <span>{participant.nickname}</span>
-              <button
-                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                onClick={() => onParticipantAction(participant)}
-              >
-                신고
-              </button>
-            </li>
+// import './ChatComponent.css'
+import { Tooltip } from '@material-ui/core'
+
+export default class SidebarComponent extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      messageList: [],
+      message: '',
+    }
+    this.chatScroll = React.createRef()
+
+    this.handleChange = this.handleChange.bind(this)
+    this.handlePressKey = this.handlePressKey.bind(this)
+    this.sendMessage = this.sendMessage.bind(this)
+  }
+
+  componentDidMount() {
+    this.props.user
+      .getStreamManager()
+      .stream.session.on('signal:chat', (event) => {
+        const data = JSON.parse(event.data)
+        let messageList = this.state.messageList
+        messageList.push({
+          connectionId: event.from.connectionId,
+          nickname: data.nickname,
+          message: data.message,
+        })
+        const document = window.document
+        setTimeout(() => {
+          const userImg = document.getElementById(
+            'userImg-' + (this.state.messageList.length - 1)
+          )
+          const video = document.getElementById('video-' + data.streamId)
+          const avatar = userImg.getContext('2d')
+          avatar.drawImage(video, 200, 120, 285, 285, 0, 0, 60, 60)
+          this.props.messageReceived()
+        }, 50)
+        this.setState({ messageList: messageList })
+        this.scrollToBottom()
+      })
+  }
+
+  handleChange(event) {
+    this.setState({ message: event.target.value })
+  }
+
+  handlePressKey(event) {
+    if (event.key === 'Enter') {
+      this.sendMessage()
+    }
+  }
+
+  sendMessage() {
+    console.log(this.state.message)
+    if (this.props.user && this.state.message) {
+      let message = this.state.message.replace(/ +(?= )/g, '')
+      if (message !== '' && message !== ' ') {
+        const data = {
+          message: message,
+          nickname: this.props.user.getNickname(),
+          streamId: this.props.user.getStreamManager().stream.streamId,
+        }
+        this.props.user.getStreamManager().stream.session.signal({
+          data: JSON.stringify(data),
+          type: 'chat',
+        })
+      }
+    }
+    this.setState({ message: '' })
+  }
+
+  scrollToBottom() {
+    setTimeout(() => {
+      try {
+        this.chatScroll.current.scrollTop = this.chatScroll.current.scrollHeight
+      } catch (err) {}
+    }, 20)
+  }
+
+  render() {
+    const styleChat = { display: this.props.chatDisplay }
+    return (
+      <div id="chatContainer">
+        <div id="chatToolbar">
+          <span>
+            {this.props.user.getStreamManager().stream.session.sessionId} - CHAT
+          </span>
+        </div>
+        <div className="message-wrap" ref={this.chatScroll}>
+          {this.state.messageList.map((data, i) => (
+            <div
+              key={i}
+              id="remoteUsers"
+              className={
+                'message' +
+                (data.connectionId !== this.props.user.getConnectionId()
+                  ? ' left'
+                  : ' right')
+              }
+            >
+              <canvas
+                id={'userImg-' + i}
+                width="60"
+                height="60"
+                className="user-img"
+              />
+              <div className="msg-detail">
+                <div className="msg-info">
+                  <p> {data.nickname}</p>
+                </div>
+                <div className="msg-content">
+                  <span className="triangle" />
+                  <p className="text">{data.message}</p>
+                </div>
+              </div>
+            </div>
           ))}
-        </ul>
-      </div>
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold mb-4">채팅</h3>
-        <div className="h-64 overflow-y-auto bg-gray-200 p-2 rounded">
-          <ChatComponent
-            user={localUser}
-            chatDisplay="block" // Sidebar에서는 항상 채팅을 표시
-            close={() => {}} // Sidebar에서는 close 기능을 사용하지 않음
-            messageReceived={() => {}} // 메시지 알림 처리
+        </div>
+
+        <div id="messageInput">
+          <input
+            placeholder="Send a messge"
+            id="chatInput"
+            value={this.state.message}
+            onChange={this.handleChange}
+            onKeyPress={this.handlePressKey}
           />
+          <Tooltip title="Send message">
+            <Fab size="small" id="sendButton" onClick={this.sendMessage}>
+              <Send />
+            </Fab>
+          </Tooltip>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 }
-
-export default SidebarComponent

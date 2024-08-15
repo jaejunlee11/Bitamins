@@ -15,6 +15,7 @@ import { useChatStore } from '../../../../store/useChatStore' // ChatStore 추�
 import FooterComponent from './video/FooterComponent'
 import HeaderComponent from './video/HeaderComponent'
 import SidebarComponent from './video/SidebarComponent'
+import { fetchRoomData } from '../../../../store/useConsultationStore' // zustand 스토어 임포트
 
 var localUser = new UserModel()
 
@@ -41,6 +42,7 @@ class VideoRoomComponent extends Component {
       showModal: false, // 모달 표시 여부 상태
       consultationId: consultationId,
       participants: [], // 참여자 리스트 상태 추가
+      roomData: null, // roomData 상태 추가
     }
 
     this.joinSession = this.joinSession.bind(this)
@@ -60,6 +62,7 @@ class VideoRoomComponent extends Component {
     this.checkSize = this.checkSize.bind(this)
     this.handleConfirmLeave = this.handleConfirmLeave.bind(this) // 모달 확인 버튼 핸들러
     this.handleCancelLeave = this.handleCancelLeave.bind(this) // 모달 취소 버튼 핸들러
+    this.getRoomData = fetchRoomData.getState().getRoom // zustand에서 getRoom 메서드 가져오기
   }
 
   componentDidMount() {
@@ -88,12 +91,26 @@ class VideoRoomComponent extends Component {
     console.log('Joining session with ID:', this.state.mySessionId)
     console.log('Using token:', this.state.token)
     this.startStt()
+
+    console.log('Get ConsultataionData:', this.state.consultationId)
+    this.getRoomData(this.state.consultationId).then(() => {
+      const roomData = fetchRoomData.getState().roomData
+      this.setState({ roomData })
+      console.log('roomdata입니다', roomData)
+    })
   }
 
   componentDidUpdate(prevProps, prevState) {
     // participants 상태가 업데이트될 때마다 로그 출력
     if (prevState.participants !== this.state.participants) {
       console.log('Participants updated:', this.state.participants)
+    }
+    if (prevState.consultationId !== this.state.consultationId) {
+      console.log('Consultation ID changed:', this.state.consultationId)
+      this.getRoomData(this.state.consultationId).then(() => {
+        const roomData = fetchRoomData.getState().roomData
+        this.setState({ roomData })
+      })
     }
   }
 
@@ -632,15 +649,18 @@ class VideoRoomComponent extends Component {
 
   render() {
     const mySessionId = this.state.mySessionId
+    const roomData = this.state.roomData
     const localUser = this.state.localUser
     const chatDisplay = { display: this.state.chatDisplay }
 
     return (
       <>
-        {/* <HeaderComponent
-          isPrivate={true} // 방이 비밀방인지 여부에 따라 변경
-          title={mySessionId} // 세션 ID를 방 제목으로 사용
-        /> */}
+        {roomData && (
+          <HeaderComponent
+            isPrivate={roomData.isPrivate} // 방이 비밀방인지 여부에 따라 변경
+            title={roomData.title} // 세션 ID를 방 제목으로 사용
+          />
+        )}
         {/* <SidebarComponent
           participants={this.state.participants}
           localUser={localUser}
@@ -652,7 +672,7 @@ class VideoRoomComponent extends Component {
           />
         )}
         <div className="container" id="container">
-        <ToolbarComponent
+          {/* <ToolbarComponent
             sessionId={mySessionId}
             user={localUser}
             showNotification={this.state.messageReceived}
@@ -665,7 +685,7 @@ class VideoRoomComponent extends Component {
             leaveSession={() => this.setState({ showModal: true })}
             toggleChat={this.toggleChat}
             consultationId={this.state.consultationId}
-          />
+          /> */}
 
           <DialogExtensionComponent
             showDialog={this.state.showExtensionDialog}
@@ -733,8 +753,51 @@ class VideoRoomComponent extends Component {
           {/* <SidebarComponent
             participants={this.state.participants}
             onParticipantAction={this.handleParticipantAction}
-            localUser={localUser}
+            user={localUser}
+            chatDisplay={this.state.chatDisplay}
+            close={this.toggleChat}
+            messageReceived={this.checkNotification}
           /> */}
+
+          {/* <SidebarComponent
+            user={localUser}
+            chatDisplay={this.state.chatDisplay}
+            messageReceived={this.checkNotification}
+          /> */}
+
+          {/* <ChatComponent
+            user={localUser}
+            chatDisplay={this.state.chatDisplay}
+            close={this.toggleChat}
+            messageReceived={this.checkNotification}
+          /> */}
+
+          {/* <ToolbarComponent
+            sessionId={mySessionId}
+            user={localUser}
+            showNotification={this.state.messageReceived}
+            camStatusChanged={this.camStatusChanged}
+            micStatusChanged={this.micStatusChanged}
+            screenShare={this.screenShare}
+            stopScreenShare={this.stopScreenShare}
+            toggleFullscreen={this.toggleFullscreen}
+            switchCamera={this.switchCamera}
+            leaveSession={() => this.setState({ showModal: true })}
+            toggleChat={this.toggleChat}
+          /> */}
+
+          {roomData && (
+            <FooterComponent
+              user={localUser}
+              sessionId={mySessionId}
+              camStatusChanged={this.camStatusChanged}
+              micStatusChanged={this.micStatusChanged}
+              screenShare={this.screenShare}
+              stopScreenShare={this.stopScreenShare}
+              leaveSession={() => this.setState({ showModal: true })}
+              category={roomData.category}
+            />
+          )}
 
           {/* <FooterComponent
             camStatusChanged={this.camStatusChanged}
