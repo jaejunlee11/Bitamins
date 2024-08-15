@@ -1,75 +1,88 @@
-import create from 'zustand'
+import create from 'zustand';
+import { getMission, substituteMission } from '@/api/missionAPI';
 
-interface Mission {
-  id: number
-  missionName: string
-  missionDescription: string
-  missionLevel: number
+interface MissionData {
+  id: number;
+  missionName: string;
+  missionDescription: string;
+  missionLevel: number;
 }
 
 interface MissionState {
-  mission: Mission | null
-  substitutionCount: number
-  lastSubstitutionDate: string
-  setMission: (mission: Mission) => void
-  increaseSubstitutionCount: () => void
-  resetSubstitutionCount: () => void
-  resetMissionIfNewDay: () => void
+  mission: MissionData | null;
+  substituteCount: number;
+  fetchMission: () => Promise<void>;
+  handleSubstituteMission: () => Promise<void>;
 }
 
-const getCurrentDate = (): string => {
-  const today = new Date()
-  const year = today.getFullYear()
-  const month = String(today.getMonth() + 1).padStart(2, '0')
-  const day = String(today.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+export const useMissionStore = create<MissionState>((set) => ({
+  mission: null,
+  substituteCount: 0,
 
-const useMissionStore = create<MissionState>((set) => ({
-  mission: JSON.parse(localStorage.getItem('mission') || 'null'),
-  substitutionCount: parseInt(
-    localStorage.getItem('substitutionCount') || '0',
-    10
-  ),
-  lastSubstitutionDate:
-    localStorage.getItem('lastSubstitutionDate') || getCurrentDate(),
-  setMission: (mission) => {
-    localStorage.setItem('mission', JSON.stringify(mission))
-    set({ mission })
-  },
-  increaseSubstitutionCount: () => {
-    const currentDate = getCurrentDate()
-    set((state) => {
-      const newCount =
-        state.lastSubstitutionDate === currentDate
-          ? state.substitutionCount + 1
-          : 1
+  fetchMission: async () => {
+    const today = new Date().toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).replace(/\. /g, '-').replace('.', '');
+    const savedDate = localStorage.getItem('missionDate');
 
-      localStorage.setItem('substitutionCount', newCount.toString())
-      localStorage.setItem('lastSubstitutionDate', currentDate)
+    if (savedDate !== today) {
+      // 날짜가 변경되었으므로 로컬 스토리지 초기화
+      localStorage.removeItem('missionDate');
+      localStorage.removeItem('missionData');
+      localStorage.removeItem('substituteCount');
 
-      return {
-        substitutionCount: newCount,
-        lastSubstitutionDate: currentDate,
+      try {
+        const response = await getMission();
+        if (response.success) {
+          // 새로운 데이터를 로컬 스토리지에 저장
+          console.log("Saving date to localStorage:", today);
+          localStorage.setItem('missionDate', today);
+
+          localStorage.setItem('missionDate', today);
+          localStorage.setItem('missionData', JSON.stringify(response.data));
+          localStorage.setItem('substituteCount', '0');
+          set({ mission: response.data, substituteCount: 0 });
+        } else {
+          console.error('미션을 가져오는데 실패했습니다:', response.message);
+        }
+      } catch (error) {
+        console.error('미션을 가져오는 중 오류 발생:', error);
       }
-    })
-  },
-  resetSubstitutionCount: () => {
-    localStorage.removeItem('substitutionCount')
-    localStorage.removeItem('lastSubstitutionDate')
-    set({ substitutionCount: 0, lastSubstitutionDate: getCurrentDate() })
-  },
-  resetMissionIfNewDay: () => {
-    const currentDate = getCurrentDate()
-    if (localStorage.getItem('lastSubstitutionDate') !== currentDate) {
-      localStorage.removeItem('mission')
-      set({
-        mission: null,
-        lastSubstitutionDate: currentDate,
-        substitutionCount: 0,
-      })
+    } else {
+      const savedMission = localStorage.getItem('missionData');
+      const savedSubstituteCount = localStorage.getItem('substituteCount');
+
+      if (savedMission) {
+        set({
+          mission: JSON.parse(savedMission),
+          substituteCount: savedSubstituteCount ? parseInt(savedSubstituteCount, 10) : 0,
+        });
+      }
     }
   },
-}))
 
-export default useMissionStore
+  handleSubstituteMission: async () => {
+    const { mission, substituteCount } = useMissionStore.getState();
+    if (!mission || substituteCount >= 5) return;
+
+    try {
+      const response = await substituteMission(mission.id);
+      if (response.success) {
+        set((state) => ({
+          mission: response.data,
+          substituteCount: state.substituteCount + 1,
+        }));
+
+        localStorage.setItem('missionData', JSON.stringify(response.data));
+        localStorage.setItem('substituteCount', (substituteCount + 1).toString());
+      } else {
+        console.error('미션 교체에 실패했습니다:', response.message);
+      }
+    } catch (error) {
+      console.error('미션 교체 중 오류 발생:', error);
+    }
+  }
+}));
+

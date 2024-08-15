@@ -9,7 +9,6 @@
   font-size: 1.3vh;
   color: #000;
   font-family: Lato, sans-serif;
-  margin-top: 1000px;
 }
 /* 운동 뜨는 뒤의 배경 */
 .upChild {
@@ -18,6 +17,7 @@
   /* left: calc(50% - 512px); */
   background-color: rgba(252, 210, 179, 0.25);
   width: 100%;
+  height: 96.11vh;
 }
 /* 운동 url 뜨는 네모 */
 .upItem {
@@ -235,10 +235,11 @@
 .div13 {
   position: absolute;
   top: 73.55vh;
-  left: 54.22vw;
+  left: 52.22vw;
   font-family: NanumBarunpen, sans-serif;
   text-align: left;
   font-size: larger;
+  width: 40vw;
 }
 
 .p {

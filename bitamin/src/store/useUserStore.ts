@@ -10,6 +10,7 @@ interface UserState {
   fetchUser: () => Promise<void>
   setUserImage: (image: File) => void
   updateProfileUrl: (url: string) => void
+  clearUserData: () => void // 유저 데이터 초기화 메서드 추가
 }
 
 const useUserStore = create<UserState>()(
@@ -41,6 +42,28 @@ const useUserStore = create<UserState>()(
         set((state) => ({
           user: state.user ? { ...state.user, profileUrl: url } : null,
         }))
+      },
+
+      clearUserData: () => {
+        set({
+          user: {
+            email: '',
+            name: '',
+            nickname: '',
+            birthday: '',
+            sidoName: '',
+            gugunName: '',
+            dongName: '',
+            profileUrl: '',
+            lat: '',
+            lng: '',
+            xcoordinate: '',
+            ycoordinate: '',
+            // 필요한 다른 속성들도 여기서 초기화할 수 있습니다.
+          },
+          loading: false,
+          error: null,
+        })
       },
     }),
     {

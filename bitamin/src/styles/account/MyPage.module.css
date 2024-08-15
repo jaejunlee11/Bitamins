@@ -2,40 +2,40 @@
 .child {
   position: absolute;
   left: 0px;
-  box-shadow: 4px 4px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0.37vw 0.37vw 2.78vw rgba(0, 0, 0, 0.25);
   background-color: #f9ea9b;
   width: 100%;
-  height: 450px;
+  height: 45vh;
   display: flex;
   justify-content: flex-start; /* 왼쪽 정렬 */
   align-items: center;
-  padding-left: 50px; /* 왼쪽 여백 추가 */
+  padding-left: 5vw; /* 왼쪽 여백 추가 */
 }
 /* 이미지 클릭 */
 .item {
-  position: relative; /* absolute에서 relative로 변경 */
-  box-shadow: 4px 4px 25px rgba(92, 92, 92, 0.25);
-  border-radius: 8px;
+  position: relative;
+  box-shadow: 0.37vw 0.37vw 2.31vw rgba(92, 92, 92, 0.25);
+  border-radius: 0.74vw;
   background-color: #f1f1f5;
-  width: 286px;
-  height: 278px;
+  width: 26.48vw;
+  height: 25.74vh;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
 }
-/* 공통 입력 필드 스타일 */
+/* 입력 필드 스타일 */
 .inputField {
-  font-size: 14px; /* 일반 텍스트와 동일한 크기 */
-  font-family: NanumGothic; /* 동일한 폰트 */
-  color: #555; /* 동일한 텍스트 색상 */
-  padding: 5px; /* 적절한 패딩 */
-  border: 1px solid #ddd; /* 경계선 추가 */
-  border-radius: 4px; /* 부드러운 모서리 */
-  box-sizing: border-box; /* 박스 크기 조절 */
+  font-size: 1.3vh;
+  font-family: NanumGothic;
+  color: #555;
+  padding: 0.36vh;
+  border: 0.09vw solid #ddd;
+  border-radius: 0.37vw;
+  box-sizing: border-box;
 }
 .categoryContent {
-  font-size: 14px; /* 동일한 글씨 크기 */
+  font-size: 1.3vh;
   color: #555; /* 동일한 색상 */
   /* 다른 스타일들 */
 }
@@ -49,36 +49,36 @@
 /* 유저 정보 */
 .frameParent {
   position: absolute;
-  top: 16.8%;
-  left: 53%;
-  width: 403px;
+  top: 13.8%;
+  left: 60%;
+  width: 37.31vw;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: 10px;
-  font-size: 15px;
+  gap: 1.39vh;
+  font-size: 1.39vh;
   color: rgba(0, 0, 0, 0.5);
   font-family: Inter;
 }
 /* 밑줄 */
 .inner {
   position: absolute;
-  top: 13.5%;
-  left: 53%;
-  border-radius: 2px;
+  top: 10.5%;
+  left: 60%;
+  border-radius: 0.18vw;
   background-color: rgba(252, 124, 76, 0.72);
-  width: 98px;
-  height: 7px;
+  width: 7.07vw;
+  height: 0.75vh;
 }
 /* 마이페이지 글씨 */
 .div4 {
   position: absolute;
-  top: 12%;
-  left: 53%;
-  font-size: 20px;
-  letter-spacing: -0.18px;
-  line-height: 16px;
+  top: 9%;
+  left: 60%;
+  font-size: 2.5vh;
+  letter-spacing: -0.015vw;
+  line-height: 1.48vh;
   color: #333;
 }
 .imageAddIcon {
@@ -95,15 +95,15 @@
 /* 이미지 컨테이너 스타일 */
 .item {
   position: absolute;
-  top: 20%;
+  top: 8%;
   left: 20%;
-  box-shadow: 4px 4px 25px rgba(92, 92, 92, 0.25);
-  border-radius: 8px;
+  box-shadow: 0.37vw 0.37vw 2.31vw rgba(92, 92, 92, 0.25);
+  border-radius: 0.74vw;
   background-color: #f1f1f5;
-  width: 300px;
-  height: 300px;
+  width: 22.78vw;
+  height: 38.78vh;
   overflow: hidden;
-  margin-left: 100px;
+  margin-left: 7.26vw;
   margin-top: 0px;
   display: flex;
   justify-content: center;
@@ -121,43 +121,42 @@
 /* 비밀번호 변경 버튼 */
 .container {
   position: relative; /* absolute에서 relative로 변경 */
-  margin-top: 20px; /* 주소 아래로 위치하도록 마진 조정 */
-  border-radius: 10px;
+  margin-top: 1.85vh; /* 주소 아래로 위치하도록 마진 조정 */
+  border-radius: 0.93vw;
   background-color: #fff;
-  border: 1px solid #ff713c;
+  border: 0.09vw solid #ff713c;
   box-sizing: border-box;
-  width: 147px;
-  height: 30px;
+  width: 13.61vw;
+  height: 2.78vh;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   text-align: center;
-  color: #ff713c;
+  color: #493cff;
 }
 /* 정보 수정 버튼 */
 button {
   position: relative; /* absolute에서 relative로 변경 */
-  /* margin-top: 20px; 비밀번호 변경 버튼 아래에 위치하도록 마진 조정 */
 }
 .buttonContainer {
   display: flex;
-  gap: 15px;
+  gap: 1.39vh;
   justify-content: flex-start;
   align-items: flex-start;
 }
 .buttonStyle {
   background-color: #fff;
-  border: 1px solid #ff713c;
+  border: 0.09vw solid #ff713c;
   box-sizing: border-box;
-  border-radius: 10px;
-  padding: 8px 32px;
+  border-radius: 0.93vw;
+  padding: 0.74vh 2.96vw;
   cursor: pointer;
   text-align: center;
   color: #ff713c;
-  height: 40px; /* 동일한 높이 설정 */
-  width: 147px; /* 비밀번호 변경 버튼에 맞춘 동일한 너비 설정 */
+  height: 3.7vh; /* 동일한 높이 설정 */
+  width: 9.61vw; /* 비밀번호 변경 버튼에 맞춘 동일한 너비 설정 */
   display: flex; /* 컨텐츠를 가운데 정렬하기 위해 flex 사용 */
   align-items: center; /* 텍스트 수직 정렬 */
   justify-content: center; /* 텍스트 수평 정렬 */
@@ -167,24 +166,24 @@ button {
 /* 검진 결과 */
 .rectangleDiv {
   position: absolute;
-  top: 62%;
+  top: 51.6%;
   left: 59%;
   background-color: #f1f1f5;
-  width: 540px;
+  width: 33vw;
   height: auto; /* 내용에 따라 자동으로 높이 조절 */
-  padding: 20px; /* 내부 여백 추가 */
-  border-radius: 8px; /* 모서리 둥글게 */
+  padding: 1.85vh; /* 내부 여백 추가 */
+  border-radius: 0.74vw; /* 모서리 둥글게 */
 }
 /* 점수 텍스트 */
 .div8 {
-  font-size: 18px;
-  letter-spacing: 0.5px;
-  line-height: 16px;
+  font-size: 1.67vh;
+  letter-spacing: 0.046vw;
+  line-height: 1.48vh;
   font-weight: 500;
   font-family: Roboto;
   color: #000;
-  margin-bottom: 10px; /* 간격 추가 */
-  text-align: left; /* 왼쪽 정렬 */
+  margin-bottom: 1.5vh;
+  text-align: left;
 }
 
 /* 결과 섹션 컨테이너 */
@@ -192,40 +191,40 @@ button {
   display: flex;
   flex-direction: column;
   align-items: flex-start; /* 왼쪽 정렬 */
-  padding: 20px; /* 패딩 추가 */
+  padding: 1.85vh; /* 패딩 추가 */
 }
 
 /* 검사 결과 제목 */
 .div10 {
-  font-size: 20px;
-  letter-spacing: 0.5px;
-  line-height: 24px;
+  font-size: 2.5vh;
+  letter-spacing: 0.046vw;
+  line-height: 2.22vh;
   font-family: Roboto;
   color: #000;
-  margin-bottom: 10px; /* 간격 추가 */
+  margin-bottom: 3vh; /* 간격 추가 */
   text-align: left; /* 왼쪽 정렬 */
 }
 .span {
-  line-height: 24px;
+  line-height: 2.22vh;
 }
 .span1 {
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 1.11vh;
+  line-height: 1.48vh;
   font-weight: 500;
 }
 /* 점수 숫자 */
 .div11 {
-  font-size: 23px;
+  font-size: 2.13vh;
   font-family: Roboto;
   color: #000;
-  margin-bottom: 10px; /* 간격 추가 */
+  margin-bottom: 2vh; /* 간격 추가 */
   text-align: left; /* 왼쪽 정렬 */
 }
 /* 설명 텍스트 */
 .div12 {
-  font-size: 15px;
-  letter-spacing: 0.5px;
-  line-height: 16px;
+  font-size: 1.7vh;
+  letter-spacing: 0.15vw;
+  line-height: 1.48vh;
   font-weight: 500;
   font-family: Roboto;
   color: #333;
@@ -235,375 +234,56 @@ button {
   justify-content: flex-start;
   width: 100%;
   height: auto;
-  line-height: 2.1;
+  line-height: 1.94vh;
+  white-space: pre-line;
 }
 /* 지도 감싸는 박스 */
 .child1 {
   position: absolute;
-  top: 1224px;
-  left: calc(50% - 525px);
-  box-shadow: 0px 1px 50px rgba(119, 119, 119, 0.16);
-  border-radius: 10px;
+  top: 122.4vh;
+  left: calc(50% - 29.5vw);
+  box-shadow: 0 0.09vh 4.63vh rgba(119, 119, 119, 0.16);
+  border-radius: 0.93vw;
   background-color: #fff;
-  width: 1069px;
-  height: 1405px;
+  width: 58.89vw;
+  height: 155.09vh;
 }
 /* 지도 */
 .mapWrapper {
   position: absolute;
-  top: 1272px;
-  left: calc(50% - 525px);
-  width: 1069px;
+  top: 128.4vh;
+  left: calc(50% - 29.5vw);
+  width: 58.8vw;
   height: 304px;
   object-fit: cover;
 }
 .txt {
   width: 100%;
 }
-
-.frameParent4 {
-  width: 72px;
-  height: 19px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 4px;
-}
-.personcircleParent {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 7px;
-}
-.icon {
-  width: 19px;
-  position: relative;
-  height: 19.7px;
-}
-.wrapper4 {
-  height: 24px;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-end;
-  cursor: pointer;
-}
-.frameParent3 {
-  align-self: stretch;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 6px;
-}
-.div46 {
-  width: 124px;
-  height: 98px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-}
-.navbar {
+/* 정신건강의학과 글씨 */
+.div66 {
   position: absolute;
-  top: -1px;
-  left: 39px;
-  background-color: #fff;
-  width: 944px;
-  height: 74px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+  top: 124vh;
+  left: calc(50% - 28vw);
+  font-size: 2.3vh;
   text-align: center;
-  color: #ff713c;
+  color: #333;
 }
-.groupChild {
-  position: absolute;
-  height: 41.18%;
-  width: 100%;
-  top: 58.82%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  border-radius: 2px;
-  background-color: rgba(252, 124, 76, 0.72);
-}
+
 /* 나의 차트 섹션 */
 .div48 {
   position: absolute;
-  top: 470px; /* 이미지와 같은 수평선상에 배치 */
-  left: 560px; /* 원하는 위치로 조정 */
-  font-size: 16px;
-  letter-spacing: 0.5px;
-  line-height: 16px;
+  top: 47vh; /* 이미지와 같은 수평선상에 배치 */
+  left: 51.85vw; /* 원하는 위치로 조정 */
+  font-size: 1.48vh;
+  letter-spacing: 0.046vw;
+  line-height: 1.48vh;
   font-weight: 500;
   font-family: Roboto;
   color: #000;
   text-align: center;
 }
 
-.groupIcon {
-  position: absolute;
-  height: 0.41%;
-  width: 89.52%;
-  top: 82.48%;
-  right: 0.75%;
-  bottom: 17.1%;
-  left: 9.73%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.vectorIcon1 {
-  position: absolute;
-  height: 93.65%;
-  width: 2.82%;
-  top: 2.07%;
-  right: -2.77%;
-  bottom: 4.27%;
-  left: 99.94%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.vectorIcon2 {
-  position: absolute;
-  height: 5.52%;
-  width: 31.73%;
-  top: 51.67%;
-  right: -0.14%;
-  bottom: 42.81%;
-  left: 68.41%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.div49 {
-  position: absolute;
-  height: 100%;
-  width: 42.17%;
-  top: 0%;
-  left: 0%;
-  display: inline-block;
-}
-.group3 {
-  position: absolute;
-  height: 8.77%;
-  width: 70.34%;
-  top: 91.21%;
-  right: 0.06%;
-  bottom: 0.03%;
-  left: 29.61%;
-}
-.vectorIcon3 {
-  position: absolute;
-  height: 5.52%;
-  width: 25.08%;
-  top: 51.67%;
-  right: 0.03%;
-  bottom: 42.81%;
-  left: 74.89%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.div50 {
-  position: absolute;
-  height: 100%;
-  width: 53.97%;
-  top: 0%;
-  left: 0%;
-  display: inline-block;
-}
-.group4 {
-  position: absolute;
-  height: 8.77%;
-  width: 88.98%;
-  top: 67.79%;
-  right: -0.08%;
-  bottom: 23.44%;
-  left: 11.1%;
-}
-.vectorIcon4 {
-  position: absolute;
-  height: 5.52%;
-  width: 22.32%;
-  top: 51.67%;
-  right: -0.06%;
-  bottom: 42.81%;
-  left: 77.74%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.div51 {
-  position: absolute;
-  height: 100%;
-  width: 59.32%;
-  top: 0%;
-  left: 0%;
-  display: inline-block;
-}
-.group5 {
-  position: absolute;
-  height: 8.77%;
-  width: 100%;
-  top: 44.37%;
-  right: 0%;
-  bottom: 46.86%;
-  left: 0%;
-}
-.vectorIcon5 {
-  position: absolute;
-  height: 5.52%;
-  width: 23.17%;
-  top: 51.67%;
-  right: -0.03%;
-  bottom: 42.81%;
-  left: 76.86%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.div52 {
-  position: absolute;
-  height: 100%;
-  width: 57.77%;
-  top: 0%;
-  left: 0%;
-  display: inline-block;
-}
-.group6 {
-  position: absolute;
-  height: 8.77%;
-  width: 96.33%;
-  top: 20.96%;
-  right: -0.01%;
-  bottom: 70.27%;
-  left: 3.69%;
-}
-.vectorIcon6 {
-  position: absolute;
-  height: 5.52%;
-  width: 23.17%;
-  top: 23.64%;
-  right: -0.03%;
-  bottom: 70.83%;
-  left: 76.86%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.group7 {
-  position: absolute;
-  height: 8.77%;
-  width: 96.33%;
-  top: 0%;
-  right: -0.01%;
-  bottom: 91.23%;
-  left: 3.69%;
-}
-.group2 {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-}
-.group1 {
-  position: absolute;
-  height: 85.4%;
-  width: 7.74%;
-  top: 0.73%;
-  right: 90.27%;
-  bottom: 13.88%;
-  left: 1.99%;
-}
-.groupIcon1 {
-  position: absolute;
-  height: 79.98%;
-  width: 89.52%;
-  top: 2.5%;
-  right: 0.75%;
-  bottom: 17.53%;
-  left: 9.73%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.groupIcon2 {
-  position: absolute;
-  height: 28.34%;
-  width: 90.42%;
-  top: 48.99%;
-  right: 0.3%;
-  bottom: 22.67%;
-  left: 9.28%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.vectorIcon7 {
-  position: absolute;
-  height: 20.06%;
-  width: 6.85%;
-  top: 0%;
-  right: 29.18%;
-  bottom: 79.94%;
-  left: 63.97%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.div54 {
-  position: absolute;
-  height: 51.81%;
-  width: 100%;
-  top: 48.33%;
-  left: 0%;
-  display: inline-block;
-}
-.group8 {
-  position: absolute;
-  height: 14.85%;
-  width: 3.19%;
-  top: 82.55%;
-  right: -0.41%;
-  bottom: 2.6%;
-  left: 97.21%;
-  text-align: center;
-}
-/* .chart {
-  position: absolute;
-  top: 62%;
-  left: 0px;
-  width: 80%;
-  height: 241.7px;
-  overflow: hidden;
-  text-align: right;
-} */
-.div55 {
-  position: absolute;
-  height: 7.18%;
-  width: 6.14%;
-  top: 83.73%;
-  left: 93.87%;
-  display: inline-block;
-}
-.div56 {
-  position: absolute;
-  height: 7.18%;
-  width: 6.14%;
-  top: 0%;
-  left: 5.02%;
-  display: inline-block;
-}
 /* 차트 */
 .chartParent {
   position: absolute;
@@ -612,157 +292,7 @@ button {
   width: 490px;
   height: 259px;
 }
-.vectorIcon8 {
-  position: absolute;
-  height: 20.17%;
-  width: 24.39%;
-  top: 0%;
-  right: 25.59%;
-  bottom: 79.83%;
-  left: 50.02%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.div57 {
-  position: absolute;
-  height: 50.7%;
-  width: 100%;
-  top: 49.14%;
-  left: 0%;
-  display: inline-block;
-}
-.group9 {
-  position: absolute;
-  height: 13.78%;
-  width: 0.84%;
-  top: 83.73%;
-  right: 90.43%;
-  bottom: 2.48%;
-  left: 8.74%;
-}
-.vectorIcon9 {
-  position: absolute;
-  height: 20.17%;
-  width: 18.18%;
-  top: 0%;
-  right: 32.03%;
-  bottom: 79.83%;
-  left: 49.79%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.group10 {
-  position: absolute;
-  height: 13.78%;
-  width: 1.12%;
-  top: 83.73%;
-  right: 81%;
-  bottom: 2.48%;
-  left: 17.88%;
-}
-.group11 {
-  position: absolute;
-  height: 13.78%;
-  width: 1.12%;
-  top: 83.73%;
-  right: 71.72%;
-  bottom: 2.48%;
-  left: 27.16%;
-}
-.group12 {
-  position: absolute;
-  height: 13.78%;
-  width: 1.12%;
-  top: 83.73%;
-  right: 62.44%;
-  bottom: 2.48%;
-  left: 36.44%;
-}
-.group13 {
-  position: absolute;
-  height: 13.78%;
-  width: 1.12%;
-  top: 83.73%;
-  right: 53.16%;
-  bottom: 2.48%;
-  left: 45.72%;
-}
-.group14 {
-  position: absolute;
-  height: 13.78%;
-  width: 1.12%;
-  top: 83.73%;
-  right: 43.87%;
-  bottom: 2.48%;
-  left: 55%;
-}
-.vectorIcon14 {
-  position: absolute;
-  height: 20.17%;
-  width: 20.83%;
-  top: 0%;
-  right: 29.28%;
-  bottom: 79.83%;
-  left: 49.89%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.group15 {
-  position: absolute;
-  height: 13.78%;
-  width: 0.98%;
-  top: 83.73%;
-  right: 34.67%;
-  bottom: 2.48%;
-  left: 64.35%;
-}
-.group16 {
-  position: absolute;
-  height: 13.78%;
-  width: 1.12%;
-  top: 83.73%;
-  right: 25.31%;
-  bottom: 2.48%;
-  left: 73.57%;
-}
-.group17 {
-  position: absolute;
-  height: 13.78%;
-  width: 1.12%;
-  top: 83.73%;
-  right: 16.03%;
-  bottom: 2.48%;
-  left: 82.85%;
-}
-.groupParent {
-  position: absolute;
-  top: 452px;
-  left: 40px;
-  width: 490px;
-  height: 259px;
-  text-align: center;
-  font-size: 12px;
-  color: #000;
-  font-family: Inter;
-}
-.span5 {
-  color: #000;
-}
-.span4 {
-  color: #555;
-}
-/* 정신건강의학과 글씨 */
-.div66 {
-  position: absolute;
-  top: 1235px;
-  left: 610px;
-  font-size: 18px;
-  text-align: center;
-  color: #333;
-}
+/* 나의 차트 뒤 주황 배경 */
 .div {
   width: 100%;
   position: relative;
@@ -812,37 +342,30 @@ button {
   gap: 20px; /* 항목 사이의 간격 설정 */
 }
 
-.hospitalItem {
-  flex: 0 1 calc(50% - 20px); /* 항목을 2열로 배치 (50% 너비에서 간격 제외) */
-  background-color: #fff;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 /* 차트 컨테이너 */
 .chartContainer {
   position: relative;
-  margin-top: 20px; /* 결과 섹션 아래에 적당한 간격 추가 */
+  margin-top: 1.85vh; /* 결과 섹션 아래에 적당한 간격 추가 */
   background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 10px; /* 내부 여백 추가 */
+  border-radius: 0.74vw;
+  box-shadow: 0 0.37vw 0.93vw rgba(0, 0, 0, 0.1);
+  padding: 0.93vh; /* 내부 여백 추가 */
   width: 100%; /* 차트가 전체 너비를 차지하도록 설정 */
-  max-width: 800px; /* 최대 너비 설정 */
-  height: 465px; /* 차트 높이 설정 */
+  max-width: 88.06vh; /* 최대 너비 설정 */
+  height: 51.66vh; /* 차트 높이 설정 */
   display: flex;
   justify-content: center;
   align-items: center;
-  top: 560px;
+  top: 62vh;
   left: 8%;
 }
 
 /* 차트 제목 */
 .chartTitle {
-  font-size: 20px;
+  font-size: 1.85vh;
   font-weight: bold;
   color: #333;
-  margin-bottom: 20px;
+  margin-bottom: 1.85vh;
   text-align: center; /* 제목을 중앙 정렬 */
 }
 
@@ -878,43 +401,43 @@ button {
 /* x축과 y축 라벨 스타일 */
 .xAxisLabel,
 .yAxisLabel {
-  font-size: 14px;
+  font-size: 1.3vh;
   font-weight: 500;
   color: #555;
 }
 
 /* y축 눈금 스타일 */
 .yAxisTick {
-  font-size: 12px;
+  font-size: 1.11vh;
   color: #777;
 }
 
 /* x축 눈금 스타일 */
 .xAxisTick {
-  font-size: 12px;
+  font-size: 1.11vh;
   color: #777;
 }
 
 /* Tooltip 스타일 */
 .tooltipContent {
   background-color: #fff;
-  border: 1px solid #ddd;
-  padding: 5px;
-  border-radius: 4px;
+  border: 0.09vw solid #ddd;
+  padding: 0.46vh;
+  border-radius: 0.37vw;
 }
 
 /* 차트 선 스타일 */
 .lineChartPath {
-  stroke-width: 2;
+  stroke-width: 0.18vw;
   stroke: #ff713c;
 }
 
 /* 차트 포인트 스타일 */
 .lineChartPoint {
-  r: 4;
+  /* r: 0.37vw; */
   fill: #ff713c;
   stroke: #fff;
-  stroke-width: 2;
+  stroke-width: 0.18vw;
 }
 
 /* 중간 네모 */
@@ -922,7 +445,7 @@ button {
   width: 100%;
   position: relative;
   background-color: #fffbfa;
-  min-height: 100vh; /* 최소 높이를 뷰포트 높이로 설정 */
+  min-height: 120vh; /* 최소 높이를 뷰포트 높이로 설정 */
   padding-bottom: 50px; /* 아래쪽에 공간 추가 */
   text-align: left;
   font-size: 14px;
@@ -937,17 +460,17 @@ button {
 /* 삭제 x 버튼 */
 .deleteButton {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  background-color: red;
+  top: 1.5vh;
+  right: 0.46vh;
+  background-color: rgb(249, 95, 95);
   color: white;
   border: none;
   border-radius: 50%;
-  width: 25px;
-  height: 25px;
+  width: 2.31vh;
+  height: 2.31vh;
   cursor: pointer;
   font-weight: bold;
-  line-height: 25px;
+  line-height: 2.31vh;
   text-align: center;
 }
 .deleteButton:hover {
@@ -959,7 +482,7 @@ button {
   flex-direction: column; /* 세로로 입력란이 나열되도록 설정 */
   align-items: flex-start; /* 입력란이 왼쪽 정렬되도록 설정 */
   justify-content: flex-start;
-  gap: 15px; /* 각 입력란 사이의 간격을 더 넓게 설정 */
+  gap: 1.39vh; /* 각 입력란 사이의 간격을 더 넓게 설정 */
   width: 100%; /* 컨테이너가 전체 너비를 차지하도록 설정 */
 }
 
@@ -969,5 +492,5 @@ button {
   flex-direction: row; /* 라벨과 입력란이 가로로 배치되도록 설정 */
   align-items: center; /* 라벨과 입력란이 수직으로 가운데 정렬되도록 설정 */
   width: 100%; /* 컨테이너가 전체 너비를 차지하도록 설정 */
-  margin-bottom: 10px; /* 각 항목 사이에 간격 추가 */
+  margin-bottom: 0.93vh; /* 각 항목 사이에 간격 추가 */
 }

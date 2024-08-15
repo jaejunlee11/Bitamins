@@ -15,6 +15,7 @@ import {
   createRoom,
   sendChatGPTMessage,
   leaveConsultation,
+  // getRoomData,
 } from 'api/consultationAPI'
 
 // Consultation List 상태 관리
@@ -75,8 +76,10 @@ export const joinConsultation = create<JoinConsultationState>()(
         try {
           const consultation = await joinRoom(joinData)
 
-          // 받은 consultation 데이터를 zustand 스토어에 저장
+          // const roomData = await getRoomData(consultation.id)
+          await // 받은 consultation 데이터를 zustand 스토어에 저장
           set({ joinconsultation: consultation })
+          // set({ joinconsultation: consultation, roomData })
 
           // consultation 데이터를 반환하여 사용 가능하게 함
           return consultation
@@ -150,7 +153,10 @@ export const useJoinRandomRoom = create<joinRandomRoomState>()(
       joinRandomRoom: async (type: string) => {
         try {
           const response = await joinRandomRoom(type)
+
+          // const roomData = await getRoomData(response.id)
           set({ joinconsultation: response })
+          // set({ joinconsultation: response, roomData })
           return response
         } catch (error) {
           console.error('Failed to join room:', error)

@@ -1,18 +1,20 @@
-/* custom-datepicker.css */
 .react-datepicker {
     font-family: 'Arial', sans-serif;
     border: none;
+    font-size: 14px; /* 전체 폰트 크기 조정 */
 }
 
 .react-datepicker__current-month {
-    font-size: 1.2em;
+    font-size: 1.3em; /* 월 표기 크기 조정 */
     font-weight: bold;
+    margin-bottom: 0.8rem; /* 월 표기와 날짜 간격 조정 */
 }
 
 .react-datepicker__day-name,
 .react-datepicker__day {
-    width: 2rem;
-    line-height: 2rem;
+    width: 2.8rem; /* 날짜 셀 너비 약간 축소 */
+    line-height: 2.8rem; /* 날짜 셀 높이 약간 축소 */
+    margin: 0.15rem; /* 날짜 셀 간격 조정 */
 }
 
 .react-datepicker__day--selected,
@@ -31,7 +33,7 @@
 }
 
 .react-datepicker__day {
-    position: relative; /* 점을 표시하기 위해 상대 위치 지정 */
+    position: relative;
 }
 
 .react-datepicker__day--mission::before,
@@ -39,13 +41,13 @@
 .react-datepicker__day--phrase--mission::before {
     content: '';
     display: inline-block;
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     position: absolute;
-    bottom: 4px;
+    bottom: 5px;
     left: 50%;
-    transform: translateX(-50%); /* 가운데로 위치 조정 */
+    transform: translateX(-50%);
 }
 
 .react-datepicker__day--mission::before {
@@ -57,22 +59,18 @@
 }
 
 .react-datepicker__day--phrase--mission::before {
-    background-color: #fac2c2; /* 두 클래스가 모두 적용된 경우 */
+    background-color: #fac2c2;
 }
 
 .react-datepicker__day--disabled {
-    pointer-events: none; /* 마우스 이벤트를 비활성화 */
+    pointer-events: none;
     cursor: default;
-    color: #ccc; /* 비활성화된 날짜에 대한 색상 */
+    color: #ccc;
 }
 
 .react-datepicker__day--disabled:hover {
-    background-color: transparent; /* 호버 시 배경색 변경 없음 */
-    color: #ccc; /* 호버 시에도 색상이 변하지 않음 */
-}
-
-.react-datepicker {
-    font-family: 'Arial', sans-serif;
+    background-color: transparent;
+    color: #ccc;
 }
 
 .react-datepicker__header {
@@ -81,18 +79,20 @@
 }
 
 .react-datepicker__day-names {
-    border-bottom: none; /* 요일 밑줄 제거 */
+    border-bottom: none;
 }
 
 .react-datepicker__day-name,
 .react-datepicker__day {
-    width: 2.5rem;
-    line-height: 2.5rem;
-    border: none; /* 요일과 날짜 셀의 테두리 제거 */
+    width: 2.8rem; /* 요일 셀 너비 약간 축소 */
+    line-height: 2.8rem; /* 요일 셀 높이 약간 축소 */
+    margin: 0.15rem; /* 요일 셀 간격 조정 */
+    border: none;
 }
 
 .react-datepicker__current-month {
-    font-size: 1.2em;
+    font-size: 1.3em; /* 월 표기 크기 조정 */
     font-weight: bold;
-    border-bottom: none; /* 상단 줄 제거 */
+    border-bottom: none;
+    margin-bottom: 0.8rem; /* 월 표기와 날짜 간격 조정 */
 }

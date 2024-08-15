@@ -52,6 +52,7 @@ const MessageDetailPage: React.FC = () => {
   const [isCheckModalOpen, setCheckModalOpen] = useState(false)
   const [replyModalId, setReplyModalId] = useState(0)
   const [isReportModalOpen, setReportModalOpen] = useState(false)
+  const [isModalOpen, setModalOpen] = useState<boolean>(false)
 
   const closeCheckModal = () => {
     setCheckModalOpen(false)
@@ -176,6 +177,15 @@ const MessageDetailPage: React.FC = () => {
   if (error) return <div>{error}</div>
 
   const isAdmin = message?.nickname === '관리자'
+
+  const reportUserClose = () =>{
+    setModalOpen(true)
+    setReportModalOpen(false)
+  }
+
+  const closeModal = () => {
+    setModalOpen(false)
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md relative">
@@ -357,8 +367,22 @@ const MessageDetailPage: React.FC = () => {
       {isReportModalOpen && (
         <ReportUserModal
           isOpen={isReportModalOpen}
-          onRequestClose={() => setReportModalOpen(false)}
+          onRequestClose={() => reportUserClose()}
           respondentId={String(message?.opponentId)} // number를 string으로 변환
+        />
+      )}
+
+  {isModalOpen && (
+        <Modal
+          title="신고 접수"
+          content="신고가 성공적으로 접수되었습니다."
+          iconSrc="src.alert"
+          onClose={closeModal}
+          headerBackgroundColor="#FF1B1B"
+          buttonBorderColor="#FF1B1B"
+          buttonTextColor="#FF1B1B"
+          imgColor="#333"
+          imgSize={100}
         />
       )}
     </div>

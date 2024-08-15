@@ -2,15 +2,12 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import MainPage from 'stories/pages/main/MainPage'
 import MissionPage from 'stories/pages/mission/MissionPage'
-import Weather from 'stories/pages/mission/Weather'
 import LoginPage from 'stories/pages/account/LoginPage'
 import SignUpPage from 'stories/pages/account/SignUpPage'
 import SurveyPage from 'stories/pages/account/SurveyPage'
 import ConsultationListPage from 'stories/pages/counsultation/ConsultationListPage'
 import ConsultationPage from 'stories/pages/counsultation/ConsultationPage'
 import VideoRoomComponent from 'stories/organisms/consultation/components/VideoRoomComponent'
-// import CounsultPage from 'stories/pages/counsultation/CounsultPage'
-// import Counsult from 'stories/pages/counsultation/Counsult.js'
 import ConsultationSharingPage from 'stories/pages/counsultation/ConsultationSharingPage'
 import HealthUpListPage from 'stories/pages/healthup/HealthUpListPage'
 import HealthUpPage from 'stories/pages/healthup/HealthUpPage'
@@ -24,12 +21,9 @@ import LandingPage from 'stories/pages/main/LandingPage'
 import ExLogin from 'stories/pages/account/ExLogin'
 import MyPage from 'stories/pages/account/MyPage'
 import ComponentPage from 'stories/pages/ComponentPage'
-import AuthPage from '@/stories/pages/account/AuthPage'
 import PrivateRoute from './PrivateRouter'
 import PasswordChangePage from '@/stories/pages/account/PasswordChangePage'
-import MissionForm from '@/stories/pages/mission/MissionForm.tsx'
 import CompleteMission from '@/stories/pages/mission/CompleteMission.tsx'
-import CalendarCompleteMission from '@/stories/pages/mission/CalendarCompleteMission.tsx'
 import MyPlant from '@/stories/pages/mission/MyPlant.tsx'
 import ModalExampleUsage from '@/stories/organisms/ModalExampleUsage'
 
@@ -47,8 +41,8 @@ const AppRouter: React.FC = () => {
       {/* 인증 여부 없이도 접속 가능한 페이지 */}
       <Route path="" element={<LandingPage />} />
       <Route path="/component" element={<ComponentPage />} />
-      <Route path="/home" element={<MainPage />} />
       <Route path="/modal" element={<ModalExampleUsage />} />
+      <Route path="/home" element={<MainPage />} />
 
       {/* 인증 반드시 필요한 페이지 */}
       <Route element={<PrivateRoute authentication={true} />}>
@@ -70,8 +64,6 @@ const AppRouter: React.FC = () => {
         <Route path="/mission" element={<MissionPage />} />
         {/* <Route path="/missionform" element={<MissionForm />} />
         <Route path="/complete" element={<CompleteMission />} /> */}
-        <Route path="/completecal" element={<CalendarCompleteMission />} />
-        <Route path="/weather" element={<Weather />} />
         <Route path="/plant" element={<MyPlant />} />
 
         {/* 관리자페이지 */}
