@@ -1,7 +1,7 @@
 package com.saessakmaeul.bitamin.exercise.service;
 
-import com.saessakmaeul.bitamin.exercise.dto.responseDto.ExcersizeDetailResponse;
-import com.saessakmaeul.bitamin.exercise.dto.responseDto.ExcersizeModelResponse;
+import com.saessakmaeul.bitamin.exercise.dto.response.ExcersizeDetailResponse;
+import com.saessakmaeul.bitamin.exercise.dto.response.ExcersizeModelResponse;
 import com.saessakmaeul.bitamin.exercise.entity.Excersize;
 import com.saessakmaeul.bitamin.exercise.entity.ExcersizeModel;
 import com.saessakmaeul.bitamin.exercise.repository.ExcersizeModelRepository;
