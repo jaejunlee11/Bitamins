@@ -5,9 +5,9 @@ module.exports = {
     extend: {
       fontFamily: {
         bagel: ['"Bagel Fat One"', 'cursive'],
-        nanum: ['"Nanum Gothic"', 'sans-serif'],
-        ownglyph: ['"Ownglyph ryuttung"', 'cursive'],
-        'bagel-fat-one': "'Bagel Fat One'",
+        nanum: ['Nanum Gothic', 'sans-serif'],
+        nanumBold: ['Nanum Gothic Bold', 'sans-serif'],
+        ownglyph: ['Ownglyph ryuttung', 'cursive'],
       },
     },
   },
