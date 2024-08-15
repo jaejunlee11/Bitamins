@@ -39,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
 
         logger.debug(requestURI + " " + method);
-
+        System.out.println(requestURI);
          if(requestURI.startsWith("/api/auth/login") ||
                  requestURI.startsWith("/api/auth/kakao") ||
                  requestURI.startsWith("/api/auth/google") ||
