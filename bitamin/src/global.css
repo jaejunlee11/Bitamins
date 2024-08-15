@@ -9,3 +9,23 @@ body {
   margin: 0;
   line-height: normal;
 }
+@font-face {
+  font-family: 'Nanum Gothic';
+  src: url('/fonts/NanumGothic.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Nanum Gothic Bold';
+  src: url('/fonts/NanumGothicBold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Ownglyph ryuttung';
+  src: url('/fonts/온글잎 류뚱체 (1).ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
