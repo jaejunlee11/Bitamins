@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import useAuthStore from '@/store/useAuthStore'
 import { useCookies } from 'react-cookie'
 import useUserStore from '@/store/useUserStore'
+import { BsSend } from 'react-icons/bs'
+import mainQuestImg from 'assets/image/mainQuestImg.png'
 
 const Header: FunctionComponent = () => {
   const navigate = useNavigate()
@@ -154,7 +156,7 @@ const Header: FunctionComponent = () => {
               <img
                 className="w-[1.188rem] relative h-[1.188rem] overflow-hidden shrink-0"
                 alt=""
-                src="PersonCircle.svg"
+                src={mainQuestImg}
               />
               <div
                 className="w-[4.5rem] h-[1.188rem] flex flex-row items-center justify-start gap-[0.25rem] cursor-pointer"
@@ -175,11 +177,7 @@ const Header: FunctionComponent = () => {
                   </div>
                 </div>
                 <div className="w-[0.563rem] h-[1.188rem] flex flex-col items-center justify-end py-[0.312rem] px-[0rem] box-border">
-                  <img
-                    className="w-[0.563rem] relative h-[0.375rem]"
-                    alt=""
-                    src="Vector.svg"
-                  />
+                  <img></img>
                 </div>
               </div>
             </div>
@@ -187,11 +185,7 @@ const Header: FunctionComponent = () => {
               className="h-[1.5rem] flex flex-row items-start justify-end cursor-pointer"
               onClick={onMessageClick}
             >
-              <img
-                className="w-[1.188rem] relative h-[1.231rem]"
-                alt=""
-                src="쪽지 버튼.svg"
-              />
+              <BsSend />
             </div>
           </div>
           {dropdownVisible && (
