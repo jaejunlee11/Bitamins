@@ -8,6 +8,7 @@ import {
   ChatGPTRequest,
   ChatGPTResponse,
   Message,
+  RoomData1,
 } from 'ts/consultationType'
 import { WebSocketService } from 'api/WebSocketService'
 
@@ -93,19 +94,17 @@ export const joinRandomRoom = async (type: string) => {
   }
 }
 
-// export const getRoomData = async (
-//   consultationId: number
-// ): Promise<RoomData> => {
-//   try {
-//     const response = await axiosInstance.get<RoomData>(
-//       `/consultation/${consultationId}`
-//     )
-//     return response.data
-//   } catch (error) {
-//     console.error('Error fetching room data:', error)
-//     throw error
-//   }
-// }
+export const getRoomData = async (consultationId: number) => {
+  try {
+    const response = await axiosInstance.get<RoomData1>(
+      `/consultations/${consultationId}`
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error fetching room data:', error)
+    throw error
+  }
+}
 
 // ChatGPT 메시지를 보내는 함수
 export const sendChatGPTMessage = async (
