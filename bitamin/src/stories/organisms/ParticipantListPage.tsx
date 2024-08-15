@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { fetchParticipants } from 'api/participantsAPI'
 import MessageModal from './MessageModal'
+import { BsSend } from 'react-icons/bs'
 
 interface Participant {
   id: number
@@ -42,13 +43,13 @@ const ParticipantListPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {participants.map((participant) => (
           <div key={participant.id} className="flex items-center border-b pb-4">
-            <span className="font-semibold">{participant.memberNickname}</span>
-            <img
-              src="path/to/icon.png" // 이미지 경로를 여기에 입력하세요
-              alt="Message Icon"
-              className="ml-2 w-6 h-6 cursor-pointer"
+            <span
+              className="font-semibold"
               onClick={() => openModal(participant)}
-            />
+            >
+              {participant.memberNickname}
+            </span>
+            <BsSend className="ml-2" onClick={() => openModal(participant)} />
           </div>
         ))}
       </div>

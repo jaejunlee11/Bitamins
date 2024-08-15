@@ -147,105 +147,110 @@ const ConsultationListPa: React.FC = () => {
   if (error) return <div className="text-center text-red-500">{error}</div>
 
   return (
-    <div className="max-w-screen-lg mx-auto p-8 bg-pink-50 min-h-screen">
-      <div className="flex justify-center space-x-4 mb-6">
-        {['전체', '독서', '영화', '미술', '음악', '대화'].map((type) => (
-          <button
-            key={type}
-            onClick={() => handleTypeChange(type)}
-            className={`py-2 px-4 rounded-full ${
-              selectedType === type
-                ? 'bg-orange-400 text-white'
-                : 'bg-pink-100 text-gray-700'
-            }`}
-          >
-            {type}
-          </button>
-        ))}
-      </div>
-
-      <ul className="space-y-4">
-        {ConsultationList.consultationList
-          .slice(0, visibleConsultations)
-          .map((consultation) => (
-            <li
-              key={consultation.id}
-              className="flex items-center justify-between p-4 bg-pink-50 rounded-lg shadow-md"
+    <>
+      <div
+        className="max-w-screen-lg mx-auto p-8 bg-pink-50 min-h-screen"
+        style={{ marginTop: 'calc(9/16*100vw*0.1)' }}
+      >
+        <div className="flex justify-center space-x-4 mb-6">
+          {['전체', '독서', '영화', '미술', '음악', '대화'].map((type) => (
+            <button
+              key={type}
+              onClick={() => handleTypeChange(type)}
+              className={`py-2 px-4 rounded-full ${
+                selectedType === type
+                  ? 'bg-orange-400 text-white'
+                  : 'bg-pink-100 text-gray-700'
+              }`}
             >
-              <div className="flex items-center space-x-4">
-                <span className="w-10 h-10 text-3xl">
-                  {consultation.isPrivated ? '🔒' : '🔓'}
-                </span>
-                <span className="py-1 px-2 bg-pink-200 text-gray-700 rounded-full">
-                  {consultation.category}
-                </span>
-                <span className="text-gray-700">
-                  {formatTime(consultation.startTime)}
-                </span>
-                <span className="text-gray-700">{consultation.title}</span>
-              </div>
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-700">
-                  {consultation.currentParticipants} / 5
-                </span>
-                <button
-                  onClick={() => handleJoinRoom(consultation)}
-                  className="py-2 px-4 bg-orange-400 text-white rounded-lg shadow"
-                >
-                  입장
-                </button>
-              </div>
-            </li>
+              {type}
+            </button>
           ))}
-      </ul>
+        </div>
 
-      {visibleConsultations < ConsultationList.consultationList.length && (
-        <div className="flex justify-center mt-4">
+        <ul className="space-y-4">
+          {ConsultationList.consultationList
+            .slice(0, visibleConsultations)
+            .map((consultation) => (
+              <li
+                key={consultation.id}
+                className="flex items-center justify-between p-4 bg-pink-50 rounded-lg shadow-md"
+              >
+                <div className="flex items-center space-x-4">
+                  <span className="w-10 h-10 text-3xl">
+                    {consultation.isPrivated ? '🔒' : '🔓'}
+                  </span>
+                  <span className="py-1 px-2 bg-pink-200 text-gray-700 rounded-full">
+                    {consultation.category}
+                  </span>
+                  <span className="text-gray-700">
+                    {formatTime(consultation.startTime)}
+                  </span>
+                  <span className="text-gray-700">{consultation.title}</span>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-700">
+                    {consultation.currentParticipants} / 5
+                  </span>
+                  <button
+                    onClick={() => handleJoinRoom(consultation)}
+                    className="py-2 px-4 bg-orange-400 text-white rounded-lg shadow"
+                  >
+                    입장
+                  </button>
+                </div>
+              </li>
+            ))}
+        </ul>
+
+        {visibleConsultations < ConsultationList.consultationList.length && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={showMoreConsultations}
+              className="bg-orange-400 text-white py-2 px-4 rounded-lg"
+            >
+              더보기
+            </button>
+          </div>
+        )}
+
+        <div className="flex justify-center mt-10">
           <button
-            onClick={showMoreConsultations}
-            className="bg-orange-400 text-white py-2 px-4 rounded-lg"
+            onClick={openModal}
+            className="bg-pink-100 p-4 rounded-lg text-gray-700 hover:bg-pink-200 transition"
           >
-            더보기
+            <i className="fas fa-plus-circle mr-2"></i> 새로운 방을 생성하세요
           </button>
         </div>
-      )}
 
-      <div className="flex justify-center mt-10">
-        <button
-          onClick={openModal}
-          className="bg-pink-100 p-4 rounded-lg text-gray-700 hover:bg-pink-200 transition"
-        >
-          <i className="fas fa-plus-circle mr-2"></i> 새로운 방을 생성하세요
-        </button>
+        <p className="text-center text-gray-500 mt-4">
+          어디로 들어가야 할 지 모르겠다면?{' '}
+          <span
+            className="text-orange-400 underline cursor-pointer"
+            onClick={openRandomModal}
+          >
+            click here !
+          </span>
+        </p>
+
+        {isModalOpen && <CreateRoomModal onClose={closeModal} />}
+        {isRandomModalOpen && (
+          <RandomConsultationModal
+            isOpen={isRandomModalOpen}
+            onClose={closeRandomModal}
+            onJoin={handleJoinRandomRoom}
+          />
+        )}
+        {isPasswordModalOpen && (
+          <PasswordModal
+            isOpen={isPasswordModalOpen}
+            onClose={() => setIsPasswordModalOpen(false)}
+            onSubmit={handlePasswordSubmit}
+            error={passwordError}
+          />
+        )}
       </div>
-
-      <p className="text-center text-gray-500 mt-4">
-        어디로 들어가야 할 지 모르겠다면?{' '}
-        <span
-          className="text-orange-400 underline cursor-pointer"
-          onClick={openRandomModal}
-        >
-          click here !
-        </span>
-      </p>
-
-      {isModalOpen && <CreateRoomModal onClose={closeModal} />}
-      {isRandomModalOpen && (
-        <RandomConsultationModal
-          isOpen={isRandomModalOpen}
-          onClose={closeRandomModal}
-          onJoin={handleJoinRandomRoom}
-        />
-      )}
-      {isPasswordModalOpen && (
-        <PasswordModal
-          isOpen={isPasswordModalOpen}
-          onClose={() => setIsPasswordModalOpen(false)}
-          onSubmit={handlePasswordSubmit}
-          error={passwordError}
-        />
-      )}
-    </div>
+    </>
   )
 }
 

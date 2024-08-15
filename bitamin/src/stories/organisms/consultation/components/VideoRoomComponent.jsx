@@ -104,6 +104,8 @@ class VideoRoomComponent extends Component {
     this.setState({
       maxCount: this.state.roomData?.category === '미술' ? 6 : 5,
     })
+
+    this.getRoomDataWithRetry(this.state.consultationId)
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -117,6 +119,26 @@ class VideoRoomComponent extends Component {
         const roomData = fetchRoomData.getState().roomData
         this.setState({ roomData })
       })
+    }
+  }
+
+  async getRoomDataWithRetry(consultationId, retryCount = 0) {
+    try {
+      await this.getRoomData(consultationId)
+      const roomData = fetchRoomData.getState().roomData
+      this.setState({ roomData })
+      console.log('roomdata입니다', roomData)
+    } catch (error) {
+      console.error('getRoomData 실패:', error)
+      if (retryCount < 10) {
+        // 재시도 횟수를 제한하려면 이 조건을 설정
+        console.log(`${retryCount + 1}번째 재시도 중...`)
+        setTimeout(() => {
+          this.getRoomDataWithRetry(consultationId, retryCount + 1)
+        }, 2000) // 2초 후 재시도
+      } else {
+        console.error('재시도 실패, 더 이상 시도하지 않음')
+      }
     }
   }
 
@@ -659,8 +681,8 @@ class VideoRoomComponent extends Component {
     useChatStore
       .getState()
       .sendMessage(
-        this.state.myUserName,
-        useChatStore.getState().sttText,
+        this.state.myUserName | null,
+        useChatStore.getState().sttText | null,
         '요약',
         this.state.consultationId
       )
@@ -691,6 +713,13 @@ class VideoRoomComponent extends Component {
     const roomData = this.state.roomData
     const localUser = this.state.localUser
     const chatDisplay = { display: this.state.chatDisplay }
+    const layoutStyle = {
+      marginTop: '60px', // Header height
+      marginBottom: '60px', // Footer height
+      height: 'calc(100vh - 120px)', // 전체 높이에서 Header와 Footer의 height를 뺀 나머지
+      overflow: 'hidden', // 레이아웃 영역 넘침 방지
+      position: 'relative', // 자식 요소의 절대 위치 설정을 위해
+    }
 
     return (
       <>
@@ -714,7 +743,7 @@ class VideoRoomComponent extends Component {
             onCancel={this.handleCancelLeave}
           />
         )}
-        <div className="container" id="container">
+        <div className="container" id="container" style={layoutStyle}>
           {/* <ToolbarComponent
             sessionId={mySessionId}
             user={localUser}
