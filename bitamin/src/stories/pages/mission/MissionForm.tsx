@@ -6,29 +6,24 @@ import emptyimg from '@/assets/missionImage/emptyImg.png'
 import deleteimg from '@/assets/missionImage/deleteImg.png'
 import missionchange from '@/assets/missionImage/missionchange.png'
 import styles from '/src/styles/mission/MissionPage.module.css'
-import missionDescriptionImg from '@/assets/missionImage/missionDescriptionImg.png'
-import MissionModal from './MissionModal'
+import missionDescriptionImg from '@/assets/missionImage/missionDescriptionImg.png';
+import MissionModal from './MissionModal';
 
 interface MissionFormProps {
-  onMissionComplete: () => void // 콜백 함수 정의
+  onMissionComplete: () => void; // 콜백 함수 정의
 }
 
 const MissionForm: React.FC<MissionFormProps> = ({ onMissionComplete }) => {
-  const { mission, substituteCount, fetchMission, handleSubstituteMission } =
-    useMissionStore()
+  const { mission, substituteCount, fetchMission, handleSubstituteMission } = useMissionStore()
   const [missionReview, setMissionReview] = useState<string>('')
   const [missionImage, setMissionImage] = useState<File | null>(null)
-  const [missionImagePreview, setMissionImagePreview] = useState<string | null>(
-    null
-  )
+  const [missionImagePreview, setMissionImagePreview] = useState<string | null>(null)
   const [phraseUrl, setPhraseUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [completeDate, setCompleteDate] = useState<Date | null>(null)
   const [showModal, setShowModal] = useState<boolean>(false)
-  const [selectedMissionId, setSelectedMissionId] = useState<number | null>(
-    null
-  )
+  const [selectedMissionId, setSelectedMissionId] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -36,14 +31,11 @@ const MissionForm: React.FC<MissionFormProps> = ({ onMissionComplete }) => {
     setCompleteDate(new Date())
 
     const fetchPhrase = async () => {
-      const todayDate = new Date()
-        .toLocaleDateString('ko-KR', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        })
-        .replace(/\. /g, '-')
-        .replace('.', '')
+      const todayDate = new Date().toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).replace(/\. /g, '-').replace('.', '');
       try {
         const phraseResponse = await getMemberPhraseByDate(todayDate)
         if (phraseResponse.success) {
@@ -67,14 +59,11 @@ const MissionForm: React.FC<MissionFormProps> = ({ onMissionComplete }) => {
       setLoading(true)
       const completeDateStr = completeDate?.toISOString().split('T')[0]
       const formData = new FormData()
-      formData.append(
-        'memberMissionRequest',
-        JSON.stringify({
-          missionReview,
-          completeDate: completeDateStr,
-          missionId: mission.id,
-        })
-      )
+      formData.append('memberMissionRequest', JSON.stringify({
+        missionReview,
+        completeDate: completeDateStr,
+        missionId: mission.id,
+      }))
       formData.append('missionImage', missionImage)
 
       const response = await submitMission(formData)
@@ -145,15 +134,9 @@ const MissionForm: React.FC<MissionFormProps> = ({ onMissionComplete }) => {
             </div>
             <div className={styles.missionNameForm}>
               {mission.missionName}
-              <button
-                onClick={() => openModal(mission.id)}
-                className={styles.modalButton}
-              >
-                <img
-                  src={missionDescriptionImg}
-                  alt="정보 보기"
-                  style={{ width: '24px', height: '24px', marginLeft: '15px' }}
-                />
+              <button onClick={() => openModal(mission.id)} className={styles.modalButton}>
+                <img src={missionDescriptionImg} alt="정보 보기"
+                     style={{ width: '24px', height: '24px', marginLeft: '15px' }} />
               </button>
             </div>
             <div className={styles.missionChange}>
@@ -167,12 +150,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ onMissionComplete }) => {
                 }}
               />
             </div>
+
           </h3>
           <div className={styles.missionSubstituteInfo}>
-            <p>
-              미션 교체는 하루에 5번 가능합니다. (남은 횟수:{' '}
-              {5 - substituteCount}번)
-            </p>
+            <p>미션 교체는 하루에 5번 가능합니다. (남은 횟수: {5 - substituteCount}번)</p>
           </div>
           <div className={styles.missionContent}>
             {missionImagePreview ? (
@@ -182,10 +163,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ onMissionComplete }) => {
                   alt="미션 이미지 미리보기"
                   className={styles.missionImagePreview}
                 />
-                <button
-                  onClick={handleImageDelete}
-                  className={styles.deleteButton}
-                >
+                <button onClick={handleImageDelete} className={styles.deleteButton}>
                   <img src={deleteimg} alt="삭제 이미지" />
                 </button>
               </div>
@@ -220,9 +198,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ onMissionComplete }) => {
               </audio>
             )}
 
-            <button onClick={handleMissionSubmit} className={styles.saveButton}>
-              저장
-            </button>
+            <button onClick={handleMissionSubmit} className={styles.saveButton}>저장</button>
           </div>
         </div>
       ) : (

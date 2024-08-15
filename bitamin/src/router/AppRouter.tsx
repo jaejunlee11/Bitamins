@@ -28,7 +28,6 @@ import AuthPage from '@/stories/pages/account/AuthPage'
 import PrivateRoute from './PrivateRouter'
 import PasswordChangePage from '@/stories/pages/account/PasswordChangePage'
 import CompleteMission from '@/stories/pages/mission/CompleteMission.tsx'
-import CalendarCompleteMission from '@/stories/pages/mission/CalendarCompleteMission.tsx'
 import MyPlant from '@/stories/pages/mission/MyPlant.tsx'
 import ModalExampleUsage from '@/stories/organisms/ModalExampleUsage'
 
@@ -69,7 +68,6 @@ const AppRouter: React.FC = () => {
         <Route path="/mission" element={<MissionPage />} />
         {/* <Route path="/missionform" element={<MissionForm />} />
         <Route path="/complete" element={<CompleteMission />} /> */}
-        <Route path="/completecal" element={<CalendarCompleteMission />} />
         <Route path="/weather" element={<Weather />} />
         <Route path="/plant" element={<MyPlant />} />
 

@@ -48,43 +48,116 @@
     flex-direction: column;
 }
 
-/*.plantBox {*/
-/*    display: flex;*/
-/*    flex-direction: column;*/
-/*    justify-content: center;*/
-/*    align-items: center;*/
-/*    background-color: rgba(117, 202, 117, 0.42);*/
-/*    border-radius: 10px;*/
-/*    padding: 20px;*/
-/*    box-sizing: border-box;*/
-/*    width: 100%;*/
-/*    max-width: 1150px;*/
-/*    height: 50vh;*/
-/*    margin: 20px auto;*/
-/*    text-align: center;*/
-/*    box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.2);*/
-/*}*/
-
-
 .plantBox {
     position: relative;
-    background-size: cover; /* 이미지가 박스 크기에 맞게 조정되도록 설정 */
-    background-position: center; /* 이미지를 박스 중앙에 위치하도록 설정 */
-    background-repeat: no-repeat; /* 이미지 반복을 방지 */
-    padding: 20px; /* 내용과 배경 이미지 간의 간격 확보 */
-    z-index: 1; /* 배경 이미지가 가장 뒤에 있도록 설정 */
-    border-radius: 8px; /* 모서리 둥글게 설정 (선택 사항) */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 20px;
+    z-index: 1;
+    border-radius: 8px;
     width: 100%;
     max-width: 1150px;
     height: 50vh;
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px;
 }
 
 .plantBox > * {
-    position: relative; /* 모든 자식 요소들이 배경 이미지 위에 오도록 설정 */
-    z-index: 2; /* 자식 요소들이 배경 이미지 위에 표시되도록 설정 */
+    position: relative;
+    z-index: 2;
 }
 
+.levelGif {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 30%;
+    height: auto;
+}
 
+.level2Gif {
+    max-width: 50%;
+}
+
+.experienceInfoImg {
+    max-width: 5%;
+    margin-left: 2.23rem;
+    margin-bottom: 0.5rem;
+    animation: nodding 2s infinite ease-in-out;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+}
+
+.clickme {
+    max-width: 5%;
+    animation: growShrink 1.5s infinite ease-in-out;
+}
+
+@keyframes growShrink {
+    0%, 100% {
+        transform: rotate(-35deg) scale(1);
+    }
+    50% {
+        transform: rotate(-35deg) scale(1.2);
+    }
+}
+
+@keyframes nodding {
+    0% {
+        transform: rotate(0deg);
+    }
+    20% {
+        transform: rotate(-8deg);
+    }
+    50% {
+        transform: rotate(0deg);
+    }
+    80% {
+        transform: rotate(8deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.postitContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.postitContainer img {
+    width: 50%;
+    height: auto;
+    display: block;
+}
+
+.textOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-top: 0.5rem;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: black;
+    font-size: 0.9rem;
+    text-align: center;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.textOverlay h3 {
+    font-weight: bold;
+}
+
+.textOverlay p + h3 {
+    margin-top: 1rem;
+}
 
 .missionContainer {
     display: flex;
@@ -223,7 +296,6 @@
     box-sizing: border-box;
     flex-shrink: 0;
 }
-
 
 .missionDetails p {
     position: relative;
