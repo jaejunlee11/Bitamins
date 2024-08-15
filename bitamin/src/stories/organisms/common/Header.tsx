@@ -168,7 +168,7 @@ const Header: FunctionComponent = () => {
                       <div>로딩 중...</div>
                     ) : (
                       <span className="w-full whitespace-nowrap">
-                        <span className="text-[1rem]">{user?.name}</span>
+                        <span className="text-[1.3rem]">{user?.name}</span>
                         <span className="font-ownglyph text-[1rem]">
                           <span className="text-[1rem]">님</span>
                         </span>
