@@ -29,7 +29,7 @@ const Footer: FunctionComponent = () => {
             </div>
           </div>
           <div className="flex flex-row items-center justify-start gap-[0.25vw]">
-            <img
+            {/* <img
               className="w-[1.5vw] h-[1.5vw] object-cover"
               alt=""
               src="Facebook.png"
@@ -43,7 +43,7 @@ const Footer: FunctionComponent = () => {
               className="w-[1.5vw] h-[1.5vw] object-cover"
               alt=""
               src="YouTube.png"
-            />
+            /> */}
           </div>
         </div>
       </div>

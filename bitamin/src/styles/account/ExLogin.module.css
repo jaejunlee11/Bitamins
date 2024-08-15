@@ -112,16 +112,16 @@
 }
 .div13 {
   position: absolute;
-  top: 54.11vh; /* 기존 top: 481.12px */
-  left: 43.28vw; /* 기존 left: 447px */
-  font-size: 1.64vw; /* 기존 font-size: 20px */
+  top: 54.11vh;
+  left: 43.28vw;
+  font-size: 1.64vw;
   color: #000;
 }
 /* 비타민 특징 밑줄 */
 .child9 {
   position: absolute;
-  top: 82vh; /* 기존 top: 676px */
-  left: 11.44vw; /* 기존 left: 137px */
+  top: 82vh;
+  left: 11.44vw;
   border-radius: 2px;
   background-color: #f9ea9b;
   width: 8vw;
@@ -175,17 +175,17 @@
   position: absolute;
   top: 118.9vh;
   left: 45%;
-  font-size: 0.98vw;
+  font-size: 0.99vw;
   color: #777;
 }
 .child10 {
   position: absolute;
-  top: 119.9vh; /* 기존 top: 1199px */
-  left: 23.23vw; /* 기존 left: 448px */
+  top: 123.9vh; /* 기존 top: 1199px */
+  left: 39.23vw; /* 기존 left: 448px */
   filter: blur(15px);
-  background-color: rgba(217, 217, 217, 0.82);
-  width: 10.68vw; /* 기존 width: 205px */
-  height: 0.78vh; /* 기존 height: 15px */
+  background-color: rgba(255, 247, 133, 0.889);
+  width: 18.68vw; /* 기존 width: 205px */
+  height: 0.98vh; /* 기존 height: 15px */
 }
 .b1 {
   font-family: Lato;
