@@ -25,11 +25,14 @@ const MainPage: React.FC = () => {
   const [isEnded, setIsEnded] = useState(false)
   const [media, setMedia] = useState<MediaRecorder | null>(null)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
-  const [consultOpacityClass, setConsultOpacityClass] = useState(styles.transparent)
+  const [consultOpacityClass, setConsultOpacityClass] = useState(
+    styles.transparent
+  )
   const [questOpacityClass, setQuestOpacityClass] = useState(styles.transparent)
   const [isModalOpen, setIsModalOpen] = useState(false) // 모달 상태 추가
 
-  const { phraseId, phraseContent, fetchPhrase, isSaved, setSaved } = usePhraseStore()
+  const { phraseId, phraseContent, fetchPhrase, isSaved, setSaved } =
+    usePhraseStore()
 
   useEffect(() => {
     fetchPhrase()
@@ -51,14 +54,14 @@ const MainPage: React.FC = () => {
   }
 
   useEffect(() => {
-    const init = async()=> {
+    const init = async () => {
       const result = await HealthReportCheck()
-      if(result.result==0){
+      if (result.result == 0) {
         setCheckModalOpen(true)
       }
     }
 
-    init();
+    init()
   }, [])
   const onRecAudio = () => {
     if (isSaved) return // 녹음이 저장되었을 경우 녹음 불가
@@ -157,12 +160,16 @@ const MainPage: React.FC = () => {
 
   const handleMouseEnterConsult = () => {
     setConsultOpacityClass(styles.opaque)
-    document.querySelector(`.${styles.consultBorder}`)?.classList.add(styles.glow)
+    document
+      .querySelector(`.${styles.consultBorder}`)
+      ?.classList.add(styles.glow)
   }
 
   const handleMouseLeaveConsult = () => {
     setConsultOpacityClass(styles.transparent)
-    document.querySelector(`.${styles.consultBorder}`)?.classList.remove(styles.glow)
+    document
+      .querySelector(`.${styles.consultBorder}`)
+      ?.classList.remove(styles.glow)
   }
 
   const handleMouseEnterQuest = () => {
@@ -172,7 +179,9 @@ const MainPage: React.FC = () => {
 
   const handleMouseLeaveQuest = () => {
     setQuestOpacityClass(styles.transparent)
-    document.querySelector(`.${styles.questBorder}`)?.classList.remove(styles.glow)
+    document
+      .querySelector(`.${styles.questBorder}`)
+      ?.classList.remove(styles.glow)
   }
 
   const openModal = () => {
@@ -194,7 +203,6 @@ const MainPage: React.FC = () => {
     <>
       {isModalOpen && <RecordModal onClose={closeModal} />}
       <div className={styles.container}>
-
         <div className={styles.innerSection}>
           <img
             className={styles.mainImg}
@@ -217,7 +225,9 @@ const MainPage: React.FC = () => {
             <img
               className={styles.recordBtn}
               alt=""
-              src={isRecording ? recordStop : isEnded ? recordPlay : recordStart}
+              src={
+                isRecording ? recordStop : isEnded ? recordPlay : recordStart
+              }
               onClick={isEnded ? onPlayClick : onRecordClick}
             />
             {isEnded && !isSaved && (

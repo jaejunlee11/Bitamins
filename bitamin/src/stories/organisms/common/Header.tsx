@@ -86,7 +86,7 @@ const Header: FunctionComponent = () => {
           onClick={onConsultationClick}
         >
           <div className="w-[5rem] h-[1.438rem] flex flex-row items-end justify-center">
-            <div className="relative text-[1.2rem]">상담</div>
+            <div className="relative text-[1rem]">상담</div>
           </div>
           <div
             className={`w-full mt-2 h-[0.125rem] ${
@@ -101,7 +101,7 @@ const Header: FunctionComponent = () => {
           onClick={onMissionClick}
         >
           <div className="w-[5rem] h-[1.438rem] flex flex-row items-end justify-center">
-            <div className="relative text-[1.2rem]">미션</div>
+            <div className="relative text-[1rem]">미션</div>
           </div>
           <div
             className={`w-full mt-2 h-[0.125rem] ${
@@ -116,7 +116,7 @@ const Header: FunctionComponent = () => {
           onClick={onHealthUPClick}
         >
           <div className="w-[5rem] h-[1.438rem] flex flex-row items-end justify-end">
-            <div className="relative text-[1.2rem]">건강</div>
+            <div className="relative text-[1rem]">건강</div>
             <div className="w-[1.688rem] h-[2.25rem] flex flex-row items-start justify-center ml-[-0.25rem] text-brand-primary font-ownglyph-ryuttung">
               <div className="w-[1.375rem] relative flex items-center justify-center h-[2.063rem] shrink-0">
                 UP
@@ -160,13 +160,13 @@ const Header: FunctionComponent = () => {
                 className="w-[4.5rem] h-[1.188rem] flex flex-row items-center justify-start gap-[0.25rem] cursor-pointer"
                 onClick={toggleDropdown}
               >
-                <div className="h-[1.563rem] flex flex-row items-center justify-center">
+                <div className="h-[1.563rem] flex flex-col items-center justify-center">
                   <div className="w-[5rem] relative flex items-center h-[1.5rem] shrink-0">
                     {loading ? (
                       <div>로딩 중...</div>
                     ) : (
-                      <span className="w-full">
-                        <span className="text-[1.2rem]">{user?.name}</span>
+                      <span className="w-full whitespace-nowrap">
+                        <span className="text-[1rem]">{user?.name}</span>
                         <span className="font-nanumbarunpen text-[1rem]">
                           <span className="text-[1rem]">님</span>
                         </span>
@@ -197,13 +197,13 @@ const Header: FunctionComponent = () => {
           {dropdownVisible && (
             <div className="absolute top-[5rem] left-0 w-[6rem] shadow-[4px_4px_25px_rgba(0,_0,_0,_0.25)] flex flex-col items-start justify-start mt-[0.25rem] text-[0.875rem] text-gray bg-white rounded-[0.25rem]">
               <div
-                className="w-full py-[0.5rem] px-[1rem] cursor-pointer hover:bg-gray-100"
+                className="w-full py-[0.5rem] px-[1rem] cursor-pointer hover:bg-gray-100 whitespace-nowrap"
                 onClick={() => navigate('/mypage')}
               >
                 마이페이지
               </div>
               <div
-                className="w-full py-[0.5rem] px-[1rem] cursor-pointer hover:bg-gray-100"
+                className="w-full py-[0.5rem] px-[1rem] cursor-pointer hover:bg-gray-100 whitespace-nowrap"
                 onClick={onLogoutClick}
               >
                 로그아웃
@@ -212,9 +212,9 @@ const Header: FunctionComponent = () => {
           )}
         </div>
       ) : (
-        <div className="w-[12rem] h-full flex flex-row items-center justify-center gap-[0.187rem] text-dimgray">
+        <div className="w-[12rem] h-full flex flex-row items-center justify-center gap-[0.287rem] text-dimgray whitespace-nowrap">
           <div
-            className="w-[4rem] relative flex items-center justify-center h-[2rem] shrink-0 cursor-pointer text-[1.2rem]"
+            className="w-[4rem] relative flex items-center justify-center h-[2rem] shrink-0 cursor-pointer text-[1rem]"
             onClick={onLoginTextClick}
           >
             로그인
@@ -223,7 +223,7 @@ const Header: FunctionComponent = () => {
             /
           </div>
           <div
-            className="relative cursor-pointer w-[8rem] text-[1.2rem]"
+            className="relative cursor-pointer w-[8rem] text-[1rem]"
             onClick={onSignupTextClick}
           >
             회원가입

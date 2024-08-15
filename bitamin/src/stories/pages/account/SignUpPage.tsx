@@ -362,6 +362,7 @@ const SignUpPage: React.FC = () => {
               )}
               {error && <div className={styles.error}>{error}</div>}
               {success && <div className={styles.success}>{success}</div>}
+
               <div className={styles.component55Child}>
                 <button type="submit" className={styles.div3}>
                   가입

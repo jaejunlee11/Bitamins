@@ -15,7 +15,7 @@ const LandingPage: React.FC = () => {
     const timer = setTimeout(() => {
       setFadeOut(true) // 페이드아웃
       setTimeout(() => {
-        navigate('/home') // 로그인 전 페이지 이동
+        navigate('/loginex') // 로그인 전 페이지 이동
       }, fadeOutDuration)
     }, typingDuration + waitDuration)
 

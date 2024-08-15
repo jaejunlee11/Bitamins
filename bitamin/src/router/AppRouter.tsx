@@ -9,8 +9,6 @@ import SurveyPage from 'stories/pages/account/SurveyPage'
 import ConsultationListPage from 'stories/pages/counsultation/ConsultationListPage'
 import ConsultationPage from 'stories/pages/counsultation/ConsultationPage'
 import VideoRoomComponent from 'stories/organisms/consultation/components/VideoRoomComponent'
-// import CounsultPage from 'stories/pages/counsultation/CounsultPage'
-// import Counsult from 'stories/pages/counsultation/Counsult.js'
 import ConsultationSharingPage from 'stories/pages/counsultation/ConsultationSharingPage'
 import HealthUpListPage from 'stories/pages/healthup/HealthUpListPage'
 import HealthUpPage from 'stories/pages/healthup/HealthUpPage'
@@ -24,7 +22,6 @@ import LandingPage from 'stories/pages/main/LandingPage'
 import ExLogin from 'stories/pages/account/ExLogin'
 import MyPage from 'stories/pages/account/MyPage'
 import ComponentPage from 'stories/pages/ComponentPage'
-import AuthPage from '@/stories/pages/account/AuthPage'
 import PrivateRoute from './PrivateRouter'
 import PasswordChangePage from '@/stories/pages/account/PasswordChangePage'
 import CompleteMission from '@/stories/pages/mission/CompleteMission.tsx'
@@ -45,8 +42,8 @@ const AppRouter: React.FC = () => {
       {/* 인증 여부 없이도 접속 가능한 페이지 */}
       <Route path="" element={<LandingPage />} />
       <Route path="/component" element={<ComponentPage />} />
-      <Route path="/home" element={<MainPage />} />
       <Route path="/modal" element={<ModalExampleUsage />} />
+      <Route path="/home" element={<MainPage />} />
 
       {/* 인증 반드시 필요한 페이지 */}
       <Route element={<PrivateRoute authentication={true} />}>

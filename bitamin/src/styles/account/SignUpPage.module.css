@@ -70,6 +70,13 @@
   font-size: 1rem;
   box-sizing: border-box;
 }
+.div3 {
+  background-color: #ff713c;
+  padding: 10px;
+  width: 100%;
+  height: 1px;
+  margin-bottom: 20px;
+}
 
 .component55Child,
 .component56Child {
@@ -80,6 +87,7 @@
   width: 100%;
   margin-bottom: 20px;
   font-size: 1rem;
+  font-weight: bold;
   border-radius: 4px;
   cursor: pointer;
 }
