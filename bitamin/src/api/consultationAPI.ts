@@ -58,17 +58,20 @@ export const joinRoom = async (joinData: JoinData) => {
       joinData
     )
 
-    // 방에 성공적으로 참여한 후 WebSocket 구독을 시작
-    const consultationId = response.data.id // 참여한 방의 ID
-    const webSocketService = new WebSocketService() // WebSocketService 인스턴스 생성
-    webSocketService.activate() // WebSocket 연결 활성화
-    webSocketService.subscribeToTopic(
-      `/sub/consultations/${consultationId}`,
-      (message) => {
-        console.log('Received message in joinRoom:', message)
-        // 여기서 받은 메시지를 처리하는 로직을 추가할 수 있음
-      }
-    )
+    // // 방에 성공적으로 참여한 후 WebSocket 구독을 시작
+    // const consultationId = response.data.id // 참여한 방의 ID
+    // const webSocketService = new WebSocketService() // WebSocketService 인스턴스 생성
+    // webSocketService.activate() // WebSocket 연결 활성화
+    // setTimeout(() => {
+    //   webSocketService.subscribeToTopic(
+    //     `/sub/consultations/${consultationId}`,
+    //     (message) => {
+    //       console.log('Received message in joinRoom:', message)
+    //       // 여기서 받은 메시지를 처리하는 로직을 추가할 수 있음
+    //     }
+    //   )
+    // }, 5000);
+   
     return response.data
   } catch (error) {
     console.error('Error joining room:', error)
