@@ -25,7 +25,7 @@ const ExLogin: React.FC = () => {
   return (
     <div>
       <div className={styles.innerSection}>
-        <img className={styles.mainImg2} alt="Main Image" src={mainImg} />
+        <img className={styles.mainImg} alt="Main Image" src={mainImg} />
         <div className={styles.inner}>
           <div className={styles.div3}>
             <p className={styles.p}>{phraseContent}</p>
