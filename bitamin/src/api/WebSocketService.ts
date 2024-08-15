@@ -8,7 +8,7 @@ export class WebSocketService {
   constructor() {
     const { accessToken } = useAuthStore.getState()
     this.client = new Client({
-      brokerURL: 'ws://i11b105.p.ssafy.io/api/ws', // WebSocket URL 설정
+      brokerURL: 'wss://i11b105.p.ssafy.io/api/ws', // WebSocket URL 설정
       connectHeaders: {
         Authorization: `Bearer ${accessToken}`,
       },
