@@ -124,14 +124,19 @@ class VideoRoomComponent extends Component {
 
   async getRoomDataWithRetry(consultationId, retryCount = 0) {
     try {
+      console.log(`${retryCount + 1}번째 시도 중...`)
       await this.getRoomData(consultationId)
+
       const roomData = fetchRoomData.getState().roomData
+      if (!roomData) {
+        throw new Error('roomData가 null 또는 undefined입니다.')
+      }
+
       this.setState({ roomData })
       console.log('roomdata입니다', roomData)
     } catch (error) {
       console.error('getRoomData 실패:', error)
-      if (retryCount < 10) {
-        // 재시도 횟수를 제한하려면 이 조건을 설정
+      if (retryCount < 20) {
         console.log(`${retryCount + 1}번째 재시도 중...`)
         setTimeout(() => {
           this.getRoomDataWithRetry(consultationId, retryCount + 1)
