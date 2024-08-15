@@ -17,6 +17,7 @@ import {
   leaveConsultation,
   // getRoomData,
 } from 'api/consultationAPI'
+import { WebSocketService } from 'api/WebSocketService'
 
 // Consultation List 상태 관리
 interface ConsultationState {
@@ -75,13 +76,27 @@ export const joinConsultation = create<JoinConsultationState>()(
       joinRoom: async (joinData: JoinData) => {
         try {
           const consultation = await joinRoom(joinData)
+          const consultationId = consultation.id // 참여한 방의 ID
+          const webSocketService = new WebSocketService() // WebSocketService 인스턴스 생성
+          webSocketService.activate() // WebSocket 연결 활성화
 
-          // const roomData = await getRoomData(consultation.id)
-          await // 받은 consultation 데이터를 zustand 스토어에 저장
+          // 주제를 구독하고 메시지를 처리하는 로직을 추가합니다.
+          webSocketService.subscribeToTopic(
+            `/sub/consultations/${consultationId}`,
+            (message) => {
+              console.log('Received message in joinRoom:', message)
+
+              // 여기서 받은 메시지를 처리하는 로직을 추가할 수 있습니다.
+              // 예를 들어, 메시지를 UI에 표시하거나 알림을 띄울 수 있습니다.
+              if (message.type === 'USER_JOINED') {
+                console.log(`${message.content}님이 입장하셨습니다.`)
+                // UI 업데이트 로직 추가
+              }
+            }
+          )
+
           set({ joinconsultation: consultation })
-          // set({ joinconsultation: consultation, roomData })
 
-          // consultation 데이터를 반환하여 사용 가능하게 함
           return consultation
         } catch (error) {
           console.error('Failed to join room:', error)
