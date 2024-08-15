@@ -10,7 +10,7 @@ import com.saessakmaeul.bitamin.mission.entity.UserExperience;
 import com.saessakmaeul.bitamin.mission.repository.MemberExperienceRepository;
 import com.saessakmaeul.bitamin.mission.repository.MemberMissionRepository;
 import com.saessakmaeul.bitamin.mission.repository.MissionRepository;
-import com.saessakmaeul.bitamin.service.S3Service;
+import com.saessakmaeul.bitamin.util.file.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

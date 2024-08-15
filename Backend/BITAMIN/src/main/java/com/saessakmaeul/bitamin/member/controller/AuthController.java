@@ -1,12 +1,10 @@
 package com.saessakmaeul.bitamin.member.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saessakmaeul.bitamin.exception.ApplicationException;
 import com.saessakmaeul.bitamin.member.dto.request.LoginRequest;
 import com.saessakmaeul.bitamin.member.dto.response.AuthResponse;
 import com.saessakmaeul.bitamin.member.service.MemberService;
-import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -152,8 +147,8 @@ public class AuthController {
         try{
             // 로그인
             LoginRequest loginRequest = memberService.kakaoLogin(code);
-            URI redirectUri = new URI("http://localhost:5173/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
-//            URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+            URI redirectUri = new URI("http://localhost:5173/login?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+//            URI redirectUri = new URI("https://i11b105.p.ssafy.io/login?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setLocation(redirectUri);
             return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
@@ -162,8 +157,8 @@ public class AuthController {
                 StringTokenizer st = new StringTokenizer(e.getMessage(),"/");
                 st.nextToken();
                 // 리다이렉트
-//                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
-                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken(); //테스트
+//                String redirectUrl = "https://i11b105.p.ssafy.io/signup?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
+                 String redirectUrl =  "http://localhost:5173/signup?email="+st.nextToken()+"&password="+st.nextToken(); //테스트
                 URI redirectUriWithParams = new URI(redirectUrl);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setLocation(redirectUriWithParams);
@@ -210,8 +205,8 @@ public class AuthController {
         try{
             // 로그인
             LoginRequest loginRequest = memberService.googleLogin(code);
-            URI redirectUri = new URI("http://localhost:5173/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
-//            URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+            URI redirectUri = new URI("http://localhost:5173/login?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+//            URI redirectUri = new URI("https://i11b105.p.ssafy.io/login?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setLocation(redirectUri);
             return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
@@ -220,8 +215,8 @@ public class AuthController {
                 StringTokenizer st = new StringTokenizer(e.getMessage(),"/");
                 st.nextToken();
                 // 리다이렉트
-//                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
-                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken(); //테스트
+//                String redirectUrl = "https://i11b105.p.ssafy.io/signup?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
+                 String redirectUrl =  "http://localhost:5173/signup?email="+st.nextToken()+"&password="+st.nextToken(); //테스트
                 URI redirectUriWithParams = new URI(redirectUrl);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setLocation(redirectUriWithParams);
@@ -267,8 +262,8 @@ public class AuthController {
         try{
             // 로그인
             LoginRequest loginRequest = memberService.naverLogin(code);
-            URI redirectUri = new URI("http://localhost:5173/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
-//            URI redirectUri = new URI("https://i11b105.p.ssafy.io/loginex?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+            URI redirectUri = new URI("http://localhost:5173/login?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
+//            URI redirectUri = new URI("https://i11b105.p.ssafy.io/login?email="+loginRequest.getEmail()+"&password="+loginRequest.getPassword());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setLocation(redirectUri);
             return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
@@ -277,8 +272,8 @@ public class AuthController {
                 StringTokenizer st = new StringTokenizer(e.getMessage(),"/");
                 st.nextToken();
                 // 리다이렉트
-//                String redirectUrl = "https://i11b105.p.ssafy.io/auth?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
-                 String redirectUrl =  "http://localhost:5173/auth?email="+st.nextToken()+"&password="+st.nextToken(); //테스트
+//                String redirectUrl = "https://i11b105.p.ssafy.io/signup?email="+st.nextToken()+"&password="+st.nextToken(); // 배포
+                 String redirectUrl =  "http://localhost:5173/signup?email="+st.nextToken()+"&password="+st.nextToken(); //테스트
                 URI redirectUriWithParams = new URI(redirectUrl);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setLocation(redirectUriWithParams);

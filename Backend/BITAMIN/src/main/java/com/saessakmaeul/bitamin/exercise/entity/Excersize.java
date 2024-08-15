@@ -21,9 +21,6 @@ public class Excersize {
     @Column(name = "level")
     private int level;
 
-    @Column(name = "exercise_key")
-    private String exerciseKey;
-
     @Column(name = "exercise_url")
     private String exerciseUrl;
 }

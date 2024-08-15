@@ -1,8 +1,8 @@
 package com.saessakmaeul.bitamin.complaint.service;
 
-import com.saessakmaeul.bitamin.complaint.dto.requestDto.ComplaintRegistRequest;
-import com.saessakmaeul.bitamin.complaint.dto.responseDto.ComplaintSimpleResponse;
-import com.saessakmaeul.bitamin.complaint.dto.responseDto.ComplatinDetailResponse;
+import com.saessakmaeul.bitamin.complaint.dto.request.ComplaintRegistRequest;
+import com.saessakmaeul.bitamin.complaint.dto.response.ComplaintSimpleResponse;
+import com.saessakmaeul.bitamin.complaint.dto.response.ComplatinDetailResponse;
 import com.saessakmaeul.bitamin.complaint.entity.Complaint;
 import com.saessakmaeul.bitamin.complaint.entity.UserStop;
 import com.saessakmaeul.bitamin.complaint.repository.ComplaintRepository;
@@ -10,10 +10,8 @@ import com.saessakmaeul.bitamin.complaint.repository.UserStopRepository;
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.entity.Role;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
-import com.saessakmaeul.bitamin.message.dto.requestDto.MessageRegistRequest;
-import com.saessakmaeul.bitamin.message.entity.Message;
+import com.saessakmaeul.bitamin.message.dto.request.MessageRegistRequest;
 import com.saessakmaeul.bitamin.message.service.MessageService;
-import jakarta.persistence.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

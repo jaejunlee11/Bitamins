@@ -4,7 +4,7 @@ import com.saessakmaeul.bitamin.mission.dto.request.MemberMissionRequest;
 import com.saessakmaeul.bitamin.mission.dto.request.MemberPhraseRequest;
 import com.saessakmaeul.bitamin.mission.dto.response.*;
 import com.saessakmaeul.bitamin.mission.service.*;
-import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +34,15 @@ public class MissionController {
         // Service 호출
         ApiResponse<MissionResponse> missionResponse = missionService.readMission(memberId);
         return missionResponse;
+    }
+
+    // 미션 설명 보기
+    @GetMapping("/description")
+    public ApiResponse<MissionDescriptionResponse> getMissionDescription(@RequestParam("missionId") Long missionId){
+
+        // Service 호출
+        ApiResponse<MissionDescriptionResponse> missionDescription = missionService.readMissionDescription(missionId);
+        return missionDescription;
     }
 
     // 미션 교체

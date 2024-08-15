@@ -1,4 +1,4 @@
-package com.saessakmaeul.bitamin.service;
+package com.saessakmaeul.bitamin.util.file.service;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
