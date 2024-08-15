@@ -17,9 +17,11 @@ import HeaderAfterLogin from '@/stories/organisms/common/HeaderAfterLogin'
 import { useNavigate } from 'react-router-dom'
 import { HealthReportCheck } from 'api/userAPI'
 import CheckModal from '@/stories/organisms/CheckModal'
+import useUserStore from '@/store/useUserStore'
 
 const MainPage: React.FC = () => {
   const navigate = useNavigate()
+  const { user, fetchUser, loading, clearUserData } = useUserStore()
 
   const [isRecording, setIsRecording] = useState(false)
   const [isEnded, setIsEnded] = useState(false)
@@ -36,6 +38,7 @@ const MainPage: React.FC = () => {
 
   useEffect(() => {
     fetchPhrase()
+    fetchUser()
   }, [fetchPhrase])
   const [isCheckModalOpen, setCheckModalOpen] = useState(false)
 
