@@ -12,6 +12,9 @@ import useUserStore from '../../../../store/useUserStore'
 import { joinConsultation } from '../../../../store/useConsultationStore'
 import ConfirmLeaveModal from './ConfirmLeaveModal' // 모달 컴포넌트
 import { useChatStore } from '../../../../store/useChatStore' // ChatStore 추가
+import FooterComponent from './video/FooterComponent'
+import HeaderComponent from './video/HeaderComponent'
+import SidebarComponent from './video/SidebarComponent'
 
 var localUser = new UserModel()
 
@@ -413,24 +416,37 @@ class VideoRoomComponent extends Component {
 
   startStt() {
     // STT 초기화 및 시작
-    const recognition = new window.webkitSpeechRecognition()
-    recognition.lang = 'ko-KR'
-    recognition.interimResults = false
-    recognition.maxAlternatives = 1
-    console.log('stt 시작')
+    if (!this.recognition) {
+      this.recognition = new window.webkitSpeechRecognition()
+      this.recognition.lang = 'ko-KR'
+      this.recognition.interimResults = false
+      this.recognition.maxAlternatives = 1
+      console.log('stt 시작')
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript
-      console.log('STT result:', transcript)
-      // STT 결과를 store에 저장
-      useChatStore.getState().saveSttText(transcript)
+      this.recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript
+        console.log('STT result:', transcript)
+        // STT 결과를 store에 저장
+        useChatStore.getState().saveSttText(this.state.nickname, transcript)
+      }
+
+      this.recognition.onerror = (event) => {
+        console.error('STT error:', event.error)
+      }
+
+      this.recognition.onend = () => {
+        console.log('STT ended.')
+        this.setState({ recognitionActive: false }) // STT가 종료되면 상태 업데이트
+        this.startStt() // STT가 종료된 후 재시작
+        console.log('STT restart.')
+      }
     }
 
-    recognition.onerror = (event) => {
-      console.error('STT error:', event.error)
+    if (!this.state.recognitionActive) {
+      // STT가 이미 실행 중이 아닌 경우에만 시작
+      this.recognition.start()
+      this.setState({ recognitionActive: true })
     }
-
-    recognition.start()
   }
 
   toggleFullscreen() {
@@ -621,6 +637,14 @@ class VideoRoomComponent extends Component {
 
     return (
       <>
+        {/* <HeaderComponent
+          isPrivate={true} // 방이 비밀방인지 여부에 따라 변경
+          title={mySessionId} // 세션 ID를 방 제목으로 사용
+        /> */}
+        {/* <SidebarComponent
+          participants={this.state.participants}
+          localUser={localUser}
+        /> */}
         {this.state.showModal && (
           <ConfirmLeaveModal
             onConfirm={() => this.handleConfirmLeave(this.state.consultationId)}
@@ -704,6 +728,23 @@ class VideoRoomComponent extends Component {
               </ul>
             </div>
           </div>
+
+          {/* <SidebarComponent
+            participants={this.state.participants}
+            onParticipantAction={this.handleParticipantAction}
+            localUser={localUser}
+          /> */}
+
+          {/* <FooterComponent
+            camStatusChanged={this.camStatusChanged}
+            micStatusChanged={this.micStatusChanged}
+            screenShare={this.screenShare}
+            stopScreenShare={this.stopScreenShare}
+            onLeave={() => this.setState({ showModal: true })}
+            isAudioActive={localUser.isAudioActive()}
+            isVideoActive={localUser.isVideoActive()}
+            isScreenSharing={localUser.isScreenShareActive()}
+          /> */}
 
           {/* GPT 버튼 주석 처리됨 */}
           {/*

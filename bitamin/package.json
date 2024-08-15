@@ -14,6 +14,7 @@
   "dependencies": {
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
+    "@stomp/stompjs": "^7.0.0",
     "@teachablemachine/image": "^0.8.5",
     "@teachablemachine/pose": "^0.8.6",
     "@tensorflow/tfjs": "4.20.0",
@@ -33,6 +34,7 @@
     "react-modal": "^3.16.1",
     "react-router-dom": "^6.26.0",
     "recharts": "^2.12.7",
+    "sockjs-client": "^1.6.1",
     "styled-components": "^6.1.12",
     "twin.macro": "^3.4.1",
     "vite-tsconfig-paths": "^4.3.2",
