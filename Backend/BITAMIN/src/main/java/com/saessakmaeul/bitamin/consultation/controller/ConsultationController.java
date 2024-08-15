@@ -215,7 +215,7 @@ public class ConsultationController {
 
         if(category != SearchCondition.요약) {
             String data = gptResponses.getGptResponses().get(jwtUtil.extractNickname(tokenHeader.substring(7))).getContent();
-
+            System.out.println(data + " " + consultationId);
             // 구독된 상담방으로 broadcast
             simpMessagingTemplate.convertAndSend("/sub/consultations/" + consultationId, data);
         }
