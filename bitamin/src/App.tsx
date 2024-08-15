@@ -7,7 +7,14 @@ import Header from './stories/organisms/common/Header'
 const AppContent: React.FC = () => {
   const location = useLocation()
   const excludeHeaderPaths = ['/', '/consult']
-  const excludeFooterPaths = ['/', '/modal', '/consult', '/healthup', '/mypage']
+  const excludeFooterPaths = [
+    '/',
+    '/modal',
+    '/consult',
+    '/healthup',
+    '/mypage',
+    '/loginex',
+  ]
   const includeContentPaths = ['/'] // 특정 경로들을 여기에 추가하세요.
 
   const contentClassName = includeContentPaths.includes(location.pathname)
