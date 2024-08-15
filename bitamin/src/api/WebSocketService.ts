@@ -24,7 +24,7 @@ export class WebSocketService {
       //   return new SockJS('/ws') // SockJS를 사용하여 WebSocket 연결을 설정
       // },
       webSocketFactory: () => {
-        return new SockJS('ws://i11b105.p.ssafy.io/ws') // 정확한 SockJS URL 설정
+        return new SockJS('wss://i11b105.p.ssafy.io/ws') // 정확한 SockJS URL 설정
       },
     })
 
