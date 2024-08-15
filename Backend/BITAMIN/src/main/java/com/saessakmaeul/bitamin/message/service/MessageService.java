@@ -2,11 +2,11 @@ package com.saessakmaeul.bitamin.message.service;
 
 import com.saessakmaeul.bitamin.member.entity.Member;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
-import com.saessakmaeul.bitamin.message.dto.requestDto.MessageRegistRequest;
-import com.saessakmaeul.bitamin.message.dto.requestDto.ReplyRegistRequest;
-import com.saessakmaeul.bitamin.message.dto.responseDto.MessageDetailResponse;
-import com.saessakmaeul.bitamin.message.dto.responseDto.MessageSimpleResponse;
-import com.saessakmaeul.bitamin.message.dto.responseDto.Replies;
+import com.saessakmaeul.bitamin.message.dto.request.MessageRegistRequest;
+import com.saessakmaeul.bitamin.message.dto.request.ReplyRegistRequest;
+import com.saessakmaeul.bitamin.message.dto.response.MessageDetailResponse;
+import com.saessakmaeul.bitamin.message.dto.response.MessageSimpleResponse;
+import com.saessakmaeul.bitamin.message.dto.response.Replies;
 import com.saessakmaeul.bitamin.message.entity.Message;
 import com.saessakmaeul.bitamin.message.entity.Reply;
 import com.saessakmaeul.bitamin.message.repository.MessageRepository;
@@ -45,6 +45,7 @@ public class MessageService {
                     .title(message.getTitle())
                     .sendDate(message.getSendDate())
                     .isRead(message.getIsRead())
+                    .url(member.getProfileUrl())
                     .build();
             result.add(dto);
         }
@@ -61,6 +62,7 @@ public class MessageService {
                     .title(message.getTitle())
                     .sendDate(message.getSendDate())
                     .isRead(message.getIsRead())
+                    .url(member.getProfileUrl())
                     .build();
             result.add(dto);
         }
@@ -71,13 +73,21 @@ public class MessageService {
     public MessageDetailResponse getMessageDetail(long id,long userId) throws Exception{
         Message message = messageRepository.findById(id).orElseThrow(()->new Exception("해당 id를 가진 메시지가 없습니다."));
         String nickname = null;
+        Long opponentId = null;
+        String url = null;
         // 유저가 송신자인 경우
         if(userId == message.getSenderId()){
-            nickname = memberRepository.findById(message.getReceiverId()).orElseThrow(()->new Exception("존재하지 않는 reciever 입니다.")).getNickname();
+            Member member = memberRepository.findById(message.getReceiverId()).orElseThrow(()->new Exception("존재하지 않는 reciever 입니다."));
+            nickname = member.getNickname();
+            opponentId = member.getId();
+            url = member.getProfileUrl();
         }
         // 유저가 수신자인 경우
         else {
-            nickname = memberRepository.findById(message.getSenderId()).orElseThrow(()->new Exception("존재하지 않는 sender 입니다.")).getNickname();
+            Member member = memberRepository.findById(message.getSenderId()).orElseThrow(()->new Exception("존재하지 않는 sender 입니다."));
+            nickname = member.getNickname();
+            opponentId = member.getId();
+            url = member.getProfileUrl();
         }
         // 답장 조회
         List<Reply> replies = replyRepository.findByMessageId(id);
@@ -87,13 +97,15 @@ public class MessageService {
         for(Reply reply : replies){
             if(reply.getIsDeleted()==1 && reply.getMemberId()==userId) continue;
             if(reply.getIsDeleted()==2 && reply.getMemberId()!=userId) continue;
+            Member member = memberRepository.findById(reply.getMemberId()).orElseThrow(Exception::new);
             Replies temp = Replies
                     .builder()
                     .id(reply.getId())
-                    .memberNickName(memberRepository.findById(reply.getMemberId()).orElseThrow(Exception::new).getNickname())
+                    .memberNickName(member.getNickname())
                     .content(reply.getContent())
                     .isRead(reply.getIsRead())
                     .sendDate(reply.getSendDate())
+                    .url(member.getProfileUrl())
                     .build();
             repliyList.add(temp);
         }
@@ -102,12 +114,14 @@ public class MessageService {
         MessageDetailResponse result = MessageDetailResponse.builder()
                 .id(id)
                 .nickname(nickname)
+                .opponentId(opponentId)
                 .category(message.getCategory())
                 .title(message.getTitle())
                 .content(message.getContent())
                 .sendDate(message.getSendDate())
                 .counselingDate(message.getCounselingDate())
                 .isRead(message.getIsRead())
+                .url(url)
                 .replies(repliyList)
                 .build();
         return result;
@@ -131,7 +145,7 @@ public class MessageService {
 
     @Transactional
     public Reply registReply(ReplyRegistRequest reply, Long id, Long userId) throws Exception{
-        messageRepository.findById(id).orElseThrow(()->new Exception("해당 id의 메시지가 없습니다."));
+        Message message = messageRepository.findById(id).orElseThrow(()->new Exception("해당 id의 메시지가 없습니다."));
         Reply registReply = new Reply();
         registReply.setMessageId(id);
         registReply.setMemberId(userId);
@@ -139,6 +153,8 @@ public class MessageService {
         registReply.setIsDeleted(0);
         registReply.setIsRead(false);
         registReply.setSendDate(LocalDateTime.now());
+        message.setSendDate(registReply.getSendDate());
+        messageRepository.save(message);
         return replyRepository.save(registReply);
     }
 

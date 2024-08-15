@@ -1,10 +1,10 @@
 package com.saessakmaeul.bitamin.complaint.controller;
 
-import com.saessakmaeul.bitamin.complaint.dto.requestDto.ComplaintRegistRequest;
-import com.saessakmaeul.bitamin.complaint.dto.responseDto.ComplaintSimpleResponse;
-import com.saessakmaeul.bitamin.complaint.dto.responseDto.ComplatinDetailResponse;
+import com.saessakmaeul.bitamin.complaint.dto.request.ComplaintRegistRequest;
+import com.saessakmaeul.bitamin.complaint.dto.response.ComplaintSimpleResponse;
+import com.saessakmaeul.bitamin.complaint.dto.response.ComplatinDetailResponse;
 import com.saessakmaeul.bitamin.complaint.service.ComplaintService;
-import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

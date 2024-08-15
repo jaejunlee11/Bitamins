@@ -1,6 +1,6 @@
 package com.saessakmaeul.bitamin.filter;
 
-import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import com.saessakmaeul.bitamin.member.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
 
         logger.debug(requestURI + " " + method);
-
+        System.out.println(requestURI);
          if(requestURI.startsWith("/api/auth/login") ||
                  requestURI.startsWith("/api/auth/kakao") ||
                  requestURI.startsWith("/api/auth/google") ||
