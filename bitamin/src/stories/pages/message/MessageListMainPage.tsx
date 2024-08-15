@@ -12,9 +12,10 @@ const MessageListMainPage: React.FC = () => {
 
   return (
     <>
-      <div className="p-4 mx-auto max-w-screen-lg">
-        {' '}
-        {/* 추가된 클래스 */}
+      <div
+        className="p-4 mx-auto max-w-screen"
+        style={{ marginTop: 'calc(9/16*100vw*0.1)' }} // 추가된 margin-top 스타일
+      >
         <div className="p-4 mx-auto" style={{ maxWidth: '60%' }}>
           <button
             className={`px-4 py-2 rounded ${

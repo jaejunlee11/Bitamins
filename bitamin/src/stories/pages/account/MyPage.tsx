@@ -290,7 +290,7 @@ const MyPage: React.FC = () => {
 
   return (
     <>
-      <div className={styles.div}>
+      <div className={styles.div} style={{ marginTop: 'calc(9/16*100vw*0.1)' }}>
         <div className={styles.InfoBox}>
           <div className={styles.child}>
             <div className={styles.item} onClick={handleImageClick}>

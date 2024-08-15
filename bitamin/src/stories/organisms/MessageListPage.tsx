@@ -3,6 +3,7 @@ import { fetchMessages, deleteMessage } from 'api/messageAPI'
 import { useNavigate } from 'react-router-dom'
 import Modal from '@/stories/organisms/Modal'
 import CheckModal from '@/stories/organisms/CheckModal'
+import mainQuestImg from 'assets/image/mainQuestImg.png'
 
 interface Message {
   id: number
@@ -105,7 +106,11 @@ const MessageListPage: React.FC = () => {
             onClick={() => navigate(`/messages/${message.id}`)}
           >
             <div className="flex items-center space-x-4">
-              <img src="path/to/icon.png" alt="icon" className="w-6 h-6" />
+              <img
+                className="w-[4rem] h-[2.5rem] relative overflow-hidden shrink-0"
+                alt=""
+                src={mainQuestImg}
+              />
               <span
                 className={`font-semibold ${
                   hoveredMessageId === message.id
