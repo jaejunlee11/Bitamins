@@ -1,10 +1,9 @@
 package com.saessakmaeul.bitamin.exercise.controller;
 
-import com.saessakmaeul.bitamin.exercise.dto.responseDto.ExcersizeDetailResponse;
-import com.saessakmaeul.bitamin.exercise.dto.responseDto.ExcersizeModelResponse;
-import com.saessakmaeul.bitamin.exercise.entity.Excersize;
+import com.saessakmaeul.bitamin.exercise.dto.response.ExcersizeDetailResponse;
+import com.saessakmaeul.bitamin.exercise.dto.response.ExcersizeModelResponse;
 import com.saessakmaeul.bitamin.exercise.service.ExcersizeService;
-import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

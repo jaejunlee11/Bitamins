@@ -1,6 +1,6 @@
 package com.saessakmaeul.bitamin.filter;
 
-import com.saessakmaeul.bitamin.util.JwtUtil;
+import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import com.saessakmaeul.bitamin.member.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
