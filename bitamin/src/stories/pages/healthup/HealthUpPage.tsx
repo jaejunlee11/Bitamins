@@ -183,10 +183,12 @@ const HealthUP: React.FC = () => {
   // }
 
   const handleExit = () => {
-    if (webcamRef.current) {
-      webcamRef.current.stop() // 웹캠 중지
-    }
-    navigate('/healthuplist') // '나가기' 버튼을 클릭 시 healthuplist로 이동
+    setTimeout(() => {
+      if (webcamRef.current) {
+        webcamRef.current.stop() // 웹캠 중지
+      }
+    }, 1000);
+    navigate('/home') // '나가기' 버튼을 클릭 시 healthuplist로 이동
   }
 
   const loop = async () => {
@@ -210,9 +212,6 @@ const HealthUP: React.FC = () => {
         if (currentPrediction && currentPrediction.probability > 0.7) {
           setCount((prevCount) => Math.max(prevCount - 1, 0))
           setPredictContainer(currentPrediction.probability)
-        } else {
-          console.error('Probability is undefined or below threshold')
-          console.log('Probability Value:', currentPrediction?.probability)
         }
       } else {
         console.error('Prediction index out of bounds')
