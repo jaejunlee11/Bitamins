@@ -12,6 +12,8 @@ import com.saessakmaeul.bitamin.member.repository.DongCodeRepository;
 import com.saessakmaeul.bitamin.member.repository.HealthReportRepository;
 import com.saessakmaeul.bitamin.member.repository.MemberRepository;
 import com.saessakmaeul.bitamin.member.repository.RefreshTokenRepository;
+import com.saessakmaeul.bitamin.mission.entity.UserExperience;
+import com.saessakmaeul.bitamin.mission.repository.MemberExperienceRepository;
 import com.saessakmaeul.bitamin.util.file.service.S3Service;
 import com.saessakmaeul.bitamin.util.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +57,7 @@ public class MemberService {
     private final S3Service s3Service;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final MemberExperienceRepository memberExperienceRepository;
 
     @Value("${KAKAO_API_KEY}")
     private String apiKey;
@@ -119,6 +122,10 @@ public class MemberService {
             }
 
             member = memberRepository.save(member);
+
+            UserExperience ue = new UserExperience();
+            ue.setId(member.getId());
+            memberExperienceRepository.save(ue);
 
             return member.getId();
         } catch (IOException e) {
