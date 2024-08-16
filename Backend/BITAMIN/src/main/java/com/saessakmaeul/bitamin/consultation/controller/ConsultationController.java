@@ -63,8 +63,8 @@ public class ConsultationController {
 
         Map<String,Object> params = new HashMap<>();
 
-        // 상담 시작 시간이 지났는지 아닌지 확인
-        if(joinRoomRequest.getStartTime().isBefore(LocalDateTime.now())) return ResponseEntity.status(404).body("입장 가능 시간이 아닙니다.");
+//        // 상담 시작 시간이 지났는지 아닌지 확인
+//        if(joinRoomRequest.getStartTime().isBefore(LocalDateTime.now())) return ResponseEntity.status(404).body("입장 가능 시간이 아닙니다.");
 
         // 입장 가능한 세션인지 확인
         Session session = openVidu.getActiveSession(joinRoomRequest.getSessionId());
