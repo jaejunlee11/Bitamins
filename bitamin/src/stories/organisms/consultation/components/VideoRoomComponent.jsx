@@ -36,7 +36,7 @@ class VideoRoomComponent extends Component {
       session: undefined,
       localUser: undefined,
       subscribers: [], // remotes 대신 subscribers로 초기화
-      chatDisplay: 'block',
+      chatDisplay: 'none',
       currentVideoDevice: undefined,
       token: token,
       showModal: false, // 모달 표시 여부 상태
@@ -681,17 +681,18 @@ class VideoRoomComponent extends Component {
   }
 
   handleSummaryClick() {
-    console.log('요약 버튼 클릭됨')
-    // 요약 버튼 클릭 시 수행할 작업 추가
-    useChatStore
-      .getState()
-      .sendMessage(
-        this.state.myUserName,
-        useChatStore.getState().sttText,
-        '요약',
-        this.state.consultationId,
-        this.count
-      )
+    if (this.state.count < this.state.maxCount) {
+      console.log('요약 버튼 클릭됨')
+      // 요약 버튼 클릭 시 수행할 작업 추가
+      useChatStore
+        .getState()
+        .sendMessage(
+          this.state.myUserName,
+          useChatStore.getState().chatLog,
+          '요약',
+          this.state.consultationId
+        )
+    }
   }
 
   handleTransferClick = () => {
@@ -705,10 +706,9 @@ class VideoRoomComponent extends Component {
             .getState()
             .sendMessage(
               this.state.myUserName,
-              useChatStore.getState().sttText,
+              `${this.state.count}번`,
               this.state.roomData.category,
-              this.state.consultationId,
-              null
+              this.state.consultationId
             )
         }
       )
@@ -750,8 +750,8 @@ class VideoRoomComponent extends Component {
             onCancel={this.handleCancelLeave}
           />
         )}
-        <div className="container" id="container" style={layoutStyle}>
-          {/* <ToolbarComponent
+        {/* <div className="container" id="container" style={layoutStyle}> */}
+        {/* <ToolbarComponent
             sessionId={mySessionId}
             user={localUser}
             showNotification={this.state.messageReceived}
@@ -766,51 +766,48 @@ class VideoRoomComponent extends Component {
             consultationId={this.state.consultationId}
           /> */}
 
-          <DialogExtensionComponent
-            showDialog={this.state.showExtensionDialog}
-            cancelClicked={this.closeDialogExtension}
-          />
+        <DialogExtensionComponent
+          showDialog={this.state.showExtensionDialog}
+          cancelClicked={this.closeDialogExtension}
+        />
 
-          <div id="layout" className="bounds">
-            {localUser !== undefined &&
-              localUser.getStreamManager() !== undefined && (
-                <div
-                  className="OT_root OT_publisher custom-class"
-                  id="localUser"
-                >
-                  <StreamComponent
-                    user={localUser}
-                    handleNickname={this.nicknameChanged}
-                  />
-                </div>
-              )}
-            {this.state.subscribers.map((sub, i) => (
-              <div
-                key={i}
-                className="OT_root OT_publisher custom-class"
-                id="remoteUsers"
-              >
+        <div id="layout" className="bounds" style={layoutStyle}>
+          {localUser !== undefined &&
+            localUser.getStreamManager() !== undefined && (
+              <div className="OT_root OT_publisher custom-class" id="localUser">
                 <StreamComponent
-                  user={sub}
-                  streamId={sub.streamManager.stream.streamId}
+                  user={localUser}
+                  handleNickname={this.nicknameChanged}
                 />
               </div>
-            ))}
-            {localUser !== undefined &&
-              localUser.getStreamManager() !== undefined && (
-                <div
-                  className="OT_root OT_publisher custom-class"
-                  style={chatDisplay}
-                >
-                  <ChatComponent
-                    user={localUser}
-                    chatDisplay={this.state.chatDisplay}
-                    close={this.toggleChat}
-                    messageReceived={this.checkNotification}
-                  />
-                </div>
-              )}
-            {/* Participants List
+            )}
+          {this.state.subscribers.map((sub, i) => (
+            <div
+              key={i}
+              className="OT_root OT_publisher custom-class"
+              id="remoteUsers"
+            >
+              <StreamComponent
+                user={sub}
+                streamId={sub.streamManager.stream.streamId}
+              />
+            </div>
+          ))}
+          {localUser !== undefined &&
+            localUser.getStreamManager() !== undefined && (
+              <div
+                className="OT_root OT_publisher custom-class"
+                style={chatDisplay}
+              >
+                <ChatComponent
+                  user={localUser}
+                  chatDisplay={this.state.chatDisplay}
+                  close={this.toggleChat}
+                  messageReceived={this.checkNotification}
+                />
+              </div>
+            )}
+          {/* Participants List
             <div className="participants-list">
               <h3>Participants:</h3>
               <ul>
@@ -826,9 +823,9 @@ class VideoRoomComponent extends Component {
                 ))}
               </ul>
             </div> */}
-          </div>
+        </div>
 
-          {/* <SidebarComponent
+        {/* <SidebarComponent
             participants={this.state.participants}
             onParticipantAction={this.handleParticipantAction}
             user={localUser}
@@ -837,7 +834,7 @@ class VideoRoomComponent extends Component {
             messageReceived={this.checkNotification}
           /> */}
 
-          {localUser !== undefined &&
+        {/* {localUser !== undefined &&
             localUser.getStreamManager() !== undefined && (
               <SidebarComponent
                 user={localUser}
@@ -845,33 +842,33 @@ class VideoRoomComponent extends Component {
                 messageReceived={this.checkNotification}
                 participant={this.state.participants}
               />
-            )}
+            )} */}
 
-          {/* <ChatComponent
+        {/* <ChatComponent
+            user={localUser}
+            chatDisplay={this.state.chatDisplay}
+            close={this.toggleChat}
+            messageReceived={this.checkNotification}
+          /> */}
+        {localUser !== undefined &&
+          localUser.getStreamManager() !== undefined && (
+            <SidebarComponent
+              className="fixed top-0 right-0 h-full w-1/4 bg-blue-100 shadow-lg" // 오른쪽에 고정하고 하늘색 배경을 설정
+              user={localUser}
+              chatDisplay={this.state.chatDisplay}
+              messageReceived={this.checkNotification}
+              handleParticipantAction={this.handleParticipantAction}
+            />
+          )}
+
+        {/* <ChatComponent
             user={localUser}
             chatDisplay={this.state.chatDisplay}
             close={this.toggleChat}
             messageReceived={this.checkNotification}
           /> */}
 
-          {localUser !== undefined &&
-            localUser.getStreamManager() !== undefined && (
-              <SidebarComponent
-                user={localUser}
-                chatDisplay={this.state.chatDisplay}
-                messageReceived={this.checkNotification}
-                handleParticipantAction={this.handleParticipantAction}
-              />
-            )}
-
-          {/* <ChatComponent
-            user={localUser}
-            chatDisplay={this.state.chatDisplay}
-            close={this.toggleChat}
-            messageReceived={this.checkNotification}
-          /> */}
-
-          {/* <ToolbarComponent
+        {/* <ToolbarComponent
             sessionId={mySessionId}
             user={localUser}
             showNotification={this.state.messageReceived}
@@ -885,20 +882,20 @@ class VideoRoomComponent extends Component {
             toggleChat={this.toggleChat}
           /> */}
 
-          {roomData && (
-            <FooterComponent
-              user={localUser}
-              sessionId={mySessionId}
-              camStatusChanged={this.camStatusChanged}
-              micStatusChanged={this.micStatusChanged}
-              screenShare={this.screenShare}
-              stopScreenShare={this.stopScreenShare}
-              leaveSession={() => this.setState({ showModal: true })}
-              category={roomData.category}
-            />
-          )}
+        {roomData && (
+          <FooterComponent
+            user={localUser}
+            sessionId={mySessionId}
+            camStatusChanged={this.camStatusChanged}
+            micStatusChanged={this.micStatusChanged}
+            screenShare={this.screenShare}
+            stopScreenShare={this.stopScreenShare}
+            leaveSession={() => this.setState({ showModal: true })}
+            category={roomData.category}
+          />
+        )}
 
-          {/* <FooterComponent
+        {/* <FooterComponent
             camStatusChanged={this.camStatusChanged}
             micStatusChanged={this.micStatusChanged}
             screenShare={this.screenShare}
@@ -909,8 +906,8 @@ class VideoRoomComponent extends Component {
             isScreenSharing={localUser.isScreenShareActive()}
           /> */}
 
-          {/* GPT 버튼 주석 처리됨 */}
-          {/*
+        {/* GPT 버튼 주석 처리됨 */}
+        {/*
           <button
             onClick={() =>
               useChatStore.getState().sendMessage(
@@ -923,7 +920,7 @@ class VideoRoomComponent extends Component {
             Send to GPT
           </button>
           */}
-        </div>
+        {/* </div> */}
       </>
     )
   }

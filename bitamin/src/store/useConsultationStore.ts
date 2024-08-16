@@ -263,7 +263,6 @@ export const useChatStore = create<ChatState>()(
             content,
             category,
             consultationId,
-            count,
             userMessages
           )
 

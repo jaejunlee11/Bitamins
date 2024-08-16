@@ -10,8 +10,7 @@ interface ChatState {
     user: string,
     content: string,
     category: string,
-    consultationId: number,
-    count: number | null
+    consultationId: number
   ) => Promise<void>
   resetChatLog: () => void
   saveSttText: (user: string, text: string) => void // STT 텍스트 저장 메서드
@@ -27,8 +26,7 @@ export const useChatStore = create<ChatState>()(
         user: string,
         content: string,
         category: string,
-        consultationId: number,
-        count: number | null
+        consultationId: number
       ) => {
         try {
           const currentChatLog = get().chatLog
@@ -46,7 +44,6 @@ export const useChatStore = create<ChatState>()(
             content,
             category,
             consultationId,
-            count,
             userMessages
           )
 
