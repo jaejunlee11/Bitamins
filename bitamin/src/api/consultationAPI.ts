@@ -112,6 +112,7 @@ export const sendChatGPTMessage = async (
   content: string,
   category: string,
   consultationId: number,
+  count: number | null,
   previousMessages: Message[]
 ) => {
   try {

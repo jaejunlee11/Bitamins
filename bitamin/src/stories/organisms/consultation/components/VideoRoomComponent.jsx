@@ -686,10 +686,11 @@ class VideoRoomComponent extends Component {
     useChatStore
       .getState()
       .sendMessage(
-        this.state.myUserName | null,
-        useChatStore.getState().sttText | null,
+        this.state.myUserName,
+        useChatStore.getState().sttText,
         '요약',
-        this.state.consultationId
+        this.state.consultationId,
+        this.count
       )
   }
 
@@ -705,8 +706,9 @@ class VideoRoomComponent extends Component {
             .sendMessage(
               this.state.myUserName,
               useChatStore.getState().sttText,
-              this.state.count,
-              this.state.consultationId
+              this.state.roomData.category,
+              this.state.consultationId,
+              null
             )
         }
       )
@@ -720,8 +722,8 @@ class VideoRoomComponent extends Component {
     const chatDisplay = { display: this.state.chatDisplay }
     const layoutStyle = {
       marginTop: '60px', // Header height
-      marginBottom: '60px', // Footer height
-      height: 'calc(100vh - 120px)', // 전체 높이에서 Header와 Footer의 height를 뺀 나머지
+      marginBottom: '120px', // Footer height
+      height: 'calc(100vh - 240px)', // 전체 높이에서 Header와 Footer의 height를 뺀 나머지
       overflow: 'hidden', // 레이아웃 영역 넘침 방지
       position: 'relative', // 자식 요소의 절대 위치 설정을 위해
     }

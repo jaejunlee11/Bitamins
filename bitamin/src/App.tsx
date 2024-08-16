@@ -14,6 +14,7 @@ const AppContent: React.FC = () => {
     '/healthup',
     '/mypage',
     '/loginex',
+    '/signup',
   ]
   const includeContentPaths = ['/'] // 특정 경로들을 여기에 추가하세요.
 

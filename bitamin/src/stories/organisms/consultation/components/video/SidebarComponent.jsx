@@ -93,7 +93,7 @@ export default class SidebarComponent extends Component {
     return (
       <div className="flex h-full">
         {/* 참여자 리스트 영역 */}
-        <div className="w-2/5 p-4 border-r border-gray-200">
+        {/* <div className="w-2/5 p-4 border-r border-gray-200">
           <h2 className="text-lg font-bold mb-4">참여자 리스트</h2>
           <ul className="space-y-2">
             {this.props.participants.map((participant, index) => (
@@ -116,7 +116,7 @@ export default class SidebarComponent extends Component {
               </li>
             ))}
           </ul>
-        </div>
+        </div> */}
 
         {/* 채팅 영역 */}
         <div className="w-3/5 flex flex-col justify-between p-4">
@@ -147,14 +147,15 @@ export default class SidebarComponent extends Component {
           </div>
           <div className="flex items-center mt-4">
             <input
-              className="flex-1 p-2 border border-gray-300 rounded-lg"
+              className="flex-1 p-4 border border-gray-300 rounded-lg"
               placeholder="메시지 입력..."
               value={this.state.message}
               onChange={this.handleChange}
               onKeyPress={this.handlePressKey}
+              style={{ height: '60px' }} // 입력창 높이를 늘림
             />
             <Tooltip title="메시지 전송">
-              <Fab size="small" className="ml-2" onClick={this.sendMessage}>
+              <Fab size="medium" className="ml-4" onClick={this.sendMessage}>
                 <Send />
               </Fab>
             </Tooltip>

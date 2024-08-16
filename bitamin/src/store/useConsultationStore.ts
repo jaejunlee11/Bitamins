@@ -230,6 +230,7 @@ interface ChatState {
     user: string,
     content: string,
     category: string,
+    count: number,
     consultationId: number
   ) => Promise<void>
   resetChatLog: () => void
@@ -244,6 +245,7 @@ export const useChatStore = create<ChatState>()(
         user: string,
         content: string,
         category: string,
+        count: number,
         consultationId: number
       ) => {
         try {
@@ -261,6 +263,7 @@ export const useChatStore = create<ChatState>()(
             content,
             category,
             consultationId,
+            count,
             userMessages
           )
 
